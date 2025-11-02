@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 export default function Maintenance() {
-  // Countdown Ziel-Datum (z. B. Launch am 15. December)
+  // Countdown Ziel-Datum (z. B. Launch am 15. Dezember 2025)
   const launchDate = new Date("2025-12-15T00:00:00");
 
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, mins: 0, secs: 0 });
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    mins: 0,
+    secs: 0,
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,19 +29,20 @@ export default function Maintenance() {
         });
       }
     }, 1000);
+
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#f7f9fc] text-center px-4">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#f7f9fc] to-[#eaf2ff] text-center px-6">
       {/* Logo */}
-      <div className="mb-6 animate-pulse">
+      <div className="mb-6 animate-fade-in">
         <Image
           src="/logo.png"
-          alt="Lobbium Logo"
-          width={120}
-          height={120}
-          className="object-contain"
+          alt="Lobbium Smart Family Life Logo"
+          width={100}
+          height={100}
+          className="object-contain drop-shadow-md"
           priority
         />
       </div>
@@ -47,34 +53,31 @@ export default function Maintenance() {
       </h1>
 
       {/* Beschreibung */}
-      <p className="text-gray-600 text-base md:text-lg max-w-md mb-8 leading-relaxed">
+      <p className="text-gray-700 text-base md:text-lg max-w-xl mb-10 leading-relaxed">
         Unsere Website wird gerade liebevoll überarbeitet, um dir bald noch mehr
         smarte Ideen rund um Familie, Alltag & Finanzen zu bieten.
       </p>
 
       {/* Countdown */}
-      <div className="flex gap-4 text-blue-700 font-semibold text-lg md:text-xl mb-8">
-        <div>
-          <span className="block text-3xl md:text-4xl text-blue-600">{timeLeft.days}</span>
-          <span className="text-sm">Tage</span>
-        </div>
-        <div>
-          <span className="block text-3xl md:text-4xl text-blue-600">{timeLeft.hours}</span>
-          <span className="text-sm">Stunden</span>
-        </div>
-        <div>
-          <span className="block text-3xl md:text-4xl text-blue-600">{timeLeft.mins}</span>
-          <span className="text-sm">Minuten</span>
-        </div>
-        <div>
-          <span className="block text-3xl md:text-4xl text-blue-600">{timeLeft.secs}</span>
-          <span className="text-sm">Sekunden</span>
-        </div>
+      <div className="flex flex-wrap justify-center gap-6 text-blue-700 font-semibold text-lg md:text-xl mb-12">
+        {[
+          { label: "Tage", value: timeLeft.days },
+          { label: "Stunden", value: timeLeft.hours },
+          { label: "Minuten", value: timeLeft.mins },
+          { label: "Sekunden", value: timeLeft.secs },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex flex-col items-center">
+            <span className="text-4xl md:text-5xl font-bold text-blue-600">
+              {String(value).padStart(2, "0")}
+            </span>
+            <span className="text-sm uppercase tracking-wide">{label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Newsletter Feld */}
-      <div className="w-full max-w-md bg-white shadow-md rounded-lg p-4 border border-gray-100">
-        <p className="text-gray-700 font-medium mb-3">
+      {/* Newsletter */}
+      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
+        <p className="text-gray-800 font-medium mb-4">
           Sei dabei, wenn wir live gehen – trage dich hier ein:
         </p>
         <form
@@ -87,12 +90,12 @@ export default function Maintenance() {
           <input
             type="email"
             placeholder="Deine E-Mail-Adresse"
-            className="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             required
           />
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md font-semibold transition"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition"
           >
             Benachrichtigen
           </button>
@@ -100,9 +103,26 @@ export default function Maintenance() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-10 text-gray-400 text-xs">
+      <footer className="mt-12 text-gray-400 text-xs">
         © {new Date().getFullYear()} Lobbium Smart Family Life. Alle Rechte vorbehalten.
       </footer>
-    </div>
+
+      {/* Animation Style */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 1s ease-in-out;
+        }
+      `}</style>
+    </main>
   );
 }
