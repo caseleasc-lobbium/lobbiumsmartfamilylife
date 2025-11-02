@@ -1,52 +1,92 @@
 import { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const menuItems = [
+    { name: "Startseite", path: "/" },
+    {
+      name: "Finanzen & Spartipps",
+      path: "/finanzen-spartipps",
+      sub: [
+        { name: "Geld sparen", path: "/finanzen-spartipps/geld-sparen" },
+        { name: "Versicherungen", path: "/finanzen-spartipps/versicherungen" },
+        { name: "Geld anlegen", path: "/finanzen-spartipps/geld-anlegen" },
+        { name: "Familienbudget", path: "/finanzen-spartipps/familienbudget" },
+      ],
+    },
+    {
+      name: "Familienleben",
+      path: "/familienleben-alltag",
+      sub: [
+        { name: "Alltag & Organisation", path: "/familienleben/alltag" },
+        { name: "Beziehung & Erziehung", path: "/familienleben/erziehung" },
+        { name: "Haushalt", path: "/familienleben/haushalt" },
+      ],
+    },
+    {
+      name: "Kinder & Bildung",
+      path: "/kinder-bildung",
+      sub: [
+        { name: "Lern-Apps", path: "/kinder-bildung/lernapps" },
+        { name: "Schulbedarf", path: "/kinder-bildung/schulbedarf" },
+        { name: "Freizeit & Entwicklung", path: "/kinder-bildung/freizeit" },
+      ],
+    },
+    {
+      name: "Lifestyle",
+      path: "/lifestyle",
+      sub: [
+        { name: "Smart Home", path: "/lifestyle/smart-home" },
+        { name: "Nachhaltigkeit", path: "/lifestyle/nachhaltigkeit" },
+        { name: "Ernährung & Rezepte", path: "/lifestyle/rezepte" },
+      ],
+    },
+    { name: "Blog", path: "/blog" },
+    { name: "Kontakt", path: "/kontakt" },
+  ];
+
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-
-        {/* Logo-Bereich (links ausgerichtet) */}
-        <a href="/" className="flex items-center justify-start">
-          <div className="w-[90px] h-[90px] relative">
-            <Image
-              src="/logo.png"
-              alt="Lobbium Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-        </a>
+        {/* Logo */}
+        <Link href="/" className="flex items-center">
+          <Image src="/logo.png" alt="Lobbium Logo" width={90} height={90} priority />
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-          <a className="hover:text-blue-600 transition" href="/finanzen-spartipps">
-            Finanzen
-          </a>
-          <a className="hover:text-blue-600 transition" href="/familienleben-alltag">
-            Familienleben
-          </a>
-          <a className="hover:text-blue-600 transition" href="/kinder-bildung">
-            Kinder & Bildung
-          </a>
-          <a className="hover:text-blue-600 transition" href="/blog">
-            Blog
-          </a>
-          <a className="hover:text-blue-600 transition" href="/kontakt">
-            Kontakt
-          </a>
+          {menuItems.map((item) => (
+            <div key={item.name} className="relative group">
+              <Link href={item.path} className="hover:text-blue-600 transition">
+                {item.name}
+              </Link>
+              {item.sub && (
+                <div className="absolute hidden group-hover:block bg-white border border-gray-100 rounded-lg shadow-md mt-2 p-2">
+                  {item.sub.map((subItem) => (
+                    <Link
+                      key={subItem.name}
+                      href={subItem.path}
+                      className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded"
+                    >
+                      {subItem.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </nav>
 
-        {/* Newsletter Button (Desktop) */}
-        <a
+        {/* Newsletter Button */}
+        <Link
           href="/newsletter"
           className="hidden md:inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-white font-semibold shadow hover:bg-blue-700 transition"
         >
           Newsletter
-        </a>
+        </Link>
 
         {/* Mobile Menü Button */}
         <button
@@ -60,28 +100,27 @@ export default function Header() {
 
       {/* Mobile Menü */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 flex flex-col p-4 space-y-2 text-sm">
-          <a href="/finanzen-spartipps" className="hover:text-blue-600">
-            Finanzen
-          </a>
-          <a href="/familienleben-alltag" className="hover:text-blue-600">
-            Familienleben
-          </a>
-          <a href="/kinder-bildung" className="hover:text-blue-600">
-            Kinder & Bildung
-          </a>
-          <a href="/blog" className="hover:text-blue-600">
-            Blog
-          </a>
-          <a href="/kontakt" className="hover:text-blue-600">
-            Kontakt
-          </a>
-          <a
-            href="/newsletter"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-white font-semibold text-center shadow hover:bg-blue-700 transition"
-          >
-            Newsletter
-          </a>
+        <div className="md:hidden bg-white border-t border-gray-200 flex flex-col p-4 space-y-3 text-sm">
+          {menuItems.map((item) => (
+            <div key={item.name}>
+              <Link href={item.path} className="font-medium hover:text-blue-600">
+                {item.name}
+              </Link>
+              {item.sub && (
+                <div className="pl-4 mt-1 space-y-1 text-gray-600">
+                  {item.sub.map((subItem) => (
+                    <Link
+                      key={subItem.name}
+                      href={subItem.path}
+                      className="block hover:text-blue-600"
+                    >
+                      • {subItem.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </header>
