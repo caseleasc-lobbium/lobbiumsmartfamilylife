@@ -49,7 +49,7 @@ export default function Maintenance() {
 
       {/* Titel */}
       <h1 className="text-3xl md:text-4xl font-bold text-[#1c3d6c] mb-3">
-        🚧 Lobbium Smart Family Life
+        🚧 Jocelyne I. NGOILA 
       </h1>
 
       {/* Beschreibung */}
