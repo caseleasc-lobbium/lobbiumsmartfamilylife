@@ -1,16 +1,18 @@
 import { NextResponse } from "next/server";
 
-export function middleware(request) {
-  const maintenance = true; // Wenn du wieder live gehst: false setzen
+export function middleware(req) {
+  const url = req.nextUrl.clone();
 
-  // Weiterleitung auf /maintenance, außer man ist schon dort
-  if (maintenance && !request.nextUrl.pathname.startsWith("/maintenance")) {
-    return NextResponse.redirect(new URL("/maintenance", request.url));
+  // Ausnahme: Logo-Test und Maintenance-Seite selbst
+  if (url.pathname.startsWith("/logo-test") || url.pathname.startsWith("/maintenance")) {
+    return NextResponse.next();
+  }
+
+  // Alle anderen Seiten → Maintenance-Redirect
+  if (!url.pathname.startsWith("/_next") && !url.pathname.startsWith("/api") && !url.pathname.startsWith("/static")) {
+    url.pathname = "/maintenance";
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: ["/((?!_next|static|favicon.ico).*)"], // Ignoriere Next.js Assets
-};
