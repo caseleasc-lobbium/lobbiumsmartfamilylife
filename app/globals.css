@@ -1,0 +1,24 @@
+/* app/globals.css */
+
+/* Basis-Styles für deine ganze App */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: #f8faff;
+  color: #1a1a1a;
+  line-height: 1.6;
+}
+
+a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

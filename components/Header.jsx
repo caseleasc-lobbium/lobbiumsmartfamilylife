@@ -1,126 +1,165 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Header() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const menuItems = [
-    { name: "Startseite", path: "/" },
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navItems = [
+    { label: "Startseite", href: "/" },
     {
-      name: "Finanzen & Spartipps",
-      path: "/finanzen-spartipps",
-      sub: [
-        { name: "Geld sparen", path: "/finanzen-spartipps/geld-sparen" },
-        { name: "Versicherungen", path: "/finanzen-spartipps/versicherungen" },
-        { name: "Geld anlegen", path: "/finanzen-spartipps/geld-anlegen" },
-        { name: "Familienbudget", path: "/finanzen-spartipps/familienbudget" },
+      label: "Finanzen & Spartipps",
+      href: "/finanzen-spartipps",
+      submenu: [
+        { label: "Geld sparen", href: "/finanzen-spartipps/geld-sparen" },
+        { label: "Versicherungen", href: "/finanzen-spartipps/versicherungen" },
+        { label: "Geld anlegen", href: "/finanzen-spartipps/geld-anlegen" },
+        { label: "Familienbudget", href: "/finanzen-spartipps/familienbudget" },
       ],
     },
     {
-      name: "Familienleben",
-      path: "/familienleben-alltag",
-      sub: [
-        { name: "Alltag & Organisation", path: "/familienleben/alltag" },
-        { name: "Beziehung & Erziehung", path: "/familienleben/erziehung" },
-        { name: "Haushalt", path: "/familienleben/haushalt" },
+      label: "Familienleben",
+      href: "/familienleben",
+      submenu: [
+        { label: "Alltag & Organisation", href: "/familienleben/alltag" },
+        { label: "Beziehung & Erziehung", href: "/familienleben/erziehung" },
+        { label: "Haushalt", href: "/familienleben/haushalt" },
       ],
     },
     {
-      name: "Kinder & Bildung",
-      path: "/kinder-bildung",
-      sub: [
-        { name: "Lern-Apps", path: "/kinder-bildung/lernapps" },
-        { name: "Schulbedarf", path: "/kinder-bildung/schulbedarf" },
-        { name: "Freizeit & Entwicklung", path: "/kinder-bildung/freizeit" },
+      label: "Kinder & Bildung",
+      href: "/kinder-bildung",
+      submenu: [
+        { label: "Lern-Apps", href: "/kinder-bildung/lernapps" },
+        { label: "Schulbedarf", href: "/kinder-bildung/schulbedarf" },
+        { label: "Freizeit & Entwicklung", href: "/kinder-bildung/freizeit" },
       ],
     },
     {
-      name: "Lifestyle",
-      path: "/lifestyle",
-      sub: [
-        { name: "Smart Home", path: "/lifestyle/smart-home" },
-        { name: "Nachhaltigkeit", path: "/lifestyle/nachhaltigkeit" },
-        { name: "Ernährung & Rezepte", path: "/lifestyle/rezepte" },
+      label: "Lifestyle",
+      href: "/lifestyle",
+      submenu: [
+        { label: "Smart Home", href: "/lifestyle/smart-home" },
+        { label: "Nachhaltigkeit", href: "/lifestyle/nachhaltigkeit" },
+        { label: "Ernährung & Rezepte", href: "/lifestyle/rezepte" },
       ],
     },
-    { name: "Blog", path: "/blog" },
-    { name: "Kontakt", path: "/kontakt" },
+    { label: "Blog", href: "/blog" },
+    { label: "Kontakt", href: "/kontakt" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-      <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+    <header
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+        isScrolled
+          ? "bg-gradient-to-b from-[#e8f2ff]/80 to-white/70 backdrop-blur-md shadow-sm py-2"
+          : "bg-gradient-to-b from-[#e8f2ff]/60 to-[#f7fbff]/50 backdrop-blur-sm py-4"
+      }`}
+    >
+      <nav className="max-w-7xl mx-auto flex justify-between items-center px-6 transition-all duration-500">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
-          <Image src="/logo.png" alt="Lobbium Logo" width={90} height={90} priority />
+        <Link href="/" className="flex items-center gap-2 transition-all duration-500">
+          <Image
+            src="/logo.png"
+            alt="Smart Family Life Logo"
+            width={isScrolled ? 70 : 90}
+            height={isScrolled ? 70 : 90}
+            priority
+            className="object-contain transition-all duration-500"
+          />
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-          {menuItems.map((item) => (
-            <div key={item.name} className="relative group">
-              <Link href={item.path} className="hover:text-blue-600 transition">
-                {item.name}
+        <ul className="hidden md:flex items-center gap-6 text-[#1c3d6c] font-medium transition-all duration-500">
+          {navItems.map((item, index) => (
+            <li key={index} className="relative group">
+              <Link
+                href={item.href}
+                className="hover:text-[#2b6cb0] transition-colors duration-200"
+              >
+                {item.label}
               </Link>
-              {item.sub && (
-                <div className="absolute hidden group-hover:block bg-white border border-gray-100 rounded-lg shadow-md mt-2 p-2">
-                  {item.sub.map((subItem) => (
+
+              {item.submenu && (
+                <div className="absolute left-0 mt-2 hidden group-hover:block bg-white/90 backdrop-blur-md border border-[#e1e5ee] rounded-lg shadow-lg w-56 py-2 z-50">
+                  {item.submenu.map((sub, subIndex) => (
                     <Link
-                      key={subItem.name}
-                      href={subItem.path}
-                      className="block px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded"
+                      key={subIndex}
+                      href={sub.href}
+                      className="block px-4 py-2 text-sm text-[#1c3d6c] hover:bg-[#f0f4ff] hover:text-[#2b6cb0] transition-colors duration-150"
                     >
-                      {subItem.name}
+                      {sub.label}
                     </Link>
                   ))}
                 </div>
               )}
-            </div>
+            </li>
           ))}
-        </nav>
 
-        {/* Newsletter Button */}
-        <Link
-          href="/newsletter"
-          className="hidden md:inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-white font-semibold shadow hover:bg-blue-700 transition"
-        >
-          Newsletter
-        </Link>
+          <li>
+            <Link
+              href="/newsletter"
+              className="ml-4 bg-[#2b6cb0] hover:bg-[#1c3d6c] text-white font-semibold px-4 py-2 rounded-md transition duration-200"
+            >
+              Newsletter
+            </Link>
+          </li>
+        </ul>
 
-        {/* Mobile Menü Button */}
+        {/* Mobile Button */}
         <button
-          className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Menü öffnen oder schließen"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden text-[#1c3d6c] text-3xl focus:outline-none"
         >
           ☰
         </button>
-      </div>
+      </nav>
 
       {/* Mobile Menü */}
-      {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 flex flex-col p-4 space-y-3 text-sm">
-          {menuItems.map((item) => (
-            <div key={item.name}>
-              <Link href={item.path} className="font-medium hover:text-blue-600">
-                {item.name}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-[#e1e5ee] shadow-md">
+          <ul className="flex flex-col p-4 space-y-2">
+            {navItems.map((item, index) => (
+              <li key={index}>
+                <Link
+                  href={item.href}
+                  className="block text-[#1c3d6c] font-medium hover:text-[#2b6cb0]"
+                >
+                  {item.label}
+                </Link>
+                {item.submenu && (
+                  <div className="pl-4 mt-1 space-y-1">
+                    {item.submenu.map((sub, subIndex) => (
+                      <Link
+                        key={subIndex}
+                        href={sub.href}
+                        className="block text-sm text-[#1c3d6c] hover:text-[#2b6cb0]"
+                      >
+                        • {sub.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </li>
+            ))}
+
+            <li>
+              <Link
+                href="/newsletter"
+                className="block text-center bg-[#2b6cb0] text-white font-semibold py-2 rounded-md hover:bg-[#1c3d6c]"
+              >
+                Newsletter
               </Link>
-              {item.sub && (
-                <div className="pl-4 mt-1 space-y-1 text-gray-600">
-                  {item.sub.map((subItem) => (
-                    <Link
-                      key={subItem.name}
-                      href={subItem.path}
-                      className="block hover:text-blue-600"
-                    >
-                      • {subItem.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            </li>
+          </ul>
         </div>
       )}
     </header>

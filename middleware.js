@@ -3,22 +3,22 @@ import { NextResponse } from "next/server";
 export function middleware(req) {
   const url = req.nextUrl.clone();
 
-  // ✅ Erlaubte Seiten: Logo-Test + Maintenance
-  if (url.pathname.startsWith("/logo-test") || url.pathname.startsWith("/maintenance")) {
+  // 🧠 Wenn du lokal entwickelst (localhost), wird die Middleware deaktiviert
+  if (req.headers.get("host")?.includes("localhost")) {
     return NextResponse.next();
   }
 
-  // ❌ Alle anderen Anfragen umleiten
+  // ✅ Erlaubte Seiten: Logo-Test & Maintenance
   if (
-    !url.pathname.startsWith("/_next") &&
-    !url.pathname.startsWith("/api") &&
-    !url.pathname.startsWith("/static") &&
-    !url.pathname.startsWith("/favicon") &&
-    !url.pathname.startsWith("/logo.png")
+    url.pathname.startsWith("/logo-test") ||
+    url.pathname.startsWith("/maintenance") ||
+    url.pathname.startsWith("/logo.png") ||
+    url.pathname.startsWith("/favicon")
   ) {
-    url.pathname = "/maintenance";
-    return NextResponse.redirect(url);
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  // 🚫 Alle anderen Anfragen auf Maintenance umleiten
+  url.pathname = "/maintenance";
+  return NextResponse.redirect(url);
 }

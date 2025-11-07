@@ -1,1 +1,0 @@
-export default function Page() { return (<div className='max-w-5xl mx-auto p-8'><h1 className='text-3xl font-bold text-ldark'>Kontakt</h1><p className='mt-3 text-slate-600'>Schreib uns eine Nachricht. (Form folgt)</p></div>); }

@@ -2,8 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base typography */
-html, body { @apply bg-white text-slate-800; }
-h1, h2, h3, h4 { @apply text-ldark; }
-a { @apply text-lblue; }
-a:hover { @apply underline; }
+/* Grundstil für Schrift und Farben */
+html,
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  color: #1f2937;
+  background-color: #f8faff;
+  scroll-behavior: smooth;
+}
+
+/* Einheitlicher Abstand zwischen Sektionen */
+section {
+  scroll-margin-top: 100px;
+}
+
+/* Links & Interaktionen */
+a {
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #2563eb; /* Blau */
+}
+
+/* Footer- & Header-Abstände */
+header {
+  z-index: 50;
+}
+
+footer {
+  margin-top: auto;
+}
+
+/* Mobile Menü Animation */
+.mobile-menu-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.mobile-menu-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease-in-out;
+}
+:root {
+  --main-blue: #2b6cb0;
+  --main-dark: #1c3d6c;
+  --bg-light: #f8faff;
+}
+
+body {
+  background-color: var(--bg-light);
+  color: #333;
+  font-family: "Inter", sans-serif;
+}
+
+h1, h2, h3 {
+  color: var(--main-dark);
+}
+
+a {
+  color: var(--main-blue);
+  transition: color 0.3s;
+}
+
+a:hover {
+  color: var(--main-dark);
+}
