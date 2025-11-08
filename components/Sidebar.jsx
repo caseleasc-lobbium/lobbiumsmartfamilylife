@@ -5,7 +5,10 @@ import { useRouter, usePathname } from "next/navigation";
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
-
+  const handleNavigation = (path) => {
+    router.push(path); // Wechselt nur die Ansicht – kein Reload
+  };
+  
   const menuItems = [
     { name: "Dashboard", path: "/admin" },
     { name: "Benutzer", path: "/admin/users" },
@@ -25,16 +28,19 @@ export default function Sidebar() {
             const isActive = pathname === item.path;
             return (
               <button
-                key={item.path}
-                onClick={() => router.push(item.path)}
-                className={`text-left px-4 py-2 rounded-xl transition ${
-                  isActive
-                    ? "bg-blue-500 text-white font-semibold"
-                    : "text-gray-800 hover:bg-gray-100"
-                }`}
-              >
-                {item.name}
-              </button>
+  key={item.path}
+  onClick={(e) => {
+    e.preventDefault();
+    router.push(item.path);
+  }}
+  className={`text-left px-4 py-2 rounded-xl transition ${
+    isActive
+      ? "bg-blue-500 text-white font-semibold"
+      : "text-gray-800 hover:bg-gray-100"
+  }`}
+>
+  {item.name}
+</button>
             );
           })}
         </nav>

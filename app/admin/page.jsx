@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -21,8 +20,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-white">
-      {/* Sidebar */}
-      <Sidebar />
+
 
       {/* Dashboard-Hauptbereich */}
       <div className="flex-1 flex items-center justify-center">
