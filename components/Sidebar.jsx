@@ -1,18 +1,48 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Sidebar() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const menuItems = [
+    { name: "Dashboard", path: "/admin" },
+    { name: "Benutzer", path: "/admin/users" },
+    { name: "Statistiken", path: "/admin/stats" },
+    { name: "Einstellungen", path: "/admin/settings" },
+  ];
+
   return (
-    <aside className="w-64 bg-blue-700 text-white flex flex-col py-6 px-4 space-y-4">
-      <h2 className="text-lg font-semibold mb-4">Menü</h2>
-      <Link href="/admin" className="hover:bg-blue-600 rounded p-2">
-        Dashboard
-      </Link>
-      <Link href="#" className="hover:bg-blue-600 rounded p-2">
-        Benutzer
-      </Link>
-      <Link href="#" className="hover:bg-blue-600 rounded p-2">
-        Einstellungen
-      </Link>
-    </aside>
+    <div className="w-64 h-[85vh] my-auto ml-6 bg-white border border-gray-200 shadow-xl rounded-3xl flex flex-col justify-between">
+      <div>
+        <div className="p-6 text-2xl font-bold text-gray-800 border-b border-gray-100">
+          ⚙️ Admin Menü
+        </div>
+
+        <nav className="flex flex-col p-4 space-y-2">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => router.push(item.path)}
+                className={`text-left px-4 py-2 rounded-xl transition ${
+                  isActive
+                    ? "bg-blue-500 text-white font-semibold"
+                    : "text-gray-800 hover:bg-gray-100"
+                }`}
+              >
+                {item.name}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="p-4 border-t border-gray-100 text-center text-sm text-gray-500">
+        © 2025 Lobbium
+      </div>
+    </div>
   );
 }
