@@ -19,7 +19,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-gray-200">
+    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-bg-white-10 to-bg-white-100">
       <form
         onSubmit={handleLogin}
         className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm"
