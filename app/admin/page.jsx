@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -16,33 +16,26 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    router.push("/admin/login");
+  };
+
   if (!isReady) return null;
 
   return (
-    <div className="flex h-screen bg-white">
-
-
-      {/* Dashboard-Hauptbereich */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-[90%] h-[85vh] bg-white border border-gray-200 shadow-xl rounded-3xl flex flex-col items-center justify-center text-center transition-all duration-300">
-          <h1 className="text-3xl font-semibold text-gray-900 mb-4">
-            🔧 Admin Dashboard
-          </h1>
-          <p className="text-gray-700 text-lg mb-6">
-            Willkommen im Administrationsbereich von{" "}
-            <b>Lobbium Smart Family Life</b>.
-          </p>
-          <button
-            onClick={() => {
-              localStorage.removeItem("isLoggedIn");
-              router.push("/admin/login");
-            }}
-            className="bg-red-500 hover:bg-red-600 text-white py-3 px-10 rounded-2xl text-lg transition-all duration-300 shadow-md hover:shadow-lg"
-          >
-            Abmelden
-          </button>
-        </div>
-      </div>
+    <div className="flex flex-col items-center justify-center bg-white p-10 rounded-3xl shadow-lg w-[90%] max-w-3xl">
+      <h1 className="text-2xl font-bold mb-4">🔧 Admin Dashboard</h1>
+      <p className="text-gray-600 mb-6">
+        Willkommen im Administrationsbereich von{" "}
+        <strong>Lobbium Smart Family Life</strong>.
+      </p>
+      <button
+        onClick={handleLogout}
+        className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition"
+      >
+        Abmelden
+      </button>
     </div>
   );
 }
