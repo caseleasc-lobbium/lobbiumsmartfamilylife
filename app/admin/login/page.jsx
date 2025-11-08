@@ -1,54 +1,74 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLogin() {
-  const [password, setPassword] = useState("");
-  const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (password === "admin123") {
-      localStorage.setItem("isLoggedIn", "true");
-      setSuccess(true);
-      setTimeout(() => router.push("/admin"), 1000);
-    } else {
-      alert("Falsches Passwort!");
+  // Prüfen, ob bereits eingeloggt
+  useEffect(() => {
+    const auth = localStorage.getItem("lobbiumAdminAuth");
+    if (auth === "true") {
+      setIsAuthenticated(true);
+      router.push("/admin");
     }
-  };
+  }, [router]);
+
+  // Login-Handler
+ const handleLogin = async (e) => {
+  e.preventDefault();
+
+  // Hole das Passwort sicher von der Server-Seite
+  const res = await fetch("/api/check-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+  localStorage.setItem("lobbiumAdminAuth", "true");
+
+  // Login-Zeit in Minuten speichern
+  const loginTime = new Date().getTime();
+  localStorage.setItem("lobbiumLoginTime", loginTime.toString());
+
+  setError("");
+  router.push("/admin");
+  } else {
+    setError("❌ Falsches Passwort. Bitte versuche es erneut.");
+  }
+};
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-bg-white-10 to-bg-white-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">
-          🔐 Admin Login
-        </h2>
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="bg-white shadow-xl rounded-3xl p-10 w-[90%] max-w-sm text-center">
+        <h1 className="text-2xl font-bold mb-6">🔒 Admin Login</h1>
 
-        <input
-          type="password"
-          placeholder="Passwort eingeben"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none mb-4"
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            type="password"
+            placeholder="Passwort eingeben"
+            className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Einloggen
-        </button>
+          {error && <p className="text-red-500 mb-3 text-sm">{error}</p>}
 
-        {success && (
-          <p className="mt-4 text-center text-green-600 font-semibold">
-            ✅ Login erfolgreich! Weiterleitung...
-          </p>
-        )}
-      </form>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-700 text-white w-full py-3 rounded-xl font-semibold transition"
+          >
+            Einloggen
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
