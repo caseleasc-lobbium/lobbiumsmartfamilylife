@@ -5,13 +5,9 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# ⚡ Wichtig: Dynamische API-Routen & Admin müssen als Serverless Functions laufen
 [functions]
-  included_files = ["data_*.json"]
   node_bundler = "esbuild"
-
-# 🔒 Sicherheit: Admin URL verstecken & schützen
-[[redirects]]
-  from = "/admin/*"
-  to = "/__secure-admin-access-392874/*"
-  status = 200
+  included_files = [
+    "data_*.json",
+    "data/*.json"
+  ]

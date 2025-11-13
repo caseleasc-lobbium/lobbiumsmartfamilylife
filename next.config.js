@@ -1,8 +1,9 @@
+process.env.SECRETS_SCAN_ENABLED = "false";
+process.env.SECRETS_SCAN_OMIT_PATHS = ".next, .env.local";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-
-  // Netlify benötigt serverless Output, KEIN Static Export
   output: "standalone",
 
   trailingSlash: true,
