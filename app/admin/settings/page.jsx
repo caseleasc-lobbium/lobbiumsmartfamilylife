@@ -1,36 +1,138 @@
 "use client";
 
-export default function SettingsPage() {
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function AdminSettingsPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  // -----------------------------
+  // 🔐 ADMIN LOGIN / SESSION SCHUTZ
+  // -----------------------------
+  useEffect(() => {
+    const auth = localStorage.getItem("lobbiumAdminAuth");
+    const loginTime = localStorage.getItem("lobbiumLoginTime");
+
+    if (auth !== "true") {
+      router.push("/admin/login");
+      return;
+    }
+
+    // Session 30 Min.
+    const now = Date.now();
+    if (now - parseInt(loginTime) > 30 * 60 * 1000) {
+      localStorage.removeItem("lobbiumAdminAuth");
+      localStorage.removeItem("lobbiumLoginTime");
+      alert("⏳ Sitzung abgelaufen. Bitte erneut einloggen.");
+      router.push("/admin/login");
+      return;
+    }
+
+    setLoading(false);
+  }, [router]);
+
+  // -----------------------------
+  // 📦 EINSTELLUNGEN LADEN
+  // -----------------------------
+  const [settings, setSettings] = useState({
+    siteName: "",
+    siteDescription: "",
+    contactEmail: "",
+  });
+
+  const loadSettings = async () => {
+    const res = await fetch("/api/settings");
+    const data = await res.json();
+    setSettings(data);
+  };
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  // -----------------------------
+  // 💾 SPEICHERN
+  // -----------------------------
+  const handleSave = async () => {
+    const res = await fetch("/api/settings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: "lobbiumAdminAuth:true",
+      },
+      body: JSON.stringify(settings),
+    });
+
+    if (res.ok) {
+      alert("✅ Einstellungen erfolgreich gespeichert");
+    } else {
+      alert("❌ Fehler beim Speichern");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-10 text-center">
+        <p className="text-gray-500">Lade Admin...</p>
+      </div>
+    );
+  }
+
+  // -----------------------------
+  // 🎨 UI – LOBBIUM DESIGN (1:1)
+  // -----------------------------
   return (
-    <div className="bg-white shadow-xl rounded-3xl p-8 w-full max-w-3xl">
-      <h1 className="text-2xl font-bold flex items-center gap-2 mb-4">
-        ⚙️ Einstellungen
-      </h1>
-      <p className="text-gray-600 mb-6">
-        Hier kannst du später Admin-Konten, Rechte, API-Keys und Systemoptionen verwalten.
-      </p>
+    <div className="p-8">
+      <h1 className="text-2xl font-semibold mb-6">⚙️ Einstellungen</h1>
 
-      <div className="space-y-4">
-        <div className="flex justify-between items-center border-b pb-2">
-          <span>Admin-Konten verwalten</span>
-          <button className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">
-            Öffnen
-          </button>
-        </div>
+      <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 max-w-xl">
 
-        <div className="flex justify-between items-center border-b pb-2">
-          <span>API-Keys konfigurieren</span>
-          <button className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">
-            Öffnen
-          </button>
-        </div>
+        <label className="block mb-4">
+          <span className="font-medium text-gray-700">Seitenname</span>
+          <input
+            type="text"
+            className="w-full mt-1 p-2 border rounded-xl"
+            value={settings.siteName}
+            onChange={(e) =>
+              setSettings({ ...settings, siteName: e.target.value })
+            }
+            placeholder="z.B. Lobbium Smart Family Life"
+          />
+        </label>
 
-        <div className="flex justify-between items-center">
-          <span>System-Backup & Wartung</span>
-          <button className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600">
-            Jetzt sichern
-          </button>
-        </div>
+        <label className="block mb-4">
+          <span className="font-medium text-gray-700">Kurzbeschreibung</span>
+          <textarea
+            rows={3}
+            className="w-full mt-1 p-2 border rounded-xl"
+            value={settings.siteDescription}
+            onChange={(e) =>
+              setSettings({ ...settings, siteDescription: e.target.value })
+            }
+            placeholder="Beschreibung für SEO & Startseite"
+          />
+        </label>
+
+        <label className="block mb-4">
+          <span className="font-medium text-gray-700">Kontakt E-Mail</span>
+          <input
+            type="email"
+            className="w-full mt-1 p-2 border rounded-xl"
+            value={settings.contactEmail}
+            onChange={(e) =>
+              setSettings({ ...settings, contactEmail: e.target.value })
+            }
+            placeholder="z.B. kontakt@lobbium.com"
+          />
+        </label>
+
+        <button
+          onClick={handleSave}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl shadow mt-3"
+        >
+          Speichern
+        </button>
       </div>
     </div>
   );

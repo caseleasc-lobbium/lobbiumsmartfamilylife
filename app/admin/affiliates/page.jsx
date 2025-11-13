@@ -1,8 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function AffiliatesPage() {
+export default function AffiliatesAdminPage() {
+  const router = useRouter();
+
+  // -----------------------------
+  // 🔐 Login- & Session-Schutz
+  // -----------------------------
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const auth = localStorage.getItem("lobbiumAdminAuth");
+    const loginTime = localStorage.getItem("lobbiumLoginTime");
+
+    if (auth !== "true") {
+      router.push("/admin/login");
+      return;
+    }
+
+    const now = Date.now();
+    if (now - parseInt(loginTime) > 30 * 60 * 1000) {
+      localStorage.removeItem("lobbiumAdminAuth");
+      localStorage.removeItem("lobbiumLoginTime");
+      alert("⏳ Sitzung abgelaufen. Bitte neu einloggen.");
+      router.push("/admin/login");
+      return;
+    }
+
+    setLoading(false);
+  }, [router]);
+
+  // -----------------------------
+  // 📦 Daten & Formular
+  // -----------------------------
   const [affiliates, setAffiliates] = useState([]);
   const [newAffiliate, setNewAffiliate] = useState({
     title: "",
@@ -11,9 +43,8 @@ export default function AffiliatesPage() {
     link: "",
     description: "",
   });
-  const [loading, setLoading] = useState(false);
 
-  // ✅ Daten laden
+  // 🟦 Daten laden beim Start
   const loadAffiliates = async () => {
     const res = await fetch("/api/affiliates");
     const data = await res.json();
@@ -24,10 +55,12 @@ export default function AffiliatesPage() {
     loadAffiliates();
   }, []);
 
-  // ✅ Partner speichern
+  // -----------------------------
+  // 💾 Speichern
+  // -----------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+
     const res = await fetch("/api/affiliates", {
       method: "POST",
       headers: {
@@ -36,11 +69,9 @@ export default function AffiliatesPage() {
       },
       body: JSON.stringify(newAffiliate),
     });
-    setLoading(false);
 
     if (res.ok) {
-      const saved = await res.json();
-      setAffiliates((prev) => [...prev, saved]);
+      alert("Affiliate gespeichert ✅");
       setNewAffiliate({
         title: "",
         category: "",
@@ -48,127 +79,138 @@ export default function AffiliatesPage() {
         link: "",
         description: "",
       });
-      alert("Partner erfolgreich gespeichert ✅");
+      loadAffiliates();
     } else {
       alert("❌ Fehler beim Speichern");
     }
   };
 
-  // ✅ Partner löschen
+  // -----------------------------
+  // ❌ Löschen
+  // -----------------------------
   const handleDelete = async (id) => {
-    if (!confirm("Willst du diesen Partner wirklich löschen?")) return;
+    if (!confirm("Diesen Partner löschen?")) return;
+
     const res = await fetch(`/api/affiliates/${id}`, {
       method: "DELETE",
-      headers: { authorization: "Bearer lobbium_secure_key_2025_V6.1" },
+      headers: { authorization: "lobbiumAdminAuth:true" },
     });
 
     if (res.ok) {
-      setAffiliates((prev) => prev.filter((a) => a.id !== id));
+      alert("Gelöscht");
+      loadAffiliates();
     } else {
       alert("❌ Fehler beim Löschen");
     }
   };
 
+  if (loading) {
+    return (
+      <div className="p-10 text-center">
+        <p className="text-gray-500">Lade Admin...</p>
+      </div>
+    );
+  }
+
+  // -----------------------------
+  // 🎨 UI
+  // -----------------------------
+
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-semibold mb-8 text-gray-800 flex items-center gap-2">
+
+      <h1 className="text-2xl font-semibold mb-6">
         🔗 Affiliate Verwaltung
       </h1>
 
-      {/* FORMULAR */}
+      {/* Formular */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-3xl mx-auto border border-gray-100 relative overflow-hidden"
+        className="bg-white p-6 rounded-2xl shadow-md mb-8 border border-gray-200"
       >
-        {/* zarter Verlauf am Rand */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-white opacity-60 pointer-events-none rounded-2xl"></div>
-
-        <div className="relative grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <input
             type="text"
             placeholder="Titel"
+            className="border rounded-xl p-2"
             value={newAffiliate.title}
             onChange={(e) =>
               setNewAffiliate({ ...newAffiliate, title: e.target.value })
             }
-            className="border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none"
           />
+
           <input
             type="text"
-            placeholder="Kategorie"
+            placeholder="Kategorie (finanzen, familie, lifestyle...)"
+            className="border rounded-xl p-2"
             value={newAffiliate.category}
             onChange={(e) =>
               setNewAffiliate({ ...newAffiliate, category: e.target.value })
             }
-            className="border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none"
           />
+
           <input
             type="text"
             placeholder="Bild URL"
+            className="border rounded-xl p-2 col-span-2"
             value={newAffiliate.imageUrl}
             onChange={(e) =>
               setNewAffiliate({ ...newAffiliate, imageUrl: e.target.value })
             }
-            className="border border-gray-300 rounded-xl p-3 col-span-2 focus:ring-2 focus:ring-blue-500 outline-none"
           />
+
           <input
             type="text"
-            placeholder="Partner-Link"
+            placeholder="Affiliate Link"
+            className="border rounded-xl p-2 col-span-2"
             value={newAffiliate.link}
             onChange={(e) =>
               setNewAffiliate({ ...newAffiliate, link: e.target.value })
             }
-            className="border border-gray-300 rounded-xl p-3 col-span-2 focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
 
         <textarea
           placeholder="Beschreibung"
+          rows={3}
+          className="border rounded-xl p-2 w-full mt-4"
           value={newAffiliate.description}
           onChange={(e) =>
             setNewAffiliate({ ...newAffiliate, description: e.target.value })
           }
-          className="border border-gray-300 rounded-xl p-3 w-full mt-4 focus:ring-2 focus:ring-blue-500 outline-none"
-          rows="3"
         />
 
         <button
           type="submit"
-          disabled={loading}
-          className="mt-6 bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all shadow-md hover:shadow-lg"
+          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl"
         >
-          {loading ? "Speichert..." : "Speichern"}
+          Speichern
         </button>
       </form>
 
-      {/* Visuelle Trennung */}
-      <div className="my-10 border-t border-gray-200 w-full max-w-3xl mx-auto"></div>
+      {/* Liste */}
+      <h2 className="text-xl font-semibold mb-3">Aktive Partner</h2>
 
-      {/* LISTE */}
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Aktive Partner</h2>
-      {affiliates.length === 0 ? (
-        <p className="text-gray-500 italic">Keine Partner gespeichert.</p>
-      ) : (
-        <ul className="space-y-3 w-full max-w-3xl mx-auto">
-          {affiliates.map((a) => (
-            <li
-              key={a.id}
-              className="p-4 border rounded-xl bg-gray-50 hover:bg-gray-100 flex justify-between items-center transition-all shadow-sm hover:shadow-md"
+      <div className="space-y-3">
+        {affiliates.map((a) => (
+          <div
+            key={a.id}
+            className="p-4 border rounded-xl bg-gray-50 flex justify-between items-center shadow-sm"
+          >
+            <div>
+              <strong>{a.title}</strong> –{" "}
+              {a.category || <em className="text-gray-400">keine Kategorie</em>}
+            </div>
+
+            <button
+              onClick={() => handleDelete(a.id)}
+              className="text-red-600 hover:text-red-800 font-semibold"
             >
-              <div>
-                <strong className="text-gray-800">{a.title}</strong>{" "}
-                <span className="text-gray-500">– {a.category}</span>
-              </div>
-              <button
-                onClick={() => handleDelete(a.id)}
-                className="text-red-600 hover:text-red-800 font-semibold transition-all"
-              >
-                Löschen
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+              Löschen
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
