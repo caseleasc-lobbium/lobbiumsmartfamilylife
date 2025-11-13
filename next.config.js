@@ -2,36 +2,25 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // ❗ Wichtig: Vercel = KEIN output: "export", KEIN "standalone" nötig
-  // Vercel erkennt SSR, API, Middleware automatisch
-  trailingSlash: false,
+  // ❗ WICHTIG: Vercel braucht KEIN "output"
+  // ❗ KEINE static export, KEIN standalone, KEIN trailingSlash
 
   images: {
-    unoptimized: true, // falls du keine Next/Image-Optimierung nutzt
-  },
-
-  async redirects() {
-    return [];
-  },
-
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "no-cache, no-store, must-revalidate",
-          },
-        ],
-      },
-    ];
+    unoptimized: false,
   },
 
   experimental: {
     serverActions: {
       allowedOrigins: ["*"],
     },
+  },
+
+  async headers() {
+    return [];
+  },
+
+  async redirects() {
+    return [];
   },
 };
 
