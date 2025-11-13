@@ -21,3 +21,34 @@ model Message {
   message   String
   createdAt DateTime @default(now())
 }
+
+model Subscriber {
+  id           Int      @id @default(autoincrement())
+  name         String?
+  locale       String   @default("en")
+  email        String   @unique
+  consent      Boolean  @default(false)
+  date_consent DateTime @default(now())
+  token        String?  // 🔒 wichtig für den Bestätigungslink
+  createdAt    DateTime @default(now())
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  author    String
+  createdAt DateTime @default(now())
+}
+
+model Affiliate {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  imageUrl    String?
+  link        String?
+  category    String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

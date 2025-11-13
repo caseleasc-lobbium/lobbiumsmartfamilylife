@@ -1,119 +1,80 @@
 "use client";
-import Link from "next/link";
+import AffiliateGrid from "../components/AffiliateGrid";
 
 export default function HomeClient() {
   return (
     <>
-      {/* Hero-Bereich */}
-     <section className="bg-gradient-to-b from-[#eaf0ff] via-[#f3f6fb] to-[#f8faff] text-center pt-52 pb-16">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#1c3d6c] mb-4">
+      {/* HERO-BEREICH */}
+      <section className="bg-gradient-to-b from-[#f0f4ff] via-[#f5f7fa] to-[#ffffff] text-center pt-52 pb-20">
+        <h1 className="text-5xl font-bold text-[#1c3d6c] mb-4">
           Smart Family Life by Lobbium
         </h1>
-        <p className="text-lg text-gray-700 max-w-2xl mx-auto mb-8 leading-relaxed">
+        <p className="text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
           Clever sparen, Alltag organisieren und Kinder spielerisch fördern –
           kompakt, praxiserprobt und schön aufbereitet.
         </p>
       </section>
 
-      {/* Themenbereiche */}
-      <section className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 pt-10 pb-20">
+      {/* VITRINE – PARTNER DES TAGES */}
+      <section className="py-20 bg-gradient-to-b from-[#f9fbff] to-[#ffffff]">
+        <h2 className="text-3xl font-bold text-center text-[#1c3d6c] mb-10">
+          🌟 Partner des Tages – Empfehlungen für dich
+        </h2>
+        <p className="text-center text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+          Jeden Tag neu ausgewählt – beliebte Marken, clevere Spartipps und
+          familienfreundliche Inspirationen aus allen Rubriken.
+        </p>
+
+        {/* GEMISCHTE AFFILIATES */}
+        <AffiliateGrid category="all" limit={6} />
+      </section>
+
+      {/* RUBRIKENÜBERSICHT */}
+      <section className="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-4 gap-8 text-center">
         {[
           {
-            icon: "💰",
-            title: "Finanzen & Spartipps",
-            desc: "Budget, Familienkonto & smarte Routinen – so bleibt jeden Monat mehr übrig.",
-            link: "/finanzen-spartipps",
+            title: "💰 Finanzen & Spartipps",
+            desc: "Spare clever & plane nachhaltig für deine Familie.",
+            href: "/finanzen-spartipps",
           },
           {
-            icon: "🌳",
-            title: "Familienleben & Alltag",
-            desc: "Struktur, Routinen & Zeitmanagement für entspannte Tage mit Kindern.",
-            link: "/familienleben",
+            title: "👨‍👩‍👧 Familienleben",
+            desc: "Ideen & Tools für Organisation und glückliche Routinen.",
+            href: "/familienleben",
           },
           {
-            icon: "🎓",
-            title: "Kinder & Bildung",
-            desc: "Lernideen, Spiele & Medienkompetenz – modern & kindgerecht.",
-            link: "/kinder-bildung",
+            title: "🎓 Kinder & Bildung",
+            desc: "Lernideen & Spiele für kluge Köpfe.",
+            href: "/kinder-bildung",
+          },
+          {
+            title: "🌿 Lifestyle & Inspiration",
+            desc: "Selfcare, Nachhaltigkeit & Genuss für den Alltag.",
+            href: "/lifestyle",
           },
         ].map((item, index) => (
-          <div
+          <a
             key={index}
-            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border border-[#e1e5ee] text-center"
+            href={item.href}
+            className="bg-white border border-[#e1e5ee] rounded-xl shadow-md hover:shadow-lg transition p-6"
           >
-            <div className="text-4xl mb-3">{item.icon}</div>
             <h3 className="text-xl font-semibold text-[#1c3d6c] mb-2">
               {item.title}
             </h3>
-            <p className="text-gray-600 mb-4 leading-relaxed">{item.desc}</p>
-            <Link
-              href={item.link}
-              className="text-[#2b6cb0] font-medium hover:underline"
-            >
-              Mehr erfahren →
-            </Link>
-          </div>
+            <p className="text-gray-600 leading-relaxed">{item.desc}</p>
+          </a>
         ))}
       </section>
 
-      {/* Blog-Vorschau */}
-      <section className="bg-gradient-to-b from-[#f0f4ff] to-[#f8faff] py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-2xl font-bold text-[#1c3d6c]">Neu im Blog</h2>
-            <Link
-              href="/blog"
-              className="text-[#2b6cb0] hover:underline font-medium"
-            >
-              Alle Beiträge →
-            </Link>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "10 einfache Wege, monatlich 150€ zu sparen",
-                desc: "Praktische Schritte für den Familienalltag – mit Einkaufsplanung, Energietricks und Mini-Automationen.",
-              },
-              {
-                title: "Familienleben organisieren leicht gemacht",
-                desc: "Wie du Routinen schaffst, die wirklich halten – mit Planung und Flexibilität.",
-              },
-              {
-                title: "Clever investieren für die Zukunft deiner Kinder",
-                desc: "ETFs, Kindersparpläne & nachhaltige Anlagen einfach erklärt.",
-              },
-            ].map((post, i) => (
-              <div
-                key={i}
-                className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border border-[#e1e5ee]"
-              >
-                <span className="text-sm text-[#2b6cb0] font-semibold">
-                  Spartipp
-                </span>
-                <h3 className="text-lg font-bold text-[#1c3d6c] mt-2 mb-2">
-                  {post.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                  {post.desc}
-                </p>
-                <Link
-                  href="/blog"
-                  className="text-[#2b6cb0] font-medium hover:underline"
-                >
-                  Lesen →
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="text-center py-16 px-6 bg-gradient-to-r from-[#eef3fb] to-[#f8faff]">
+      {/* NEWSLETTER */}
+      <section className="text-center py-20 px-6 bg-gradient-to-r from-[#eef3fb] to-[#f8faff]">
         <h2 className="text-2xl font-bold text-[#1c3d6c] mb-4">
-          📬 Hol dir die besten Familientipps per E-Mail
+          📬 Wöchentliche Family-Highlights direkt ins Postfach
         </h2>
+        <p className="text-gray-700 mb-6 max-w-md mx-auto leading-relaxed">
+          Erhalte jede Woche neue Ideen, Partnerangebote & Spartipps für dein
+          Familienleben – kostenlos & inspirierend.
+        </p>
         <form className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
           <input
             type="email"

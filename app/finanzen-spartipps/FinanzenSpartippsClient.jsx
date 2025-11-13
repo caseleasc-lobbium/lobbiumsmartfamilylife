@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
+import AffiliateGrid from "@/components/AffiliateGrid";
 
 export default function FinanzenSpartippsClient() {
   const bereiche = [
@@ -18,12 +18,6 @@ export default function FinanzenSpartippsClient() {
     },
   ];
 
-  const partner = [
-    "/images/finance1.png",
-    "/images/finance2.png",
-    "/images/finance3.png",
-  ];
-
   return (
     <>
       {/* HERO */}
@@ -37,41 +31,12 @@ export default function FinanzenSpartippsClient() {
         </p>
       </section>
 
-      {/* THEMEN */}
-      <section className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 pt-10 pb-20">
-        {bereiche.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border border-[#e1e5ee] text-center"
-          >
-            <h3 className="text-xl font-semibold text-[#1c3d6c] mb-2">
-              {item.title}
-            </h3>
-            <p className="text-gray-600 mb-4 leading-relaxed">{item.desc}</p>
-          </div>
-        ))}
-      </section>
-
-      {/* PARTNER */}
-      <section className="bg-[#f8faff] py-16">
-        <h2 className="text-2xl font-bold text-center text-[#1c3d6c] mb-8">
-          Finanzpartner & Tools
+      {/* PARTNER-KACHELN */}
+      <section className="py-20 bg-gradient-to-b from-[#f9fbff] to-[#ffffff]">
+        <h2 className="text-2xl font-bold text-center text-[#1c3d6c] mb-10">
+          💰 Unsere Finanz-Partner des Tages
         </h2>
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 px-6">
-          {partner.map((src, i) => (
-            <div
-              key={i}
-              className="w-36 h-16 relative grayscale hover:grayscale-0 transition mx-auto"
-            >
-              <Image
-                src={src}
-                alt={`Finanzpartner ${i + 1}`}
-                fill
-                className="object-contain"
-              />
-            </div>
-          ))}
-        </div>
+        <AffiliateGrid category="finanzen" limit={9} />
       </section>
 
       {/* NEWSLETTER */}

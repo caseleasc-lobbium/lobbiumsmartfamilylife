@@ -1,32 +1,7 @@
 "use client";
-import Link from "next/link";
-import Image from "next/image";
+import AffiliateGrid from "@/components/AffiliateGrid";
 
 export default function LifestyleClient() {
-  const themen = [
-    {
-      icon: "🌿",
-      title: "Nachhaltiger Alltag",
-      desc: "Einfache Wege, um Umweltbewusstsein und Familienleben zu verbinden.",
-    },
-    {
-      icon: "🧘‍♀️",
-      title: "Selfcare & Balance",
-      desc: "Tipps für mentale Gesundheit und kleine Auszeiten im Alltag.",
-    },
-    {
-      icon: "🍲",
-      title: "Gesunde Ernährung",
-      desc: "Schnelle & ausgewogene Familienrezepte für jeden Tag.",
-    },
-  ];
-
-  const inspiration = [
-    "/images/life1.png",
-    "/images/life2.png",
-    "/images/life3.png",
-  ];
-
   return (
     <>
       {/* HERO */}
@@ -35,55 +10,27 @@ export default function LifestyleClient() {
           Lifestyle & Inspiration
         </h1>
         <p className="text-lg text-gray-700 max-w-2xl mx-auto mb-8 leading-relaxed">
-          Ideen für ein bewusstes, nachhaltiges & glückliches Familienleben.
+          Ideen für ein bewusstes, nachhaltiges und glückliches Familienleben –
+          von Ernährung bis Selfcare.
         </p>
       </section>
 
-      {/* THEMEN */}
-      <section className="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8 pt-10 pb-20">
-        {themen.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition border border-[#e1e5ee] text-center"
-          >
-            <div className="text-4xl mb-3">{item.icon}</div>
-            <h3 className="text-xl font-semibold text-[#1c3d6c] mb-2">
-              {item.title}
-            </h3>
-            <p className="text-gray-600 mb-4 leading-relaxed">{item.desc}</p>
-          </div>
-        ))}
-      </section>
-
-      {/* INSPIRATIONSBEREICH */}
-      <section className="bg-[#f8faff] py-16">
-        <h2 className="text-2xl font-bold text-center text-[#1c3d6c] mb-8">
-          Inspiration aus dem Alltag
+      {/* DYNAMISCHE PARTNER */}
+      <section className="py-20 bg-gradient-to-b from-[#f9fbff] to-[#ffffff]">
+        <h2 className="text-2xl font-bold text-center text-[#1c3d6c] mb-10">
+          🌿 Inspiration & Lifestyle-Partner
         </h2>
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 px-6">
-          {inspiration.map((src, i) => (
-            <div
-              key={i}
-              className="w-40 h-24 relative grayscale hover:grayscale-0 transition mx-auto"
-            >
-              <Image
-                src={src}
-                alt={`Lifestyle Inspiration ${i + 1}`}
-                fill
-                className="object-cover rounded-lg"
-              />
-            </div>
-          ))}
-        </div>
+        <AffiliateGrid category="lifestyle" limit={9} />
       </section>
 
       {/* NEWSLETTER */}
       <section className="text-center py-16 px-6 bg-gradient-to-r from-[#eef3fb] to-[#f8faff]">
         <h2 className="text-2xl font-bold text-[#1c3d6c] mb-4">
-          🌸 Lebe inspiriert – Woche für Woche!
+          💌 Inspirationen für dein Familienleben
         </h2>
         <p className="text-gray-700 mb-6 max-w-md mx-auto leading-relaxed">
-          Erhalte kreative Lifestyle-Tipps, nachhaltige Ideen & Motivation für dein Familienleben direkt per E-Mail.
+          Entdecke wöchentlich neue Ideen rund um Ernährung, Achtsamkeit und
+          Nachhaltigkeit für dich & deine Familie.
         </p>
         <form className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
           <input

@@ -1,0 +1,9 @@
+{
+  "Home": { "title": "...", "description": "..." },
+  "Newsletter": {
+    "title": "Abonnez-vous à notre newsletter",
+    "placeholder": "Adresse e-mail",
+    "button": "S'abonner",
+    "success": "Veuillez vérifier votre e-mail pour confirmer votre inscription."
+  }
+}
