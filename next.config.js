@@ -2,9 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // ❗ WICHTIG: Vercel braucht KEIN "output"
-  // ❗ KEINE static export, KEIN standalone, KEIN trailingSlash
-
+  // WICHTIG: Für Vercel NICHTS setzen wie "output", "trailingSlash", "export"
   images: {
     unoptimized: false,
   },
