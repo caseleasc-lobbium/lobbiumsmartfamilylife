@@ -1,4 +1,3 @@
-// 🔒 Deaktiviert Netlify Secret Scanning für Build-Dateien
 process.env.SECRETS_SCAN_ENABLED = "false";
 process.env.SECRETS_SCAN_OMIT_PATHS = ".next, .env.local";
 
