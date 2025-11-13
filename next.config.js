@@ -1,15 +1,21 @@
-process.env.SECRETS_SCAN_ENABLED = "false";
-process.env.SECRETS_SCAN_OMIT_PATHS = ".next, .env.local";
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
+  // FULL SSR für Netlify (wichtig!)
   output: "standalone",
 
   trailingSlash: true,
 
   images: {
     unoptimized: true,
+  },
+
+  // Keine Static-Export Sachen mehr!
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["*"],
+    }
   },
 
   async redirects() {
