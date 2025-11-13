@@ -1,5 +1,8 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -14,18 +17,19 @@ export default function AdminSettingsPage() {
     const auth = localStorage.getItem("lobbiumAdminAuth");
     const loginTime = localStorage.getItem("lobbiumLoginTime");
 
+    // Nicht eingeloggt → Redirect
     if (auth !== "true") {
-      router.push("/admin/login");
+      router.replace("/admin/login");
       return;
     }
 
-    // Session 30 Min.
+    // Timeout → 30 Min
     const now = Date.now();
-    if (now - parseInt(loginTime) > 30 * 60 * 1000) {
+    if (!loginTime || now - parseInt(loginTime) > 30 * 60 * 1000) {
       localStorage.removeItem("lobbiumAdminAuth");
       localStorage.removeItem("lobbiumLoginTime");
       alert("⏳ Sitzung abgelaufen. Bitte erneut einloggen.");
-      router.push("/admin/login");
+      router.replace("/admin/login");
       return;
     }
 
@@ -42,9 +46,18 @@ export default function AdminSettingsPage() {
   });
 
   const loadSettings = async () => {
-    const res = await fetch("/api/settings");
-    const data = await res.json();
-    setSettings(data);
+    try {
+      const res = await fetch("/api/settings", { cache: "no-store" });
+      const data = await res.json();
+      setSettings(data);
+    } catch {
+      console.warn("⚠️ Konnte Settings nicht laden.");
+      setSettings({
+        siteName: "",
+        siteDescription: "",
+        contactEmail: "",
+      });
+    }
   };
 
   useEffect(() => {
@@ -71,6 +84,9 @@ export default function AdminSettingsPage() {
     }
   };
 
+  // -----------------------------
+  // 🚀 Ladebildschirm
+  // -----------------------------
   if (loading) {
     return (
       <div className="p-10 text-center">
@@ -80,7 +96,7 @@ export default function AdminSettingsPage() {
   }
 
   // -----------------------------
-  // 🎨 UI – LOBBIUM DESIGN (1:1)
+  // 🎨 UI – LOBBIUM DESIGN
   // -----------------------------
   return (
     <div className="p-8">
@@ -133,6 +149,7 @@ export default function AdminSettingsPage() {
         >
           Speichern
         </button>
+
       </div>
     </div>
   );

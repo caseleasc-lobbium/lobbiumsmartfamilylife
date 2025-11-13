@@ -1,5 +1,8 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
@@ -10,17 +13,17 @@ export default function AdminLayout({ children }) {
 
   const isLoginPage = pathname === "/admin/login";
 
-  // 🔐 Admin-Schutz – blockiert NICHT-eingeloggte Nutzer
   useEffect(() => {
     const auth = localStorage.getItem("lobbiumAdminAuth");
     const loginTime = localStorage.getItem("lobbiumLoginTime");
 
-    // Wenn NICHT login und NICHT eingeloggt → redirect
+    // 🚫 Schutz für alle Admin-Seiten außer Login
     if (!isLoginPage && auth !== "true") {
       router.push("/admin/login");
+      return;
     }
 
-    // ⏳ Session Timeout (30 min)
+    // ⏳ Session Timeout (30 Minuten)
     if (auth === "true" && loginTime) {
       const now = Date.now();
       const diff = now - parseInt(loginTime);
@@ -40,9 +43,8 @@ export default function AdminLayout({ children }) {
         background: "linear-gradient(to bottom right, #ffffff, #ffffff)",
         fontFamily: "Inter, sans-serif",
         minHeight: "100vh",
-        padding: "0rem",
       }}
-      className="flex items-start justify-center"
+      className="flex items-start"
     >
       {!isLoginPage && <Sidebar />}
 

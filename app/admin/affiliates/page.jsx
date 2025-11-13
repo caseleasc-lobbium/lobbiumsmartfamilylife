@@ -1,5 +1,8 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -16,16 +19,16 @@ export default function AffiliatesAdminPage() {
     const loginTime = localStorage.getItem("lobbiumLoginTime");
 
     if (auth !== "true") {
-      router.push("/admin/login");
+      router.replace("/admin/login");
       return;
     }
 
     const now = Date.now();
-    if (now - parseInt(loginTime) > 30 * 60 * 1000) {
+    if (!loginTime || now - parseInt(loginTime) > 30 * 60 * 1000) {
       localStorage.removeItem("lobbiumAdminAuth");
       localStorage.removeItem("lobbiumLoginTime");
-      alert("⏳ Sitzung abgelaufen. Bitte neu einloggen.");
-      router.push("/admin/login");
+      alert("⏳ Sitzung abgelaufen. Bitte erneut einloggen.");
+      router.replace("/admin/login");
       return;
     }
 
@@ -44,11 +47,15 @@ export default function AffiliatesAdminPage() {
     description: "",
   });
 
-  // 🟦 Daten laden beim Start
+  // 🟦 Daten laden
   const loadAffiliates = async () => {
-    const res = await fetch("/api/affiliates");
-    const data = await res.json();
-    setAffiliates(data);
+    try {
+      const res = await fetch("/api/affiliates", { cache: "no-store" });
+      const data = await res.json();
+      setAffiliates(data || []);
+    } catch {
+      setAffiliates([]);
+    }
   };
 
   useEffect(() => {
@@ -115,7 +122,6 @@ export default function AffiliatesAdminPage() {
   // -----------------------------
   // 🎨 UI
   // -----------------------------
-
   return (
     <div className="p-8">
 
@@ -129,6 +135,7 @@ export default function AffiliatesAdminPage() {
         className="bg-white p-6 rounded-2xl shadow-md mb-8 border border-gray-200"
       >
         <div className="grid grid-cols-2 gap-4">
+
           <input
             type="text"
             placeholder="Titel"

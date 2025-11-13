@@ -1,5 +1,8 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -11,21 +14,21 @@ export default function StatsPage() {
     const auth = localStorage.getItem("lobbiumAdminAuth");
     const loginTime = localStorage.getItem("lobbiumLoginTime");
 
-    // Kein Login → zurück
+    // ❌ Nicht eingeloggt → redirect
     if (auth !== "true") {
-      router.push("/admin/login");
+      router.replace("/admin/login");
       return;
     }
 
-    // Session Timeout (30 Minuten)
+    // ⏳ Session Timeout
     const now = Date.now();
     const diff = now - parseInt(loginTime);
 
-    if (diff > 30 * 60 * 1000) {
+    if (!loginTime || diff > 30 * 60 * 1000) {
       localStorage.removeItem("lobbiumAdminAuth");
       localStorage.removeItem("lobbiumLoginTime");
       alert("⏳ Sitzung abgelaufen. Bitte erneut einloggen.");
-      router.push("/admin/login");
+      router.replace("/admin/login");
       return;
     }
 
@@ -51,7 +54,7 @@ export default function StatsPage() {
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        
+
         <div className="bg-blue-50 rounded-2xl p-4 text-center shadow-sm">
           <h2 className="text-xl font-semibold text-blue-600">1.245</h2>
           <p className="text-gray-600 text-sm">Registrierte Benutzer</p>
