@@ -2,20 +2,12 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // FULL SSR für Netlify (wichtig!)
-  output: "standalone",
-
-  trailingSlash: true,
+  // ❗ Wichtig: Vercel = KEIN output: "export", KEIN "standalone" nötig
+  // Vercel erkennt SSR, API, Middleware automatisch
+  trailingSlash: false,
 
   images: {
-    unoptimized: true,
-  },
-
-  // Keine Static-Export Sachen mehr!
-  experimental: {
-    serverActions: {
-      allowedOrigins: ["*"],
-    }
+    unoptimized: true, // falls du keine Next/Image-Optimierung nutzt
   },
 
   async redirects() {
@@ -27,10 +19,19 @@ const nextConfig = {
       {
         source: "/(.*)",
         headers: [
-          { key: "Cache-Control", value: "no-store" }
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
         ],
       },
     ];
+  },
+
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["*"],
+    },
   },
 };
 
