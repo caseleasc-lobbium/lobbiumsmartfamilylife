@@ -1,7 +1,10 @@
 "use client";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+
+export default function DashboardPage() {
+  return <div>Dashboard</div>;
+}
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
