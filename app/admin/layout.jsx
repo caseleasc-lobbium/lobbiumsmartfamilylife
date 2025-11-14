@@ -2,10 +2,6 @@
 
 export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
-  return <div>Dashboard</div>;
-}
-
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
