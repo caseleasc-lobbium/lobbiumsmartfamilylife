@@ -1,51 +1,81 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import fs from "fs";
+import path from "path";
 import { encrypt, decrypt } from "@/lib/encryption";
 
-const prisma = new PrismaClient();
+// Datei-Pfad
+const filePath = path.join(process.cwd(), "data", "subscribers.json");
 
-// ✅ POST → neuen Subscriber anlegen
+// Datei laden
+function loadSubscribers() {
+  try {
+    if (!fs.existsSync(filePath)) return [];
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (err) {
+    console.error("subscribers.json laden Fehler:", err);
+    return [];
+  }
+}
+
+// Datei speichern
+function saveSubscribers(data) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+
+// --------------------------------------------------
+// POST → neuen Subscriber anlegen
+// --------------------------------------------------
 export async function POST(req) {
   try {
     const { name, email, consent } = await req.json();
 
     if (!email) {
-      return NextResponse.json({ error: "E-Mail ist erforderlich" }, { status: 400 });
+      return NextResponse.json(
+        { error: "E-Mail ist erforderlich" },
+        { status: 400 }
+      );
     }
 
-    // 🔐 Verschlüsselung vor dem Speichern
+    const subscribers = loadSubscribers();
+
+    // 🔐 Verschlüsselung
     const encryptedEmail = encrypt(email);
     const encryptedName = name ? encrypt(name) : null;
 
-    const subscriber = await prisma.subscriber.create({
-      data: {
-        name: encryptedName,
-        email: encryptedEmail,
-        consent: consent || false,
-        date_consent: new Date(),
-      },
-    });
+    const newSubscriber = {
+      id: Date.now(),
+      name: encryptedName,
+      email: encryptedEmail,
+      consent: consent || false,
+      date_consent: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
 
-    return NextResponse.json({ success: true, id: subscriber.id });
+    subscribers.push(newSubscriber);
+    saveSubscribers(subscribers);
+
+    return NextResponse.json({ success: true, id: newSubscriber.id });
   } catch (err) {
     console.error("POST /subscribers error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
 
-// ✅ GET → alle Subscriber abrufen (automatisch entschlüsselt)
+// --------------------------------------------------
+// GET → alle Subscriber abrufen (entschlüsselt)
+// --------------------------------------------------
 export async function GET() {
   try {
-    const subscribers = await prisma.subscriber.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    const subscribers = loadSubscribers();
 
-    // 🔓 Entschlüsselung beim Anzeigen
     const decrypted = subscribers.map((s) => ({
       ...s,
       name: s.name ? decrypt(s.name) : "",
       email: s.email ? decrypt(s.email) : "",
     }));
+
+    // Sortieren nach Datum DESC
+    decrypted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     return NextResponse.json(decrypted);
   } catch (err) {
