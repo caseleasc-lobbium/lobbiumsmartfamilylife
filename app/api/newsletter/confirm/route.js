@@ -1,47 +1,36 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { createClient } from "@supabase/supabase-js";
 
-const filePath = path.join(process.cwd(), "data", "subscribers.json");
+// -----------------------------
+// Supabase Client
+// -----------------------------
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
-// 🟦 Datei laden
-function loadSubscribers() {
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch (err) {
-    console.error("Fehler beim Lesen von subscribers.json:", err);
-    return [];
-  }
-}
-
-// 🟩 Datei speichern
-function saveSubscribers(data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
-
+// -----------------------------
+// GET → Newsletter bestätigen
+// -----------------------------
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const email = searchParams.get("email");
     const token = searchParams.get("token");
 
-    if (!email && !token) {
-      return NextResponse.json({ error: "Parameter fehlt" }, { status: 400 });
+    if (!token) {
+      return NextResponse.json({ error: "Token fehlt" }, { status: 400 });
     }
 
-    let subscribers = loadSubscribers();
+    // 🔍 Eintrag über Token finden
+    const { data: user, error: findError } = await supabase
+      .from("newsletter")
+      .select("*")
+      .eq("token", token)
+      .single();
 
-    // 🔍 Finden über Token ODER über E-Mail
-    const userIndex = subscribers.findIndex(
-      (s) =>
-        (token && s.token === token) ||
-        (email && s.email === email)
-    );
-
-    if (userIndex === -1) {
+    if (findError || !user) {
       return NextResponse.json(
         { error: "Abo nicht gefunden" },
         { status: 404 }
@@ -49,17 +38,33 @@ export async function GET(req) {
     }
 
     // 🚀 Bestätigung setzen
-    subscribers[userIndex].confirmed = true;
-    subscribers[userIndex].date_consent = new Date().toISOString();
+    const { error: updateError } = await supabase
+      .from("newsletter")
+      .update({
+        confirmed: true,
+        consent: true,
+        date_consent: new Date().toISOString(),
+      })
+      .eq("id", user.id);
 
-    saveSubscribers(subscribers);
+    if (updateError) {
+      console.error("Supabase Update Error:", updateError);
+      return NextResponse.json(
+        { error: "Fehler beim Bestätigen" },
+        { status: 500 }
+      );
+    }
 
-    // 🔁 Weiterleitung auf deine Erfolgs-Seite
+    // 🌍 Sprache erkennen (Fallback = deutsch)
+    const locale = user.locale || "de";
+
+    // 🔁 Weiterleitung auf Erfolg-Seite je nach Sprache
     return NextResponse.redirect(
-      "https://lobbium.com/newsletter/bestaetigt"
+      `https://lobbium.com/${locale}/newsletter/bestaetigt`
     );
+
   } catch (err) {
-    console.error("Bestätigung Fehler:", err);
+    console.error("❌ Bestätigung Fehler:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

@@ -10,19 +10,23 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const isLoginPage = pathname === "/admin/login";
+  // Alle Login-Pfade korrekt erkennen
+  const isLoginPage =
+    pathname === "/admin/login" || pathname.startsWith("/admin/login");
 
   useEffect(() => {
     const auth = localStorage.getItem("lobbiumAdminAuth");
     const loginTime = localStorage.getItem("lobbiumLoginTime");
 
-    // 🚫 Schutz für alle Admin-Seiten außer Login
-    if (!isLoginPage && auth !== "true") {
-      router.push("/admin/login");
+    // 🚫 Nur Admin geschützte Seiten blockieren
+    const isProtected = pathname.startsWith("/admin") && !isLoginPage;
+
+    if (isProtected && auth !== "true") {
+      router.replace("/admin/login");
       return;
     }
 
-    // ⏳ Session Timeout (30 Minuten)
+    // ⏳ Session Timeout (30 min)
     if (auth === "true" && loginTime) {
       const now = Date.now();
       const diff = now - parseInt(loginTime);
@@ -31,7 +35,7 @@ export default function AdminLayout({ children }) {
         localStorage.removeItem("lobbiumAdminAuth");
         localStorage.removeItem("lobbiumLoginTime");
         alert("⏳ Sitzung abgelaufen. Bitte erneut einloggen.");
-        router.push("/admin/login");
+        router.replace("/admin/login");
       }
     }
   }, [pathname, router, isLoginPage]);
@@ -43,15 +47,12 @@ export default function AdminLayout({ children }) {
         fontFamily: "Inter, sans-serif",
         minHeight: "100vh",
       }}
-      className="flex items-start"
+      className="flex"
     >
+      {/* Sidebar nur zeigen, wenn NICHT auf der Login-Seite */}
       {!isLoginPage && <Sidebar />}
 
-      <main
-        className={`flex-1 ${
-          !isLoginPage ? "ml-6" : ""
-        } flex justify-center items-center`}
-      >
+      <main className="flex-1 flex justify-center items-start p-4">
         {children}
       </main>
     </div>

@@ -1,66 +1,113 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { prisma } from "@/lib/prisma";
 
-const filePath = path.join(process.cwd(), "data_affiliates.json");
-
-// 🔧 Hilfsfunktionen zum Lesen und Schreiben
-function readAffiliates() {
-  try {
-    if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, JSON.stringify([]));
-    const data = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(data || "[]");
-  } catch (err) {
-    console.error("❌ Fehler beim Lesen:", err);
-    return [];
-  }
-}
-
-function writeAffiliates(data) {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
-  } catch (err) {
-    console.error("❌ Fehler beim Schreiben:", err);
-  }
-}
-
-// 🔐 Sicherheitsprüfung (ENV-basiert)
+// -----------------------------
+// Admin Authorization
+// -----------------------------
 function isAuthorized(request) {
   const authHeader = request.headers.get("authorization") || "";
-  const serverSecret = process.env.ADMIN_SECRET || "lobbium_secure_key_2025_V6.1";
-  const expected = `Bearer ${serverSecret}`;
+  const serverSecret =
+    process.env.ADMIN_SECRET || "lobbium_secure_key_2025_V6.1";
 
-  if (authHeader !== expected) {
-    console.warn("🚫 Nicht autorisiert. Erhalten:", authHeader);
-    return false;
-  }
-  return true;
+  const expected = `Bearer ${serverSecret}`;
+  return authHeader === expected;
 }
 
-// 🗑️ DELETE – Affiliate löschen
+// -----------------------------
+// GET – Einzelner Affiliate
+// -----------------------------
+export async function GET(request, { params }) {
+  try {
+    const id = Number(params.id);
+
+    const affiliate = await prisma.affiliates.findUnique({
+      where: { id },
+    });
+
+    if (!affiliate) {
+      return NextResponse.json(
+        { error: "Partner nicht gefunden" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(affiliate);
+  } catch (error) {
+    console.error("❌ GET Error:", error);
+    return NextResponse.json(
+      { error: "Serverfehler" },
+      { status: 500 }
+    );
+  }
+}
+
+// -----------------------------
+// PUT – Affiliate bearbeiten
+// -----------------------------
+export async function PUT(request, { params }) {
+  try {
+    if (!isAuthorized(request)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const id = Number(params.id);
+    const body = await request.json();
+
+    const updated = await prisma.affiliates.update({
+      where: { id },
+      data: {
+        title: body.title,
+        category: body.category,
+        imageUrl: body.imageUrl,
+        link: body.link,
+        description: body.description,
+      },
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("❌ PUT Error:", error);
+    return NextResponse.json(
+      { error: "Fehler beim Speichern" },
+      { status: 500 }
+    );
+  }
+}
+
+// -----------------------------
+// DELETE – Affiliate löschen
+// -----------------------------
 export async function DELETE(request, { params }) {
   try {
     if (!isAuthorized(request)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
-    if (!id) {
-      return NextResponse.json({ error: "Fehlende ID" }, { status: 400 });
+    const id = Number(params.id);
+
+    const existing = await prisma.affiliates.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: "Partner nicht gefunden" },
+        { status: 404 }
+      );
     }
 
-    const affiliates = readAffiliates();
-    const updated = affiliates.filter((a) => a.id !== Number(id));
+    await prisma.affiliates.delete({
+      where: { id },
+    });
 
-    if (affiliates.length === updated.length) {
-      return NextResponse.json({ error: "Partner nicht gefunden" }, { status: 404 });
-    }
+    console.log(`✅ Affiliate ${id} gelöscht`);
 
-    writeAffiliates(updated);
-    console.log(`✅ Partner ${id} gelöscht`);
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("❌ DELETE Error:", error);
-    return NextResponse.json({ error: "Fehler beim Löschen" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Fehler beim Löschen" },
+      { status: 500 }
+    );
   }
 }

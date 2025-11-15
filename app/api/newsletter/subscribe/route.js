@@ -1,37 +1,27 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
 import { encrypt } from "@/lib/encryption";
+import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+const resend = new Resend(process.env.RESEND_API_KEY);
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lobbium.com";
 
 // -----------------------------
-// JSON-Datei laden / speichern
+// Supabase Client
 // -----------------------------
-const filePath = path.join(process.cwd(), "data", "subscribers.json");
-
-function loadSubscribers() {
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch {
-    return [];
-  }
-}
-
-function saveSubscribers(data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 // -----------------------------
 // POST → Newsletter abonnieren
 // -----------------------------
 export async function POST(req) {
   try {
-    const { name, email } = await req.json();
+    const { name, email, locale } = await req.json();
 
     if (!email) {
       return NextResponse.json({ error: "E-Mail fehlt" }, { status: 400 });
@@ -44,55 +34,75 @@ export async function POST(req) {
     // 🔑 Token generieren
     const token = Math.random().toString(36).substring(2, 12);
 
-    const subscribers = loadSubscribers();
-
-    // 📝 Speichern (noch nicht bestätigt)
-    const entry = {
-      id: Date.now(),
+    // 📝 In Supabase speichern
+    const { error } = await supabase.from("newsletter").insert({
       name: encryptedName,
       email: encryptedEmail,
       token,
-      consent: false,
+      locale: locale || "de",
+      confirmed: false,
       date_consent: null,
       createdAt: new Date().toISOString(),
+    });
+
+    if (error) {
+      console.error("Supabase Insert Error:", error);
+      return NextResponse.json(
+        { error: "Fehler beim Speichern" },
+        { status: 500 }
+      );
+    }
+
+    // 🔗 Bestätigungslink
+    const confirmUrl = `${BASE_URL}/${locale || "de"}/newsletter/confirm?token=${token}`;
+
+    // 🌍 Mehrsprachige Texte
+    const texts = {
+      de: {
+        subject: "Bitte bestätige dein Newsletter-Abo",
+        html: `
+          <h2>Willkommen bei Lobbium Smart Family Life 💌</h2>
+          <p>Bitte bestätige dein Newsletter-Abo:</p>
+          <p><a href="${confirmUrl}">👉 Jetzt bestätigen</a></p>
+          <br/>
+          <p>© ${new Date().getFullYear()} Lobbium</p>
+        `,
+      },
+      fr: {
+        subject: "Veuillez confirmer votre abonnement",
+        html: `
+          <h2>Bienvenue chez Lobbium 💌</h2>
+          <p>Merci de confirmer votre abonnement :</p>
+          <p><a href="${confirmUrl}">👉 Confirmer maintenant</a></p>
+          <br/>
+          <p>© ${new Date().getFullYear()} Lobbium</p>
+        `,
+      },
+      en: {
+        subject: "Please confirm your subscription",
+        html: `
+          <h2>Welcome to Lobbium 💌</h2>
+          <p>Please confirm your subscription:</p>
+          <p><a href="${confirmUrl}">👉 Confirm now</a></p>
+          <br/>
+          <p>© ${new Date().getFullYear()} Lobbium</p>
+        `,
+      },
     };
 
-    subscribers.push(entry);
-    saveSubscribers(subscribers);
+    const t = texts[locale] || texts.de;
 
-    // 🔗 URL zur Bestätigung
-    const confirmUrl = `${BASE_URL}/newsletter/confirm?token=${token}&email=${encodeURIComponent(
-      email
-    )}`;
-
-    // 📧 E-Mail-Inhalt
-    const message = {
+    // 📧 E-Mail senden via Resend
+    await resend.emails.send({
       from: "Lobbium <info@lobbium.com>",
       to: email,
-      subject: "Bitte bestätige dein Newsletter-Abo",
-      html: `
-        <h2>Willkommen bei Lobbium Smart Family Life 💌</h2>
-        <p>Bitte bestätige dein Abonnement, indem du auf den folgenden Link klickst:</p>
-        <p><a href="${confirmUrl}" target="_blank">👉 Newsletter bestätigen</a></p>
-        <p>Wenn du dich nicht angemeldet hast, kannst du diese E-Mail ignorieren.</p>
-        <br/>
-        <p>© ${new Date().getFullYear()} Lobbium Smart Family Life</p>
-      `,
-    };
-
-    // ✉️ E-Mail senden über Resend API
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(message),
+      subject: t.subject,
+      html: t.html,
     });
 
     return NextResponse.json({
       success: true,
-      message: "Bestätigungs-E-Mail gesendet",
+      message: "Bestätigungs-E-Mail gesendet.",
     });
   } catch (err) {
     console.error("Subscribe error:", err);

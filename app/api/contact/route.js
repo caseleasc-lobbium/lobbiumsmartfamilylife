@@ -5,10 +5,10 @@ import fs from "fs";
 import path from "path";
 import { Resend } from "resend";
 
-// Daten-Datei
+// Datei-Pfad
 const filePath = path.join(process.cwd(), "data_contact.json");
 
-// Hilfsfunktion: Datei lesen
+// Sicheres Lesen
 function loadMessages() {
   try {
     if (!fs.existsSync(filePath)) {
@@ -20,12 +20,16 @@ function loadMessages() {
   }
 }
 
-// Speichern
+// Sicheres Schreiben
 function saveMessages(messages) {
   fs.writeFileSync(filePath, JSON.stringify(messages, null, 2));
 }
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+/* ============================================================================= */
+/*                                  POST – Nachricht speichern                   */
+/* ============================================================================= */
 
 export async function POST(req) {
   try {
@@ -51,7 +55,7 @@ export async function POST(req) {
     messages.push(newMessage);
     saveMessages(messages);
 
-    // Admin-Mail
+    // Admin-Notification
     if (process.env.CONTACT_RECEIVER) {
       await resend.emails.send({
         from: "Lobbium <no-reply@lobbium.com>",
@@ -73,11 +77,38 @@ export async function POST(req) {
   }
 }
 
-export async function GET() {
+/* ============================================================================= */
+/*                                  GET – Nachrichten abrufen                    */
+/* ============================================================================= */
+
+export async function GET(req) {
   try {
-    const messages = loadMessages();
-    return NextResponse.json(messages);
-  } catch {
+    const { searchParams } = new URL(req.url);
+    const filter = searchParams.get("filter"); // today | recent | all
+
+    let messages = loadMessages()
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+      );
+
+    // HEUTE
+    if (filter === "today") {
+      const today = new Date().toISOString().split("T")[0];
+      messages = messages.filter((m) =>
+        m.createdAt.startsWith(today)
+      );
+    }
+
+    // LETZTE 5
+    if (filter === "recent") {
+      messages = messages.slice(0, 5);
+    }
+
+    return NextResponse.json(messages, { status: 200 });
+  } catch (err) {
+    console.error("Contact GET Error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

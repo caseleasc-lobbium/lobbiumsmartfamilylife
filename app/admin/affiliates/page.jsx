@@ -1,222 +1,134 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AffiliatesAdminPage() {
+export default function AdminAffiliatesPage() {
   const router = useRouter();
-
-  // -----------------------------
-  // 🔐 Login- & Session-Schutz
-  // -----------------------------
+  const [affiliates, setAffiliates] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const auth = localStorage.getItem("lobbiumAdminAuth");
-    const loginTime = localStorage.getItem("lobbiumLoginTime");
-
-    if (auth !== "true") {
-      router.replace("/admin/login");
-      return;
-    }
-
-    const now = Date.now();
-    if (!loginTime || now - parseInt(loginTime) > 30 * 60 * 1000) {
-      localStorage.removeItem("lobbiumAdminAuth");
-      localStorage.removeItem("lobbiumLoginTime");
-      alert("⏳ Sitzung abgelaufen. Bitte erneut einloggen.");
-      router.replace("/admin/login");
-      return;
-    }
-
-    setLoading(false);
-  }, [router]);
-
-  // -----------------------------
-  // 📦 Daten & Formular
-  // -----------------------------
-  const [affiliates, setAffiliates] = useState([]);
-  const [newAffiliate, setNewAffiliate] = useState({
-    title: "",
-    category: "",
-    imageUrl: "",
-    link: "",
-    description: "",
-  });
-
-  // 🟦 Daten laden
-  const loadAffiliates = async () => {
+  // 🔄 Daten laden
+  const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates", { cache: "no-store" });
+      const res = await fetch("/api/affiliates");
       const data = await res.json();
       setAffiliates(data || []);
-    } catch {
-      setAffiliates([]);
+    } catch (err) {
+      console.error("Fehler beim Laden:", err);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
-    loadAffiliates();
+    loadData();
   }, []);
 
-  // -----------------------------
-  // 💾 Speichern
-  // -----------------------------
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // 🗑 Löschen
+  const handleDelete = async (id) => {
+    const ok = confirm("Willst du diesen Partner wirklich löschen?");
+    if (!ok) return;
 
-    const res = await fetch("/api/affiliates", {
-      method: "POST",
+    const res = await fetch(`/api/affiliates?id=${id}`, {
+      method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
         authorization: "lobbiumAdminAuth:true",
       },
-      body: JSON.stringify(newAffiliate),
     });
 
-    if (res.ok) {
-      alert("Affiliate gespeichert ✅");
-      setNewAffiliate({
-        title: "",
-        category: "",
-        imageUrl: "",
-        link: "",
-        description: "",
-      });
-      loadAffiliates();
-    } else {
-      alert("❌ Fehler beim Speichern");
+    const data = await res.json();
+    if (data.error) {
+      alert(data.error);
+      return;
     }
-  };
 
-  // -----------------------------
-  // ❌ Löschen
-  // -----------------------------
-  const handleDelete = async (id) => {
-    if (!confirm("Diesen Partner löschen?")) return;
-
-    const res = await fetch(`/api/affiliates/${id}`, {
-      method: "DELETE",
-      headers: { authorization: "lobbiumAdminAuth:true" },
-    });
-
-    if (res.ok) {
-      alert("Gelöscht");
-      loadAffiliates();
-    } else {
-      alert("❌ Fehler beim Löschen");
-    }
+    loadData();
   };
 
   if (loading) {
     return (
-      <div className="p-10 text-center">
-        <p className="text-gray-500">Lade Admin...</p>
+      <div className="text-center p-10 text-gray-500">
+        Lade Partner...
       </div>
     );
   }
 
-  // -----------------------------
-  // 🎨 UI
-  // -----------------------------
   return (
-    <div className="p-8">
+    <div className="max-w-6xl mx-auto mt-8 bg-white p-10 rounded-3xl shadow-lg">
 
-      <h1 className="text-2xl font-semibold mb-6">
-        🔗 Affiliate Verwaltung
-      </h1>
-
-      {/* Formular */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-2xl shadow-md mb-8 border border-gray-200"
-      >
-        <div className="grid grid-cols-2 gap-4">
-
-          <input
-            type="text"
-            placeholder="Titel"
-            className="border rounded-xl p-2"
-            value={newAffiliate.title}
-            onChange={(e) =>
-              setNewAffiliate({ ...newAffiliate, title: e.target.value })
-            }
-          />
-
-          <input
-            type="text"
-            placeholder="Kategorie (finanzen, familie, lifestyle...)"
-            className="border rounded-xl p-2"
-            value={newAffiliate.category}
-            onChange={(e) =>
-              setNewAffiliate({ ...newAffiliate, category: e.target.value })
-            }
-          />
-
-          <input
-            type="text"
-            placeholder="Bild URL"
-            className="border rounded-xl p-2 col-span-2"
-            value={newAffiliate.imageUrl}
-            onChange={(e) =>
-              setNewAffiliate({ ...newAffiliate, imageUrl: e.target.value })
-            }
-          />
-
-          <input
-            type="text"
-            placeholder="Affiliate Link"
-            className="border rounded-xl p-2 col-span-2"
-            value={newAffiliate.link}
-            onChange={(e) =>
-              setNewAffiliate({ ...newAffiliate, link: e.target.value })
-            }
-          />
-        </div>
-
-        <textarea
-          placeholder="Beschreibung"
-          rows={3}
-          className="border rounded-xl p-2 w-full mt-4"
-          value={newAffiliate.description}
-          onChange={(e) =>
-            setNewAffiliate({ ...newAffiliate, description: e.target.value })
-          }
-        />
+      {/* Kopfzeile */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">🤝 Affiliate Partner</h1>
 
         <button
-          type="submit"
-          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl"
+          onClick={() => router.push("/admin/affiliates/new")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold"
         >
-          Speichern
+          + Neuer Partner
         </button>
-      </form>
-
-      {/* Liste */}
-      <h2 className="text-xl font-semibold mb-3">Aktive Partner</h2>
-
-      <div className="space-y-3">
-        {affiliates.map((a) => (
-          <div
-            key={a.id}
-            className="p-4 border rounded-xl bg-gray-50 flex justify-between items-center shadow-sm"
-          >
-            <div>
-              <strong>{a.title}</strong> –{" "}
-              {a.category || <em className="text-gray-400">keine Kategorie</em>}
-            </div>
-
-            <button
-              onClick={() => handleDelete(a.id)}
-              className="text-red-600 hover:text-red-800 font-semibold"
-            >
-              Löschen
-            </button>
-          </div>
-        ))}
       </div>
+
+      {/* Tabelle */}
+      {affiliates.length === 0 ? (
+        <p className="text-gray-500 text-center">Keine Partner vorhanden.</p>
+      ) : (
+        <table className="min-w-full border border-gray-200 rounded-xl overflow-hidden">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">Titel</th>
+              <th className="p-3 text-left">Kategorie</th>
+              <th className="p-3 text-left">Bild</th>
+              <th className="p-3 text-left">Link</th>
+              <th className="p-3 text-left">Aktion</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {affiliates.map((a) => (
+              <tr key={a.id} className="border-t hover:bg-gray-50">
+                <td className="p-3">{a.title}</td>
+                <td className="p-3 capitalize">{a.category}</td>
+                <td className="p-3">
+                  {a.imageUrl ? (
+                    <img
+                      src={a.imageUrl}
+                      alt="preview"
+                      className="w-16 h-16 rounded-md object-cover"
+                    />
+                  ) : (
+                    <span className="text-gray-400">Kein Bild</span>
+                  )}
+                </td>
+                <td className="p-3">
+                  <a
+                    href={a.link}
+                    className="text-blue-600 underline"
+                    target="_blank"
+                  >
+                    öffnen
+                  </a>
+                </td>
+
+                <td className="p-3 flex gap-3">
+                  <button
+                    onClick={() => router.push(`/admin/affiliates/${a.id}/edit`)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Bearbeiten
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(a.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Löschen
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

@@ -1,69 +1,50 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { prisma } from "@/lib/prisma"; // Prisma Client
 
-// 📁 Speicherort für Affiliates (lokale JSON-Datei)
-const filePath = path.join(process.cwd(), "data_affiliates.json");
-
-// 🧩 Lesen & Schreiben – sicher
-function readAffiliates() {
-  try {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify([]));
-    }
-    const fileData = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(fileData || "[]");
-  } catch (err) {
-    console.error("❌ Fehler beim Lesen:", err);
-    return [];
-  }
-}
-
-function writeAffiliates(data) {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  } catch (err) {
-    console.error("❌ Fehler beim Schreiben:", err);
-  }
-}
-
-// 🔄 Hilfsfunktion: tägliche Rotation (gleicher Shuffle pro Tag)
+// -----------------------------
+// Tägliche Rotation (wie bei dir!)
+// -----------------------------
 function dailyShuffle(array) {
   const today = new Date().toISOString().slice(0, 10);
-  const seed = today.split("-").join("");
+  const seed = Number(today.split("-").join(""));
+
   return [...array].sort(
-    (a, b) => ((a.id * seed.length) % 7) - ((b.id * seed.length) % 7)
+    (a, b) => ((a.id * seed) % 7) - ((b.id * seed) % 7)
   );
 }
 
-// 📦 GET – Affiliates abrufen (mit Filter, Limit & täglicher Rotation)
+// -----------------------------
+// GET – Affiliates abrufen
+// -----------------------------
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category");
     const limit = parseInt(searchParams.get("limit") || "0", 10);
 
-    let affiliates = readAffiliates();
+    let affiliates = await prisma.affiliates.findMany({
+      orderBy: { createdAt: "desc" },
+    });
 
-    // Kategorie filtern
+    // Kategorie-Filter
     if (category && category !== "all") {
       affiliates = affiliates.filter(
         (a) => a.category?.toLowerCase() === category.toLowerCase()
       );
     }
 
-    // 🔄 Tägliche Rotation
+    // Tägliche Rotation (wie in deiner alten Logik)
     affiliates = dailyShuffle(affiliates);
 
-    // Limitieren, wenn nötig
+    // Limit
     if (limit > 0) affiliates = affiliates.slice(0, limit);
 
-    return new NextResponse(JSON.stringify(affiliates, null, 2), {
+    return NextResponse.json(affiliates, {
+      status: 200,
       headers: {
         "Content-Type": "application/json",
         "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
       },
-      status: 200,
     });
   } catch (error) {
     console.error("❌ GET Error:", error);
@@ -71,7 +52,9 @@ export async function GET(request) {
   }
 }
 
-// 💾 POST – neuen Affiliate speichern (mit Admin-Schutz)
+// -----------------------------
+// POST – Affiliate speichern (Admin)
+// -----------------------------
 export async function POST(request) {
   try {
     const auth = request.headers.get("authorization");
@@ -89,19 +72,15 @@ export async function POST(request) {
       );
     }
 
-    const affiliates = readAffiliates();
-    const newAffiliate = {
-      id: Date.now(),
-      title,
-      category,
-      imageUrl,
-      link,
-      description,
-      createdAt: new Date().toISOString(),
-    };
-
-    affiliates.push(newAffiliate);
-    writeAffiliates(affiliates);
+    const newAffiliate = await prisma.affiliates.create({
+      data: {
+        title,
+        category,
+        imageUrl,
+        link,
+        description,
+      },
+    });
 
     return NextResponse.json(newAffiliate, { status: 200 });
   } catch (error) {
@@ -113,7 +92,9 @@ export async function POST(request) {
   }
 }
 
-// 🗑 DELETE – Affiliate löschen (Admin-Schutz)
+// -----------------------------
+// DELETE – Affiliate löschen (Admin)
+// -----------------------------
 export async function DELETE(request) {
   try {
     const auth = request.headers.get("authorization");
@@ -123,13 +104,14 @@ export async function DELETE(request) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+
     if (!id) {
       return NextResponse.json({ error: "Fehlende ID" }, { status: 400 });
     }
 
-    const affiliates = readAffiliates();
-    const updated = affiliates.filter((a) => a.id !== Number(id));
-    writeAffiliates(updated);
+    await prisma.affiliates.delete({
+      where: { id: Number(id) },
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

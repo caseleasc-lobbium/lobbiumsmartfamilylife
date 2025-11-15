@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Newsletter {
+  id        String   @id @default(uuid())
+  email     String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  @@map("newsletter")
+}
+
+model affiliates {
+  id          Int      @id @default(autoincrement())
+  title       String
+  category    String?
+  imageUrl    String?
+  link        String
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model Partner {
+  id        String   @id @default(uuid())
+  name      String
+  link      String
+  logoUrl   String?
+  createdAt DateTime @default(now())
+
+  @@map("partners")
+}
+
+model affiliate_clicks {
+  id          Int      @id @default(autoincrement())
+  partner_id  Int
+  ip_address  String?
+  user_agent  String?
+  clicked_at  DateTime @default(now())
+}

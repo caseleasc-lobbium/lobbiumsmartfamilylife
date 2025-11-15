@@ -1,19 +1,58 @@
 import { NextResponse } from "next/server";
 
-export async function POST(request) {
-  const { password } = await request.json();
-  const adminPass = process.env.ADMIN_PASSWORD || "lobbium2!#025tNLmWwui9";
+export const dynamic = "force-dynamic"; // für Next.js 14 wichtig
 
-  if (password === adminPass) {
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const password = body?.password?.trim();
+
+    if (!password) {
+      return NextResponse.json(
+        { success: false, error: "Passwort fehlt" },
+        { status: 400 }
+      );
+    }
+
+    // 🔐 Passwort NUR aus ENV – sicher!
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+    if (!ADMIN_PASSWORD) {
+      console.error("❌ ERROR: ADMIN_PASSWORD fehlt in .env!");
+      return NextResponse.json(
+        { success: false, error: "Serverfehler" },
+        { status: 500 }
+      );
+    }
+
+    // ❗ Vergleich
+    const isCorrect = password === ADMIN_PASSWORD;
+
+    if (!isCorrect) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // 🎉 Login erfolgreich
     const response = NextResponse.json({ success: true });
-    // ✅ Cookie für 24h setzen
+
+    // 🔒 Sicherer Cookie (24 Stunden gültig)
     response.cookies.set("lobbium_admin_auth", "true", {
       httpOnly: true,
+      secure: true,
+      sameSite: "strict",
       maxAge: 60 * 60 * 24,
       path: "/",
     });
-    return response;
-  }
 
-  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return response;
+  } catch (err) {
+    console.error("❌ Login API Error:", err);
+    return NextResponse.json(
+      { success: false, error: "Serverfehler" },
+      { status: 500 }
+    );
+  }
 }

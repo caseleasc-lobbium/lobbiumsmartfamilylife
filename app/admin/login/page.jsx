@@ -9,11 +9,12 @@ export default function AdminLogin() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Prüfen, ob bereits eingeloggt
   useEffect(() => {
-    const auth = localStorage.getItem("lobbiumAdminAuth");
-    if (auth === "true") {
+    const cookieCheck = document.cookie.includes("lobbium_admin_auth=true");
+    if (cookieCheck) {
       router.replace("/admin");
     }
   }, [router]);
@@ -21,26 +22,30 @@ export default function AdminLogin() {
   // Login-Handler
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
 
-    const res = await fetch("/api/check-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
+    try {
+      const res = await fetch("/api/check-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      localStorage.setItem("lobbiumAdminAuth", "true");
-
-      const loginTime = Date.now();
-      localStorage.setItem("lobbiumLoginTime", loginTime.toString());
-
-      setError("");
-      router.replace("/admin");
-    } else {
-      setError("❌ Falsches Passwort. Bitte versuche es erneut.");
+      if (data.success) {
+        localStorage.setItem("lobbiumAdminAuth", "true");
+        localStorage.setItem("lobbiumLoginTime", Date.now().toString());
+        router.replace("/admin");
+      } else {
+        setError("❌ Falsches Passwort. Bitte versuche es erneut.");
+      }
+    } catch (err) {
+      setError("❌ Serverfehler – bitte später erneut probieren.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -58,14 +63,17 @@ export default function AdminLogin() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          {error && <p className="text-red-500 mb-3 text-sm">{error}</p>}
+          {error && (
+            <p className="text-red-500 mb-3 text-sm">{error}</p>
+          )}
 
           <button
             type="submit"
+            disabled={loading}
             className="bg-blue-600 hover:bg-blue-700 text-white w-full py-3 
                        rounded-xl font-semibold transition"
           >
-            Einloggen
+            {loading ? "⏳ Einloggen..." : "Einloggen"}
           </button>
         </form>
       </div>
