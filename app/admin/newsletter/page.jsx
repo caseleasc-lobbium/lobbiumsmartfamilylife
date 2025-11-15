@@ -34,12 +34,26 @@ export default function NewsletterPage() {
     setLoading(false);
   }, [router]);
 
-  // 📨 Newsletter-Daten laden
+  // 📨 Newsletter-Daten laden (aus Supabase API)
   useEffect(() => {
-    fetch("/api/subscribers")
-      .then((res) => res.json())
-      .then((data) => setSubscribers(data || []))
-      .catch(() => setSubscribers([]));
+    const loadSubscribers = async () => {
+      try {
+        const res = await fetch("/api/subscribers");
+        const data = await res.json();
+
+        if (data.error) {
+          console.error("Fehler:", data.error);
+          setSubscribers([]);
+        } else {
+          setSubscribers(data || []);
+        }
+      } catch (err) {
+        console.error("Fetch Fehler:", err);
+        setSubscribers([]);
+      }
+    };
+
+    loadSubscribers();
   }, []);
 
   if (loading) {
@@ -51,11 +65,11 @@ export default function NewsletterPage() {
   }
 
   return (
-    <div className="bg-white p-10 rounded-3xl shadow-lg w-[90%] max-w-5xl">
+    <div className="bg-white p-10 rounded-3xl shadow-lg w-[90%] max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">📬 Newsletter-Abonnenten</h1>
 
       <p className="text-gray-600 mb-6">
-        Hier siehst du aktuell alle Abonnenten der Plattform.
+        Übersicht aller Abonnenten der Plattform.
       </p>
 
       <div className="overflow-x-auto rounded-2xl border border-gray-200 shadow-sm">
@@ -85,11 +99,9 @@ export default function NewsletterPage() {
               >
                 <td className="p-4">{s.name}</td>
                 <td className="p-4 text-gray-600">{s.email}</td>
-                <td className="p-4">
-                  {s.consent ? "✅ Ja" : "❌ Nein"}
-                </td>
+                <td className="p-4">{s.consent ? "✅ Ja" : "❌ Nein"}</td>
                 <td className="p-4 text-gray-500">
-                  {new Date(s.createdAt).toLocaleDateString()}
+                  {new Date(s.created_at).toLocaleDateString("de-DE")}
                 </td>
               </tr>
             ))}

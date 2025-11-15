@@ -1,26 +1,12 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-import { encrypt, decrypt } from "@/lib/encryption";
+import { createClient } from "@supabase/supabase-js";
+import { encrypt, decrypt } from "@/lib/encryption"; 
 
-// Datei-Pfad
-const filePath = path.join(process.cwd(), "data", "subscribers.json");
-
-// Datei laden
-function loadSubscribers() {
-  try {
-    if (!fs.existsSync(filePath)) return [];
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch (err) {
-    console.error("subscribers.json laden Fehler:", err);
-    return [];
-  }
-}
-
-// Datei speichern
-function saveSubscribers(data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-}
+// 🔐 Supabase Setup
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 // --------------------------------------------------
 // POST → neuen Subscriber anlegen
@@ -36,25 +22,25 @@ export async function POST(req) {
       );
     }
 
-    const subscribers = loadSubscribers();
-
-    // 🔐 Verschlüsselung
+    // 🔐 Verschlüsseln
     const encryptedEmail = encrypt(email);
     const encryptedName = name ? encrypt(name) : null;
 
-    const newSubscriber = {
-      id: Date.now(),
-      name: encryptedName,
-      email: encryptedEmail,
-      consent: consent || false,
-      date_consent: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-    };
+    // In Supabase speichern
+    const { error } = await supabase
+      .from("newsletter_subscribers")
+      .insert({
+        name: encryptedName,
+        email: encryptedEmail,
+        consent: consent || false,
+      });
 
-    subscribers.push(newSubscriber);
-    saveSubscribers(subscribers);
+    if (error) {
+      console.error("Supabase Insert Error:", error);
+      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+    }
 
-    return NextResponse.json({ success: true, id: newSubscriber.id });
+    return NextResponse.json({ success: true });
   } catch (err) {
     console.error("POST /subscribers error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
@@ -66,16 +52,22 @@ export async function POST(req) {
 // --------------------------------------------------
 export async function GET() {
   try {
-    const subscribers = loadSubscribers();
+    const { data, error } = await supabase
+      .from("newsletter_subscribers")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    const decrypted = subscribers.map((s) => ({
+    if (error) {
+      console.error("Supabase Select Error:", error);
+      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+    }
+
+    // Entschlüsseln
+    const decrypted = data.map((s) => ({
       ...s,
       name: s.name ? decrypt(s.name) : "",
       email: s.email ? decrypt(s.email) : "",
     }));
-
-    // Sortieren nach Datum DESC
-    decrypted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     return NextResponse.json(decrypted);
   } catch (err) {

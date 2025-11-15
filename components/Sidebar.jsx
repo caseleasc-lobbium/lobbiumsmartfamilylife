@@ -8,22 +8,17 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
-  // ⏳ Clientseitige Initialisierung
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
   const menuItems = [
     { name: "Dashboard", path: "/admin" },
-    { name: "Benutzer", path: "/admin/users" },
-    { name: "Statistiken", path: "/admin/stats" },
     { name: "Newsletter", path: "/admin/newsletter" },
     { name: "Affiliates", path: "/admin/affiliates" },
-    { name: "Affiliate Analytics", path: "/admin/affiliates/analytics" },
-    { name: "Affiliate Kategorien", path: "/admin/affiliates/categories" },
+    { name: "Affiliate Statistik", path: "/admin/affiliates/stats" }, // ✔ G8
     { name: "Einstellungen", path: "/admin/settings" },
   ];
 
-  // 🔥 Unterseiten auch als aktiv markieren (wichtiger Fix!)
   const isActive = (itemPath) =>
     pathname === itemPath || pathname.startsWith(itemPath + "/");
 
@@ -36,12 +31,10 @@ export default function Sidebar() {
   return (
     <div className="w-64 h-full bg-white border border-gray-200 shadow-xl rounded-3xl flex flex-col justify-between overflow-hidden">
       <div>
-        {/* 🧩 Kopfbereich */}
         <div className="p-6 text-2xl font-bold text-gray-800 border-b border-gray-100">
           ⚙️ Admin Menü
         </div>
 
-        {/* 📋 Navigation */}
         <nav className="flex flex-col p-4 space-y-2 overflow-y-auto">
           {menuItems.map((item) => (
             <button
@@ -59,7 +52,6 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* 🔐 Logout Button */}
       <div className="p-4 border-t border-gray-100">
         <button
           onClick={handleLogout}
