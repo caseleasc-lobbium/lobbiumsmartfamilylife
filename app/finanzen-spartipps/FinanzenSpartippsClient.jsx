@@ -3,14 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-// Navigation
-import CategoryNav from "../components/CategoryNav";
-
 export default function FinanzenSpartippsClient() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Daten laden (Kategorie = finanzen)
   const loadData = async () => {
     try {
       const res = await fetch("/api/affiliates?category=finanzen&limit=9");
@@ -37,20 +33,15 @@ export default function FinanzenSpartippsClient() {
   return (
     <div className="min-h-screen bg-white px-5 py-10">
 
-      {/* Navigation */}
-      <CategoryNav />
-
-      {/* Header */}
       <h1 className="text-3xl font-bold text-center mb-6">
         💰 Finanzen & Spartipps
       </h1>
 
       <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
-        Täglich neue Spartipps, Versicherungen, Finanztools, Cashback, 
-        Verträge optimieren, Haushaltsbudget und digitale Geld-Helfer.
+        Täglich neue Empfehlungen zu Geld sparen, clever investieren und smarten Tools
+        für deine finanzielle Freiheit.
       </p>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
           <Link

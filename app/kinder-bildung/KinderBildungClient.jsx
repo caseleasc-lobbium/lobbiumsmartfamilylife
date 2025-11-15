@@ -3,20 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-// Navigation
-import CategoryNav from "../components/CategoryNav";
-
 export default function KinderBildungClient() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates?category=bildung&limit=9");
+      const res = await fetch("/api/affiliates?category=kinderbildung&limit=9");
       const data = await res.json();
       setItems(data || []);
     } catch (err) {
-      console.error("❌ Fehler beim Laden Kinder & Bildung:", err);
+      console.error("❌ Fehler beim Laden von Kinder & Bildung:", err);
     }
     setLoading(false);
   };
@@ -36,16 +33,13 @@ export default function KinderBildungClient() {
   return (
     <div className="min-h-screen bg-white px-5 py-10">
 
-      {/* Navigation */}
-      <CategoryNav />
-
       <h1 className="text-3xl font-bold text-center mb-6">
-        🎒 Kinder & Bildung
+        🎓 Kinder & Bildung
       </h1>
 
       <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
-        Täglich neue Lernideen, Kreativität, Entwicklung, 
-        Schulmaterial, Bücher, Apps, Frühförderung, Motivation & Tipps.
+        Die besten Produkte, Lernmaterialien & Marken für Kinder –
+        täglich aktualisiert und smart ausgewählt.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

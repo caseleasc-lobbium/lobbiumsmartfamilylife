@@ -3,9 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-// Navigation
-import CategoryNav from "../components/CategoryNav";
-
 export default function FamilienlebenClient() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +13,7 @@ export default function FamilienlebenClient() {
       const data = await res.json();
       setItems(data || []);
     } catch (err) {
-      console.error("❌ Fehler beim Laden Familienleben:", err);
+      console.error("❌ Fehler beim Laden von Familienleben:", err);
     }
     setLoading(false);
   };
@@ -36,16 +33,13 @@ export default function FamilienlebenClient() {
   return (
     <div className="min-h-screen bg-white px-5 py-10">
 
-      {/* Navigation */}
-      <CategoryNav />
-
       <h1 className="text-3xl font-bold text-center mb-6">
         👨‍👩‍👧 Familienleben
       </h1>
 
       <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
-        Alltagslösungen für Familie, Haushalt, Beziehungen, 
-        Erziehung, gemeinsame Aktivitäten, Planung & Organisation.
+        Jeden Tag neue Ideen, Tools und Empfehlungen für ein glückliches,
+        organisiertes und modernes Familienleben.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

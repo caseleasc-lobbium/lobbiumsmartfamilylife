@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-// 👉 Navigation import HIER (ganz oben)
-import CategoryNav from "../components/CategoryNav";
-
 export default function HomeClient() {
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
