@@ -5,56 +5,66 @@ import { useRouter, useParams } from "next/navigation";
 
 export default function EditAffiliatePage() {
   const router = useRouter();
-  const { id } = useParams();
+  const params = useParams();
+  const id = params.id;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [categories, setCategories] = useState([]);
 
   const [form, setForm] = useState({
     title: "",
     category: "",
-    image_url: "",
-    affiliate_url: "",
+    imageUrl: "",
+    link: "",
     description: "",
   });
 
-  // Daten laden
+  // Kategorien laden
+  useEffect(() => {
+    fetch("/api/affiliates/categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d || []));
+  }, []);
+
+  // Affiliate Daten laden
   useEffect(() => {
     const loadAffiliate = async () => {
-      const res = await fetch(`/api/affiliates?id=${id}`);
-      const data = await res.json();
+      try {
+        const res = await fetch(`/api/affiliates?id=${id}`);
+        const data = await res.json();
 
-      if (!data || data.error) {
-        setError("Partner nicht gefunden");
+        if (!data || data.error) {
+          setError("Partner nicht gefunden.");
+          return;
+        }
+
+        setForm({
+          title: data.title || "",
+          category: data.category || "",
+          imageUrl: data.imageUrl || "",
+          link: data.link || "",
+          description: data.description || "",
+        });
         setLoading(false);
-        return;
+      } catch (err) {
+        setError("Fehler beim Laden.");
       }
-
-      setForm({
-        title: data.title || "",
-        category: data.category || "",
-        image_url: data.image_url || "",
-        affiliate_url: data.affiliate_url || "",
-        description: data.description || "",
-      });
-
-      setLoading(false);
     };
 
     loadAffiliate();
   }, [id]);
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
-  // Speichern
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setError("");
 
-    const res = await fetch(`/api/affiliates?id=${id}`, {
+    const res = await fetch(`/api/affiliates/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -68,19 +78,22 @@ export default function EditAffiliatePage() {
 
     if (data.error) {
       setError(data.error);
-    } else {
-      router.push("/admin/affiliates");
+      return;
     }
+
+    router.push("/admin/affiliates");
   };
 
   if (loading) {
     return (
-      <div className="text-center p-10 text-gray-500">Lade Daten...</div>
+      <div className="p-8 text-center text-gray-500">
+        Lädt Partnerdaten...
+      </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-8 bg-white p-10 rounded-3xl shadow-lg">
+    <div className="max-w-3xl mx-auto bg-white p-10 shadow-xl rounded-3xl">
       <h1 className="text-2xl font-bold mb-6">✏️ Partner bearbeiten</h1>
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -95,52 +108,54 @@ export default function EditAffiliatePage() {
             name="title"
             value={form.title}
             onChange={handleChange}
-            required
             className="w-full border border-gray-300 rounded-xl px-4 py-3"
+            required
           />
         </div>
 
-        {/* Kategorie */}
+        {/* Kategorie dynamisch */}
         <div>
           <label className="block mb-1 font-semibold">Kategorie *</label>
+
           <select
             name="category"
             value={form.category}
             onChange={handleChange}
-            required
             className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white"
+            required
           >
             <option value="">Kategorie wählen</option>
-            <option value="finanzen">Finanzen & Spartipps</option>
-            <option value="familie">Familienleben</option>
-            <option value="bildung">Kinder & Bildung</option>
-            <option value="lifestyle">Lifestyle</option>
+
+            {categories.map((c) => (
+              <option key={c.id} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Bild-URL */}
+        {/* Bild URL */}
         <div>
           <label className="block mb-1 font-semibold">Bild URL</label>
           <input
             type="text"
-            name="image_url"
-            value={form.image_url}
+            name="imageUrl"
+            value={form.imageUrl}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-xl px-4 py-3"
-            placeholder="https://..."
           />
         </div>
 
-        {/* Affiliate-Link */}
+        {/* Link */}
         <div>
-          <label className="block mb-1 font-semibold">Affiliate-Link *</label>
+          <label className="block mb-1 font-semibold">Partner-Link *</label>
           <input
             type="text"
-            name="affiliate_url"
-            value={form.affiliate_url}
+            name="link"
+            value={form.link}
             onChange={handleChange}
-            required
             className="w-full border border-gray-300 rounded-xl px-4 py-3"
+            required
           />
         </div>
 
@@ -151,18 +166,17 @@ export default function EditAffiliatePage() {
             name="description"
             value={form.description}
             onChange={handleChange}
-            rows="3"
             className="w-full border border-gray-300 rounded-xl px-4 py-3"
+            rows="3"
           ></textarea>
         </div>
 
-        {/* Speichern */}
         <button
           type="submit"
           disabled={saving}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold"
+          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold w-full"
         >
-          {saving ? "Speichert..." : "Änderungen speichern"}
+          {saving ? "Speichere..." : "Änderungen speichern"}
         </button>
       </form>
 
@@ -171,7 +185,7 @@ export default function EditAffiliatePage() {
           onClick={() => router.push("/admin/affiliates")}
           className="text-gray-600 hover:text-gray-800"
         >
-          ← Zurück
+          ← Zurück zur Übersicht
         </button>
       </div>
     </div>

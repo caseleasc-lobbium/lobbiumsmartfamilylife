@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function NewAffiliatePage() {
@@ -8,18 +8,26 @@ export default function NewAffiliatePage() {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [categories, setCategories] = useState([]);
 
   const [form, setForm] = useState({
     title: "",
     category: "",
-    image_url: "",
-    affiliate_url: "",
+    imageUrl: "",
+    link: "",
     description: "",
   });
 
-  const handleChange = (e) => {
+  // Kategorien laden
+  useEffect(() => {
+    fetch("/api/affiliates/categories")
+      .then((res) => res.json())
+      .then((data) => setCategories(data || []))
+      .catch(() => setCategories([]));
+  }, []);
+
+  const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -43,7 +51,6 @@ export default function NewAffiliatePage() {
       return;
     }
 
-    // Erfolgreich → zurück zur Übersicht
     router.push("/admin/affiliates");
   };
 
@@ -68,9 +75,10 @@ export default function NewAffiliatePage() {
           />
         </div>
 
-        {/* Kategorie */}
+        {/* Kategorie dynamisch! */}
         <div>
           <label className="block mb-1 font-semibold">Kategorie *</label>
+
           <select
             name="category"
             value={form.category}
@@ -79,10 +87,12 @@ export default function NewAffiliatePage() {
             required
           >
             <option value="">Kategorie wählen</option>
-            <option value="finanzen">Finanzen & Spartipps</option>
-            <option value="familie">Familienleben</option>
-            <option value="bildung">Kinder & Bildung</option>
-            <option value="lifestyle">Lifestyle</option>
+
+            {categories.map((c) => (
+              <option key={c.id} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -91,21 +101,21 @@ export default function NewAffiliatePage() {
           <label className="block mb-1 font-semibold">Bild URL</label>
           <input
             type="text"
-            name="image_url"
-            value={form.image_url}
+            name="imageUrl"
+            value={form.imageUrl}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-xl px-4 py-3"
             placeholder="https://..."
           />
         </div>
 
-        {/* Affiliate-Link */}
+        {/* Link */}
         <div>
-          <label className="block mb-1 font-semibold">Affiliate-Link *</label>
+          <label className="block mb-1 font-semibold">Partner-Link *</label>
           <input
             type="text"
-            name="affiliate_url"
-            value={form.affiliate_url}
+            name="link"
+            value={form.link}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-xl px-4 py-3"
             required
@@ -124,7 +134,7 @@ export default function NewAffiliatePage() {
           ></textarea>
         </div>
 
-        {/* Speichern */}
+        {/* Button */}
         <button
           type="submit"
           disabled={saving}

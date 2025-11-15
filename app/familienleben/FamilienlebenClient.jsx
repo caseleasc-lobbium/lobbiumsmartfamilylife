@@ -1,52 +1,80 @@
 "use client";
-import AffiliateGrid from "@/components/AffiliateGrid";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
+// Navigation
+import CategoryNav from "../components/CategoryNav";
 
 export default function FamilienlebenClient() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadData = async () => {
+    try {
+      const res = await fetch("/api/affiliates?category=familie&limit=9");
+      const data = await res.json();
+      setItems(data || []);
+    } catch (err) {
+      console.error("❌ Fehler beim Laden Familienleben:", err);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-gray-500">
+        🔄 Inhalte werden geladen…
+      </div>
+    );
+  }
+
   return (
-    <>
-      {/* HERO */}
-      <section className="bg-gradient-to-b from-[#eaf0ff] via-[#f3f6fb] to-[#f8faff] text-center pt-52 pb-16">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#1c3d6c] mb-4">
-          Familienleben & Alltag
-        </h1>
-        <p className="text-lg text-gray-700 max-w-2xl mx-auto mb-8 leading-relaxed">
-          Struktur, Routinen & Zeitmanagement für entspannte Tage mit Kindern –
-          moderne Ideen für ein harmonisches Familienleben.
-        </p>
-      </section>
+    <div className="min-h-screen bg-white px-5 py-10">
 
-      {/* DYNAMISCHE PARTNER */}
-      <section className="py-20 bg-gradient-to-b from-[#f9fbff] to-[#ffffff]">
-        <h2 className="text-2xl font-bold text-center text-[#1c3d6c] mb-10">
-          👨‍👩‍👧 Unsere Familien-Partner des Tages
-        </h2>
-        <AffiliateGrid category="familie" limit={9} />
-      </section>
+      {/* Navigation */}
+      <CategoryNav />
 
-      {/* NEWSLETTER */}
-      <section className="text-center py-16 px-6 bg-gradient-to-r from-[#eef3fb] to-[#f8faff]">
-        <h2 className="text-2xl font-bold text-[#1c3d6c] mb-4">
-          📬 Tipps für den Familienalltag direkt ins Postfach
-        </h2>
-        <p className="text-gray-700 mb-6 max-w-md mx-auto leading-relaxed">
-          Inspirationen, Organisationstipps und kleine Routinen, um den
-          Familienalltag stressfrei zu gestalten.
-        </p>
-        <form className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
-          <input
-            type="email"
-            placeholder="Deine E-Mail-Adresse"
-            className="flex-1 border border-[#ccd3e0] rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#2b6cb0]"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-[#2b6cb0] hover:bg-[#1c3d6c] text-white px-5 py-2 rounded-md font-semibold shadow-soft transition"
+      <h1 className="text-3xl font-bold text-center mb-6">
+        👨‍👩‍👧 Familienleben
+      </h1>
+
+      <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
+        Alltagslösungen für Familie, Haushalt, Beziehungen, 
+        Erziehung, gemeinsame Aktivitäten, Planung & Organisation.
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {items.map((item) => (
+          <Link
+            key={item.id}
+            href={`/api/affiliates/click?partnerId=${item.id}&targetUrl=${encodeURIComponent(item.link)}`}
+            className="block bg-white border border-gray-200 rounded-3xl shadow hover:shadow-xl transition p-5"
           >
-            Anmelden
-          </button>
-        </form>
-      </section>
-    </>
+            {item.imageUrl ? (
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                className="w-full h-40 rounded-2xl object-cover mb-4"
+              />
+            ) : (
+              <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4" />
+            )}
+
+            <h2 className="text-lg font-bold mb-2 text-gray-800">
+              {item.title}
+            </h2>
+
+            <p className="text-gray-600 text-sm line-clamp-3">
+              {item.description || "Keine Beschreibung verfügbar."}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }
