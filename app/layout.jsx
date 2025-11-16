@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Header from "../components/Header";
-import Footer from "../components/Footer";
+import SiteFooter from "../components/SiteFooter";
 import "../styles/globals.css";
 
 export default function RootLayout({ children }) {
@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
       >
         {showHeader && <Header />}
         <main style={{ minHeight: "80vh" }}>{children}</main>
-        {showFooter && <Footer />}
+        {showFooter && <SiteFooter />}
       </body>
     </html>
   );

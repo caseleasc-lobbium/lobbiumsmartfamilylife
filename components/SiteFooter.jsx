@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-export default function Footer() {
+export default function SiteFooter() {
   const [footer, setFooter] = useState(null);
 
   useEffect(() => {
     const loadFooter = async () => {
       try {
-        const res = await fetch("/api/footer");
+        const res = await fetch("/api/site/footer");  // ✅ richtige API
         const data = await res.json();
         setFooter(data);
       } catch (err) {
@@ -43,7 +43,7 @@ export default function Footer() {
           <h3 className="text-gray-800 font-semibold mb-4">Navigation</h3>
 
           <ul className="flex flex-col gap-2">
-            {footer.links.map((l, i) => (
+            {footer.links?.map((l, i) => (
               <li key={i}>
                 <Link
                   href={l.url}
@@ -56,7 +56,7 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* NEWSLETTER BUTTON */}
+        {/* NEWSLETTER */}
         <div>
           <h3 className="text-gray-800 font-semibold mb-4">
             Newsletter
