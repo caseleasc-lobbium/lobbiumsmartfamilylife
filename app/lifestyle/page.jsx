@@ -1,3 +1,5 @@
+"use client";
+
 import { metadata } from "./metadata";
 import LifestyleClient from "./LifestyleClient";
 
