@@ -43,7 +43,7 @@ export async function GET(req) {
       .update({
         confirmed: true,
         consent: true,
-        date_consent: new Date().toISOString(),
+        date_consent: new Date().toISOString()
       })
       .eq("id", user.id);
 

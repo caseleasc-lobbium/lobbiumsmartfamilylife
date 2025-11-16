@@ -2,10 +2,16 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/encryption";
+import { createClient } from "@supabase/supabase-js";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lobbium.com";
 
 /* ============================================================================= */
@@ -24,16 +30,19 @@ export async function POST(req) {
     const encryptedName = name ? encrypt(name) : null;
     const token = Math.random().toString(36).substring(2, 12);
 
-    await prisma.newsletter.create({
-      data: {
-        email: encryptedEmail,
-        name: encryptedName,
-        token,
-        locale: locale || "en",
-        confirmed: false,
-        createdAt: new Date(),
-      },
+    // ❗ Speichern in Supabase statt Prisma
+    const { error: insertError } = await supabase.from("newsletter").insert({
+      email: encryptedEmail,
+      name: encryptedName,
+      token,
+      locale: locale || "en",
+      confirmed: false
     });
+
+    if (insertError) {
+      console.error("Supabase Insert ERROR:", insertError);
+      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+    }
 
     const confirmUrl = `${BASE_URL}/${locale}/newsletter/confirm?token=${token}`;
 
@@ -90,20 +99,26 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter"); // today | all | recent
 
-    // 🔄 Basis-Abfrage
-    let entries = await prisma.newsletter.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    // 🔄 Alles laden aus Supabase
+    let { data: entries, error } = await supabase
+      .from("newsletter")
+      .select("*")
+      .order("createdAt", { ascending: false });
 
-    // 📌 HEUTE
+    if (error) {
+      console.error("Supabase GET Error:", error);
+      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+    }
+
+    // 📌 Filter: HEUTE
     if (filter === "today") {
       const today = new Date().toISOString().split("T")[0];
       entries = entries.filter((n) =>
-        n.createdAt.toISOString().startsWith(today)
+        n.createdAt && n.createdAt.startsWith(today)
       );
     }
 
-    // 📌 LETZTE 10
+    // 📌 Filter: LETZTE 10
     if (filter === "recent") {
       entries = entries.slice(0, 10);
     }
