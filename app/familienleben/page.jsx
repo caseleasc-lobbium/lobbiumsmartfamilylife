@@ -1,5 +1,3 @@
-"use client";
-
 import { metadata } from "./metadata";
 import FamilienlebenClient from "./FamilienlebenClient";
 
