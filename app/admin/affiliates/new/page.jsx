@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function NewAffiliatePage() {
   const router = useRouter();
 
+  const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [categories, setCategories] = useState([]);
 
   const [form, setForm] = useState({
     title: "",
@@ -21,15 +21,14 @@ export default function NewAffiliatePage() {
   // Kategorien laden
   useEffect(() => {
     fetch("/api/affiliates/categories")
-      .then((res) => res.json())
-      .then((data) => setCategories(data || []))
-      .catch(() => setCategories([]));
+      .then((r) => r.json())
+      .then((d) => setCategories(d || []));
   }, []);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleCreate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
@@ -55,12 +54,12 @@ export default function NewAffiliatePage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-10 shadow-xl rounded-3xl">
-      <h1 className="text-2xl font-bold mb-6">➕ Neuer Affiliate Partner</h1>
+    <div className="max-w-3xl mx-auto bg-white p-10 rounded-3xl shadow-xl">
+      <h1 className="text-2xl font-bold mb-6">➕ Neuer Partner</h1>
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      <form onSubmit={handleCreate} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
 
         {/* Titel */}
         <div>
@@ -75,7 +74,7 @@ export default function NewAffiliatePage() {
           />
         </div>
 
-        {/* Kategorie dynamisch! */}
+        {/* Kategorie */}
         <div>
           <label className="block mb-1 font-semibold">Kategorie *</label>
 
@@ -105,7 +104,6 @@ export default function NewAffiliatePage() {
             value={form.imageUrl}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-xl px-4 py-3"
-            placeholder="https://..."
           />
         </div>
 
@@ -129,18 +127,17 @@ export default function NewAffiliatePage() {
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3"
             rows="3"
-          ></textarea>
+            className="w-full border border-gray-300 rounded-xl px-4 py-3"
+          />
         </div>
 
-        {/* Button */}
         <button
           type="submit"
           disabled={saving}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold w-full"
+          className="bg-blue-600 text-white w-full px-6 py-3 rounded-xl font-semibold"
         >
-          {saving ? "Speichere..." : "Partner hinzufügen"}
+          {saving ? "Speichere..." : "Partner speichern"}
         </button>
       </form>
 

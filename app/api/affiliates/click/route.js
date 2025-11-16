@@ -7,48 +7,46 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// -----------------------------
-// POST → Affiliate-Klick speichern
-// -----------------------------
-export async function POST(req) {
+// ------------------------------------------------------
+// POST → Klick speichern & User weiterleiten
+// ------------------------------------------------------
+export async function GET(request) {
   try {
-    const { partnerId, targetUrl } = await req.json();
+    const { searchParams } = new URL(request.url);
+    const partnerId = searchParams.get("partnerId");
+    const targetUrl = searchParams.get("targetUrl");
 
     if (!partnerId || !targetUrl) {
       return NextResponse.json(
-        { error: "Partner ID oder Ziel-URL fehlt" },
+        { error: "partnerId oder targetUrl fehlt" },
         { status: 400 }
       );
     }
 
+    // IP & User Agent erfassen
     const ip =
-      req.headers.get("x-forwarded-for") ||
-      req.headers.get("x-real-ip") ||
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
       "unknown";
 
-    const userAgent = req.headers.get("user-agent") || "unknown";
+    const ua = request.headers.get("user-agent") || "unknown";
 
-    // 📌 Klick in DB speichern
+    // Klick speichern
     const { error } = await supabase.from("affiliate_clicks").insert({
-      partner_id: partnerId,
+      partner_id: Number(partnerId),
       ip_address: ip,
-      user_agent: userAgent,
-      clicked_at: new Date().toISOString(),
+      user_agent: ua,
     });
 
     if (error) {
-      console.error("Supabase Insert Error:", error);
-      return NextResponse.json(
-        { error: "Fehler beim Speichern" },
-        { status: 500 }
-      );
+      console.error("Supabase CLICK ERROR:", error);
+      return NextResponse.redirect(targetUrl);
     }
 
-    // 🔁 Weiterleitung zum Partnerlink
+    // Weiterleitung zum Affiliate Link
     return NextResponse.redirect(targetUrl);
-
   } catch (err) {
-    console.error("Affiliate Click Error:", err);
+    console.error("CLICK ROUTE ERROR:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

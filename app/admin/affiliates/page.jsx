@@ -8,14 +8,14 @@ export default function AdminAffiliatesPage() {
   const [affiliates, setAffiliates] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔄 Daten laden
+  // 🔄 Daten laden aus Supabase API
   const loadData = async () => {
     try {
       const res = await fetch("/api/affiliates");
       const data = await res.json();
-      setAffiliates(data || []);
+      setAffiliates(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Fehler beim Laden:", err);
+      console.error("❌ Fehler beim Laden:", err);
     }
     setLoading(false);
   };
@@ -24,10 +24,9 @@ export default function AdminAffiliatesPage() {
     loadData();
   }, []);
 
-  // 🗑 Löschen
+  // 🗑 Löschen neu über Supabase-API
   const handleDelete = async (id) => {
-    const ok = confirm("Willst du diesen Partner wirklich löschen?");
-    if (!ok) return;
+    if (!confirm("Willst du diesen Partner wirklich löschen?")) return;
 
     const res = await fetch(`/api/affiliates?id=${id}`, {
       method: "DELETE",
@@ -37,18 +36,20 @@ export default function AdminAffiliatesPage() {
     });
 
     const data = await res.json();
+
     if (data.error) {
       alert(data.error);
       return;
     }
 
+    // Reload
     loadData();
   };
 
   if (loading) {
     return (
       <div className="text-center p-10 text-gray-500">
-        Lade Partner...
+        🔄 Lade Partner…
       </div>
     );
   }
@@ -56,7 +57,7 @@ export default function AdminAffiliatesPage() {
   return (
     <div className="max-w-6xl mx-auto mt-8 bg-white p-10 rounded-3xl shadow-lg">
 
-      {/* Kopfzeile */}
+      {/* Kopf */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">🤝 Affiliate Partner</h1>
 
@@ -87,7 +88,9 @@ export default function AdminAffiliatesPage() {
             {affiliates.map((a) => (
               <tr key={a.id} className="border-t hover:bg-gray-50">
                 <td className="p-3">{a.title}</td>
+
                 <td className="p-3 capitalize">{a.category}</td>
+
                 <td className="p-3">
                   {a.imageUrl ? (
                     <img
@@ -99,6 +102,7 @@ export default function AdminAffiliatesPage() {
                     <span className="text-gray-400">Kein Bild</span>
                   )}
                 </td>
+
                 <td className="p-3">
                   <a
                     href={a.link}
@@ -111,7 +115,9 @@ export default function AdminAffiliatesPage() {
 
                 <td className="p-3 flex gap-3">
                   <button
-                    onClick={() => router.push(`/admin/affiliates/${a.id}/edit`)}
+                    onClick={() =>
+                      router.push(`/admin/affiliates/${a.id}/edit`)
+                    }
                     className="text-blue-600 hover:text-blue-800"
                   >
                     Bearbeiten
@@ -124,6 +130,7 @@ export default function AdminAffiliatesPage() {
                     Löschen
                   </button>
                 </td>
+
               </tr>
             ))}
           </tbody>

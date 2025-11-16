@@ -1,22 +1,39 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@supabase/supabase-js";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+// --------------------------------------------------
+// GET – Alle Kategorien laden
+// --------------------------------------------------
 export async function GET() {
   try {
-    const categories = await prisma.affiliate_categories.findMany({
-      orderBy: { name: "asc" }
-    });
+    const { data, error } = await supabase
+      .from("affiliate_categories")
+      .select("*")
+      .order("name", { ascending: true });
 
-    return NextResponse.json(categories);
+    if (error) {
+      console.error("GET categories error:", error);
+      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
   } catch (err) {
     console.error("GET categories error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
 
-export async function POST(req) {
+// --------------------------------------------------
+// POST – Kategorie hinzufügen
+// --------------------------------------------------
+export async function POST(request) {
   try {
-    const { name } = await req.json();
+    const { name } = await request.json();
 
     if (!name) {
       return NextResponse.json({ error: "Name fehlt" }, { status: 400 });
@@ -24,29 +41,45 @@ export async function POST(req) {
 
     const slug = name.toLowerCase().replace(/ /g, "-");
 
-    const newCategory = await prisma.affiliate_categories.create({
-      data: { name, slug }
-    });
+    const { data, error } = await supabase
+      .from("affiliate_categories")
+      .insert({ name, slug })
+      .select()
+      .single();
 
-    return NextResponse.json(newCategory);
+    if (error) {
+      console.error("POST categories error:", error);
+      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
   } catch (err) {
     console.error("POST categories error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
 
-export async function DELETE(req) {
+// --------------------------------------------------
+// DELETE – Kategorie löschen
+// --------------------------------------------------
+export async function DELETE(request) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {
       return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
     }
 
-    await prisma.affiliate_categories.delete({
-      where: { id: Number(id) }
-    });
+    const { error } = await supabase
+      .from("affiliate_categories")
+      .delete()
+      .eq("id", Number(id));
+
+    if (error) {
+      console.error("DELETE categories error:", error);
+      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

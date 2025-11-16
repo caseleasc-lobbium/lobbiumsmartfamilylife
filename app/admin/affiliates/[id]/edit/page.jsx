@@ -1,191 +1,168 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function EditAffiliatePage() {
+export default function EditAffiliatePage({ params }) {
   const router = useRouter();
-  const params = useParams();
-  const id = params.id;
+  const { id } = params;
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [categories, setCategories] = useState([]);
+  const [affiliate, setAffiliate] = useState(null);
 
-  const [form, setForm] = useState({
-    title: "",
-    category: "",
-    imageUrl: "",
-    link: "",
-    description: "",
-  });
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [link, setLink] = useState("");
+  const [description, setDescription] = useState("");
 
-  // Kategorien laden
+  // 🔄 Laden des Partners
+  const loadAffiliate = async () => {
+    try {
+      const res = await fetch(`/api/affiliates/${id}`);
+      const data = await res.json();
+
+      if (data.error) {
+        alert("Partner nicht gefunden");
+        router.push("/admin/affiliates");
+        return;
+      }
+
+      setAffiliate(data);
+
+      setTitle(data.title || "");
+      setCategory(data.category || "");
+      setImageUrl(data.imageUrl || "");
+      setLink(data.link || "");
+      setDescription(data.description || "");
+    } catch (err) {
+      console.error("LOAD ERROR:", err);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    fetch("/api/affiliates/categories")
-      .then((r) => r.json())
-      .then((d) => setCategories(d || []));
+    loadAffiliate();
   }, []);
 
-  // Affiliate Daten laden
-  useEffect(() => {
-    const loadAffiliate = async () => {
-      try {
-        const res = await fetch(`/api/affiliates?id=${id}`);
-        const data = await res.json();
-
-        if (!data || data.error) {
-          setError("Partner nicht gefunden.");
-          return;
-        }
-
-        setForm({
-          title: data.title || "",
-          category: data.category || "",
-          imageUrl: data.imageUrl || "",
-          link: data.link || "",
-          description: data.description || "",
-        });
-        setLoading(false);
-      } catch (err) {
-        setError("Fehler beim Laden.");
-      }
-    };
-
-    loadAffiliate();
-  }, [id]);
-
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setError("");
-
+  // 💾 Speichern (PUT Request)
+  const handleSave = async () => {
     const res = await fetch(`/api/affiliates/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         authorization: "lobbiumAdminAuth:true",
       },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        title,
+        category,
+        imageUrl,
+        link,
+        description,
+      }),
     });
 
     const data = await res.json();
-    setSaving(false);
 
     if (data.error) {
-      setError(data.error);
+      alert("Fehler: " + data.error);
       return;
     }
 
+    alert("Änderungen gespeichert!");
     router.push("/admin/affiliates");
   };
 
-  if (loading) {
-    return (
-      <div className="p-8 text-center text-gray-500">
-        Lädt Partnerdaten...
-      </div>
-    );
+  if (loading || !affiliate) {
+    return <div className="p-10 text-center text-gray-500">Lade Daten...</div>;
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-10 shadow-xl rounded-3xl">
-      <h1 className="text-2xl font-bold mb-6">✏️ Partner bearbeiten</h1>
+    <div className="max-w-3xl mx-auto bg-white p-10 rounded-3xl shadow-lg mt-10">
+      <h1 className="text-2xl font-bold mb-6">
+        ✏️ Partner bearbeiten – ID #{id}
+      </h1>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {/* Titel */}
+      <div className="mb-4">
+        <label className="font-semibold">Titel</label>
+        <input
+          type="text"
+          className="w-full border p-3 rounded-xl mt-1"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-      <form onSubmit={handleSave} className="space-y-5">
-
-        {/* Titel */}
-        <div>
-          <label className="block mb-1 font-semibold">Titel *</label>
-          <input
-            type="text"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3"
-            required
-          />
-        </div>
-
-        {/* Kategorie dynamisch */}
-        <div>
-          <label className="block mb-1 font-semibold">Kategorie *</label>
-
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white"
-            required
-          >
-            <option value="">Kategorie wählen</option>
-
-            {categories.map((c) => (
-              <option key={c.id} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Bild URL */}
-        <div>
-          <label className="block mb-1 font-semibold">Bild URL</label>
-          <input
-            type="text"
-            name="imageUrl"
-            value={form.imageUrl}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3"
-          />
-        </div>
-
-        {/* Link */}
-        <div>
-          <label className="block mb-1 font-semibold">Partner-Link *</label>
-          <input
-            type="text"
-            name="link"
-            value={form.link}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3"
-            required
-          />
-        </div>
-
-        {/* Beschreibung */}
-        <div>
-          <label className="block mb-1 font-semibold">Beschreibung</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-xl px-4 py-3"
-            rows="3"
-          ></textarea>
-        </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold w-full"
+      {/* Kategorie */}
+      <div className="mb-4">
+        <label className="font-semibold">Kategorie</label>
+        <select
+          className="w-full border p-3 rounded-xl mt-1"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
         >
-          {saving ? "Speichere..." : "Änderungen speichern"}
-        </button>
-      </form>
+          <option value="">Kategorie wählen</option>
+          <option value="finanzen-spartipps">Finanzen & Spartipps</option>
+          <option value="familienleben">Familienleben</option>
+          <option value="kinder-bildung">Kinder & Bildung</option>
+          <option value="lifestyle">Lifestyle</option>
+        </select>
+      </div>
 
-      <div className="mt-6 text-center">
+      {/* Bild */}
+      <div className="mb-4">
+        <label className="font-semibold">Bild-URL</label>
+        <input
+          type="text"
+          className="w-full border p-3 rounded-xl mt-1"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+        />
+
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            className="w-32 h-32 mt-3 rounded-xl object-cover shadow"
+          />
+        )}
+      </div>
+
+      {/* Link */}
+      <div className="mb-4">
+        <label className="font-semibold">Affiliate Link</label>
+        <input
+          type="text"
+          className="w-full border p-3 rounded-xl mt-1"
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+        />
+      </div>
+
+      {/* Beschreibung */}
+      <div className="mb-6">
+        <label className="font-semibold">Beschreibung</label>
+        <textarea
+          className="w-full border p-3 rounded-xl mt-1 h-28"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-4">
+        <button
+          onClick={handleSave}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold"
+        >
+          💾 Speichern
+        </button>
+
         <button
           onClick={() => router.push("/admin/affiliates")}
-          className="text-gray-600 hover:text-gray-800"
+          className="px-5 py-3 rounded-xl bg-gray-200 hover:bg-gray-300"
         >
-          ← Zurück zur Übersicht
+          Zurück
         </button>
       </div>
     </div>
