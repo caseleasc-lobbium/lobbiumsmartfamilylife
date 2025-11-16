@@ -8,16 +8,16 @@ import "../styles/globals.css";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
 
-  // ✨ A2: Startseite ohne Header/Footer
-  const isHome = pathname === "/";
-
-  // Admin-/Auth-Bereich ohne Header/Footer
   const isInternal =
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/auth") ||
     pathname?.startsWith("/login");
 
-  const hideHeaderFooter = isHome || isInternal;
+  const isHome = pathname === "/";
+
+  const showFrame = !isInternal;          // Rahmen = Header + Footer
+  const showHeader = showFrame && !isHome; // Header NICHT auf Startseite
+  const showFooter = showFrame;           // Footer überall außer Admin/Auth
 
   return (
     <html lang="de">
@@ -26,11 +26,12 @@ export default function RootLayout({ children }) {
           fontFamily: "Inter, sans-serif",
           backgroundColor: "#f9fafb",
           minHeight: "100vh",
+          overflowY: "auto",
         }}
       >
-        {!hideHeaderFooter && <Header />}
+        {showHeader && <Header />}
         <main style={{ minHeight: "80vh" }}>{children}</main>
-        {!hideHeaderFooter && <Footer />}
+        {showFooter && <Footer />}
       </body>
     </html>
   );

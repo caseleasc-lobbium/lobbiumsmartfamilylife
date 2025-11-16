@@ -1,84 +1,100 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 export default function Footer() {
   const [footer, setFooter] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
+    const loadFooter = async () => {
       try {
-        const res = await fetch("/api/footer");
+        const res = await fetch("/api/site/footer");
         const data = await res.json();
+        if (!data || data.error) {
+          console.error("Footer API error:", data?.error);
+          return;
+        }
         setFooter(data);
       } catch (err) {
-        console.error("Footer Load Error:", err);
+        console.error("Footer fetch error:", err);
       }
     };
 
-    load();
+    loadFooter();
   }, []);
 
-  if (!footer) return null;
-
-  const { sections, copyright } = footer;
-
   return (
-    <footer className="w-full border-t border-gray-200 bg-white mt-20">
-      
-      {/* Container */}
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+    <footer className="w-full border-t border-gray-200 bg-white/80 backdrop-blur-sm">
+      <div className="max-w-6xl mx-auto py-8 px-4 flex flex-col md:flex-row md:justify-between gap-8 text-sm text-gray-600">
+        {/* Linke Seite */}
+        <div className="max-w-md">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex h-8 w-8 rounded-full bg-blue-600 items-center justify-center text-white text-xs font-bold">
+              💡
+            </span>
+            <span className="font-semibold text-gray-800">
+              Smart Family Life by Lobbium
+            </span>
+          </div>
+          <p className="text-gray-500">
+            Spartipps, Alltag & Bildungsideen für Familien. Dein Begleiter für
+            Organisation, Sparen und entspanntes Familienleben.
+          </p>
+        </div>
 
-          {/* Themen */}
+        {/* Themen & Rechtliches */}
+        <div className="flex-1 grid grid-cols-2 gap-8 max-w-md">
           <div>
-            <h4 className="text-[#0F1C3F] text-sm font-semibold mb-3">
-              Themen
-            </h4>
-
-            <ul className="space-y-2">
-              {sections?.themen?.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.url}
-                    className="text-gray-600 hover:text-[#0F1C3F] transition text-sm"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+            <h4 className="font-semibold text-gray-800 mb-2">Themen</h4>
+            <ul className="space-y-1">
+              <li>
+                <a href="/finanzen-spartipps" className="text-blue-600 hover:underline">
+                  Finanzen & Spartipps
+                </a>
+              </li>
+              <li>
+                <a href="/familienleben" className="text-blue-600 hover:underline">
+                  Familienleben & Alltag
+                </a>
+              </li>
+              <li>
+                <a href="/kinder-bildung" className="text-blue-600 hover:underline">
+                  Kinder & Bildung
+                </a>
+              </li>
+              <li>
+                <a href="/lifestyle" className="text-blue-600 hover:underline">
+                  Lifestyle
+                </a>
+              </li>
             </ul>
           </div>
 
-          {/* Rechtliches */}
           <div>
-            <h4 className="text-[#0F1C3F] text-sm font-semibold mb-3">
-              Rechtliches
-            </h4>
-
-            <ul className="space-y-2">
-              {sections?.rechtliches?.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.url}
-                    className="text-gray-600 hover:text-[#0F1C3F] transition text-sm"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+            <h4 className="font-semibold text-gray-800 mb-2">Rechtliches</h4>
+            <ul className="space-y-1">
+              <li>
+                <a href="/impressum" className="text-blue-600 hover:underline">
+                  Impressum
+                </a>
+              </li>
+              <li>
+                <a href="/datenschutz" className="text-blue-600 hover:underline">
+                  Datenschutz
+                </a>
+              </li>
+              <li>
+                <a href="/kontakt" className="text-blue-600 hover:underline">
+                  Kontakt
+                </a>
+              </li>
             </ul>
           </div>
-
         </div>
+      </div>
 
-        {/* Copy */}
-        <div className="mt-10 pt-6 border-t border-gray-100 text-center">
-          <p className="text-gray-500 text-xs">{copyright}</p>
-        </div>
-
+      <div className="border-t border-gray-100 py-4 text-center text-xs text-gray-400">
+        © 2025 Smart Family Life by Lobbium. Alle Rechte vorbehalten.
       </div>
     </footer>
   );
