@@ -1,167 +1,66 @@
 "use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
+
+import { useEffect, useState } from "react";
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    async function load() {
+      try {
+        const res = await fetch("/api/site/header");
+        const json = await res.json();
+        setData(json);
+      } catch (e) {
+        console.error("Header load error", e);
+      }
+    }
+    load();
   }, []);
 
-  const navItems = [
-    { label: "Startseite", href: "/" },
-    {
-      label: "Finanzen & Spartipps",
-      href: "/finanzen-spartipps",
-      submenu: [
-        { label: "Geld sparen", href: "/finanzen-spartipps/geld-sparen" },
-        { label: "Versicherungen", href: "/finanzen-spartipps/versicherungen" },
-        { label: "Geld anlegen", href: "/finanzen-spartipps/geld-anlegen" },
-        { label: "Familienbudget", href: "/finanzen-spartipps/familienbudget" },
-      ],
-    },
-    {
-      label: "Familienleben",
-      href: "/familienleben",
-      submenu: [
-        { label: "Alltag & Organisation", href: "/familienleben/alltag" },
-        { label: "Beziehung & Erziehung", href: "/familienleben/erziehung" },
-        { label: "Haushalt", href: "/familienleben/haushalt" },
-      ],
-    },
-    {
-      label: "Kinder & Bildung",
-      href: "/kinder-bildung",
-      submenu: [
-        { label: "Lern-Apps", href: "/kinder-bildung/lernapps" },
-        { label: "Schulbedarf", href: "/kinder-bildung/schulbedarf" },
-        { label: "Freizeit & Entwicklung", href: "/kinder-bildung/freizeit" },
-      ],
-    },
-    {
-      label: "Lifestyle",
-      href: "/lifestyle",
-      submenu: [
-        { label: "Smart Home", href: "/lifestyle/smart-home" },
-        { label: "Nachhaltigkeit", href: "/lifestyle/nachhaltigkeit" },
-        { label: "Ernährung & Rezepte", href: "/lifestyle/rezepte" },
-      ],
-    },
-    { label: "Blog", href: "/blog" },
-    { label: "Kontakt", href: "/kontakt" },
-  ];
+  if (!data) {
+    return (
+      <div className="p-4 text-center text-gray-400">
+        Lade Header...
+      </div>
+    );
+  }
 
   return (
-    <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        isScrolled
-          ? "bg-gradient-to-b from-[#e8f2ff]/80 to-white/70 backdrop-blur-md shadow-sm py-2"
-          : "bg-gradient-to-b from-[#e8f2ff]/60 to-[#f7fbff]/50 backdrop-blur-sm py-4"
-      }`}
-    >
-      <nav className="max-w-7xl mx-auto flex justify-between items-center px-6 transition-all duration-500">
+    <header className="w-full border-b bg-white">
+      <div className="max-w-6xl mx-auto flex items-center justify-between p-4">
+        
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 transition-all duration-500">
-          <Image
-            src="/logo.png"
-            alt="Smart Family Life Logo"
-            width={isScrolled ? 70 : 90}
-            height={isScrolled ? 70 : 90}
-            priority
-            className="object-contain transition-all duration-500"
+        <a href="/" className="flex items-center gap-2">
+          <img
+            src={data.logo_url}
+            alt="Lobbium Logo"
+            className="h-10"
           />
-        </Link>
+        </a>
 
-        {/* Desktop Navigation */}
-        <ul className="hidden md:flex items-center gap-6 text-[#1c3d6c] font-medium transition-all duration-500">
-          {navItems.map((item, index) => (
-            <li key={index} className="relative group">
-              <Link
-                href={item.href}
-                className="hover:text-[#2b6cb0] transition-colors duration-200"
-              >
-                {item.label}
-              </Link>
-
-              {item.submenu && (
-                <div className="absolute left-0 mt-2 hidden group-hover:block bg-white/90 backdrop-blur-md border border-[#e1e5ee] rounded-lg shadow-lg w-56 py-2 z-50">
-                  {item.submenu.map((sub, subIndex) => (
-                    <Link
-                      key={subIndex}
-                      href={sub.href}
-                      className="block px-4 py-2 text-sm text-[#1c3d6c] hover:bg-[#f0f4ff] hover:text-[#2b6cb0] transition-colors duration-150"
-                    >
-                      {sub.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </li>
-          ))}
-
-          <li>
-            <Link
-              href="/newsletter"
-              className="ml-4 bg-[#2b6cb0] hover:bg-[#1c3d6c] text-white font-semibold px-4 py-2 rounded-md transition duration-200"
+        {/* Navigation */}
+        <nav className="flex gap-6">
+          {data.navigation?.items?.map((item, i) => (
+            <a
+              key={i}
+              href={item.url}
+              className="text-gray-700 hover:text-blue-600 font-medium"
             >
-              Newsletter
-            </Link>
-          </li>
-        </ul>
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
-        {/* Mobile Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden text-[#1c3d6c] text-3xl focus:outline-none"
+        {/* Newsletter Button */}
+        <a
+          href={data.newsletter_link}
+          className="bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold"
         >
-          ☰
-        </button>
-      </nav>
+          {data.newsletter_text}
+        </a>
 
-      {/* Mobile Menü */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-[#e1e5ee] shadow-md">
-          <ul className="flex flex-col p-4 space-y-2">
-            {navItems.map((item, index) => (
-              <li key={index}>
-                <Link
-                  href={item.href}
-                  className="block text-[#1c3d6c] font-medium hover:text-[#2b6cb0]"
-                >
-                  {item.label}
-                </Link>
-                {item.submenu && (
-                  <div className="pl-4 mt-1 space-y-1">
-                    {item.submenu.map((sub, subIndex) => (
-                      <Link
-                        key={subIndex}
-                        href={sub.href}
-                        className="block text-sm text-[#1c3d6c] hover:text-[#2b6cb0]"
-                      >
-                        • {sub.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </li>
-            ))}
-
-            <li>
-              <Link
-                href="/newsletter"
-                className="block text-center bg-[#2b6cb0] text-white font-semibold py-2 rounded-md hover:bg-[#1c3d6c]"
-              >
-                Newsletter
-              </Link>
-            </li>
-          </ul>
-        </div>
-      )}
+      </div>
     </header>
   );
 }
