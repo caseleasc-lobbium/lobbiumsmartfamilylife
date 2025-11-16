@@ -1,65 +1,77 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function Header() {
+  const pathname = usePathname();
   const [data, setData] = useState(null);
 
+  // Header aus Supabase laden
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/site/header");
-        const json = await res.json();
-        setData(json);
-      } catch (e) {
-        console.error("Header load error", e);
-      }
+    async function loadHeader() {
+      const { data, error } = await supabase
+        .from("site_header")
+        .select("*")
+        .single();
+
+      if (!error) setData(data);
     }
-    load();
+    loadHeader();
   }, []);
 
-  if (!data) {
-    return (
-      <div className="p-4 text-center text-gray-400">
-        Lade Header...
-      </div>
-    );
-  }
+  if (!data) return null;
+
+  const { logo_url, navigation, newsletter_text, newsletter_link } = data;
 
   return (
-    <header className="w-full border-b bg-white">
-      <div className="max-w-6xl mx-auto flex items-center justify-between p-4">
-        
+    <header className="w-full bg-white py-4 shadow-none border-none">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-4">
+
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
+        <Link href="/">
           <img
-            src={data.logo_url}
-            alt="Lobbium Logo"
-            className="h-10"
+            src={logo_url}
+            alt="Logo"
+            className="h-10 w-auto cursor-pointer"
           />
-        </a>
+        </Link>
 
         {/* Navigation */}
-        <nav className="flex gap-6">
-          {data.navigation?.items?.map((item, i) => (
-            <a
-              key={i}
-              href={item.url}
-              className="text-gray-700 hover:text-blue-600 font-medium"
-            >
-              {item.label}
-            </a>
-          ))}
+        <nav className="flex gap-3 ml-10">
+          {navigation.items.map((item) => {
+            const active = pathname === item.url;
+            return (
+              <Link
+                key={item.url}
+                href={item.url}
+                className={`
+                  px-4 py-2 rounded-full text-sm font-medium transition
+                  ${active
+                    ? "bg-blue-600 text-white shadow"
+                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"}
+                `}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Newsletter Button */}
-        <a
-          href={data.newsletter_link}
-          className="bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold"
+        <Link
+          href={newsletter_link}
+          className="px-5 py-2 bg-blue-600 text-white rounded-xl font-semibold shadow hover:bg-blue-700"
         >
-          {data.newsletter_text}
-        </a>
-
+          {newsletter_text}
+        </Link>
       </div>
     </header>
   );
