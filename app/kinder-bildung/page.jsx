@@ -1,8 +1,22 @@
-import { metadata } from "./metadata";
-import KinderBildungClient from "./KinderBildungClient";
+import SharedHero from "../components/SharedHero";
+import SharedTabs from "../components/SharedTabs";
+import SharedGrid from "../components/SharedGrid";
 
-export { metadata };
+export const metadata = {
+  title: "Kinder & Bildung – Smart Family Life by Lobbium",
+};
 
 export default function KinderBildungPage() {
-  return <KinderBildungClient />;
+  return (
+    <>
+      <SharedHero
+        title="Kinder & Bildung"
+        subtitle="Spielerisch lernen, fördern und begleiten – Angebote & Ideen für Kinder."
+      />
+
+      <SharedTabs active="bildung" />
+
+      <SharedGrid category="bildung" />
+    </>
+  );
 }

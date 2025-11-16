@@ -1,8 +1,22 @@
-import { metadata } from "./metadata";
-import LifestyleClient from "./LifestyleClient";
+import SharedHero from "../components/SharedHero";
+import SharedTabs from "../components/SharedTabs";
+import SharedGrid from "../components/SharedGrid";
 
-export { metadata };
+export const metadata = {
+  title: "Lifestyle – Smart Family Life by Lobbium",
+};
 
 export default function LifestylePage() {
-  return <LifestyleClient />;
+  return (
+    <>
+      <SharedHero
+        title="Lifestyle"
+        subtitle="Dein smarter Begleiter für moderne Familien – Haushalt, Shopping & Lebensstil."
+      />
+
+      <SharedTabs active="lifestyle" />
+
+      <SharedGrid category="lifestyle" />
+    </>
+  );
 }

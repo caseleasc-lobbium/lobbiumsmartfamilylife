@@ -1,8 +1,22 @@
-import { metadata } from "./metadata";
-import FamilienlebenClient from "./FamilienlebenClient";
+import SharedHero from "../components/SharedHero";
+import SharedTabs from "../components/SharedTabs";
+import SharedGrid from "../components/SharedGrid";
 
-export { metadata };
+export const metadata = {
+  title: "Familienleben – Smart Family Life by Lobbium",
+};
 
 export default function FamilienlebenPage() {
-  return <FamilienlebenClient />;
+  return (
+    <>
+      <SharedHero
+        title="Familienleben"
+        subtitle="Organisation, Alltag & Inspirationen für ein entspanntes Familienleben."
+      />
+
+      <SharedTabs active="familie" />
+
+      <SharedGrid category="familie" />
+    </>
+  );
 }
