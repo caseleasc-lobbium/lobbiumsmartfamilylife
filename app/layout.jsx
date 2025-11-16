@@ -1,9 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Header from "../components/Header";
+import TopNav from "../components/TopNav";
 import SiteFooter from "../components/SiteFooter";
-import TopTabs from "../components/TopTabs";   // ⬅️ Neu hinzufügen
 import "../styles/globals.css";
 
 export default function RootLayout({ children }) {
@@ -14,12 +13,8 @@ export default function RootLayout({ children }) {
     pathname?.startsWith("/auth") ||
     pathname?.startsWith("/login");
 
-  const isHome = pathname === "/";
-
-  const showFrame = !isInternal;           // Öffentliche Seiten
-  const showHeader = showFrame && !isHome; // Header NICHT auf Startseite
-  const showTabs = showFrame;              // Tabs auf ALLEN öffentlichen Seiten (inkl. Home)
-  const showFooter = showFrame;            // Footer überall außer Admin
+  const showFrame = !isInternal;
+  const showFooter = showFrame;
 
   return (
     <html lang="de">
@@ -28,19 +23,14 @@ export default function RootLayout({ children }) {
           fontFamily: "Inter, sans-serif",
           backgroundColor: "#f9fafb",
           minHeight: "100vh",
-          overflowY: "auto",
         }}
       >
-        {/* HEADER (nicht auf Home) */}
-        {showHeader && <Header />}
+        {showFrame && <TopNav />}
 
-        {/* NAVIGATION TABS – immer sichtbar auf public Seiten */}
-        {showTabs && <TopTabs />}
+        <main className="pt-28" style={{ minHeight: "80vh" }}>
+          {children}
+        </main>
 
-        {/* CONTENT */}
-        <main style={{ minHeight: "80vh" }}>{children}</main>
-
-        {/* FOOTER */}
         {showFooter && <SiteFooter />}
       </body>
     </html>
