@@ -1,6 +1,6 @@
-import SharedHero from "../components/SharedHero";
-import SharedTabs from "../components/SharedTabs";
-import SharedGrid from "../components/SharedGrid";
+import SharedHero from "@/components/SharedHero";
+import SharedTabs from "@/components/SharedTabs";
+import SharedGrid from "@/components/SharedGrid";
 
 export const metadata = {
   title: "Kinder & Bildung – Smart Family Life by Lobbium",
