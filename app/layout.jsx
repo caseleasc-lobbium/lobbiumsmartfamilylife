@@ -8,11 +8,16 @@ import "../styles/globals.css";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
 
-  // Nur Admin-/Auth-Seiten isolieren
+  // ✨ A2: Startseite ohne Header/Footer
+  const isHome = pathname === "/";
+
+  // Admin-/Auth-Bereich ohne Header/Footer
   const isInternal =
     pathname?.startsWith("/admin") ||
     pathname?.startsWith("/auth") ||
     pathname?.startsWith("/login");
+
+  const hideHeaderFooter = isHome || isInternal;
 
   return (
     <html lang="de">
@@ -21,12 +26,11 @@ export default function RootLayout({ children }) {
           fontFamily: "Inter, sans-serif",
           backgroundColor: "#f9fafb",
           minHeight: "100vh",
-          overflowY: "auto", // ✅ Scroll wieder aktiv
         }}
       >
-        {!isInternal && <Header />}
+        {!hideHeaderFooter && <Header />}
         <main style={{ minHeight: "80vh" }}>{children}</main>
-        {!isInternal && <Footer />}
+        {!hideHeaderFooter && <Footer />}
       </body>
     </html>
   );
