@@ -2,21 +2,19 @@ import SharedHero from "@/components/SharedHero";
 import SharedTabs from "@/components/SharedTabs";
 import SharedGrid from "@/components/SharedGrid";
 
-export const metadata = {
-  title: "Finanzen & Spartipps – Smart Family Life by Lobbium",
-};
-
 export default function FinanzenSpartippsPage() {
   return (
-    <>
+    <div className="w-full flex flex-col items-center">
+
       <SharedHero
         title="Finanzen & Spartipps"
-        subtitle="Clever sparen – mit smarten Finanzideen, Angeboten & Spartipps für deinen Alltag."
+        subtitle="Täglich neue Wege Geld zu sparen, clever zu investieren und den Alltag günstiger zu gestalten."
       />
 
       <SharedTabs active="finanzen" />
 
       <SharedGrid category="finanzen" />
-    </>
+
+    </div>
   );
 }

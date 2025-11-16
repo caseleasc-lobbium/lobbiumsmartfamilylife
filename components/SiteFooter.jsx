@@ -7,7 +7,7 @@ export default function Footer() {
   const [footer, setFooter] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
+    const loadFooter = async () => {
       try {
         const res = await fetch("/api/footer");
         const data = await res.json();
@@ -16,69 +16,73 @@ export default function Footer() {
         console.error("Footer Load Error:", err);
       }
     };
-
-    load();
+    loadFooter();
   }, []);
 
   if (!footer) return null;
 
-  const { sections, copyright } = footer;
-
   return (
-    <footer className="w-full border-t border-gray-200 bg-white mt-20">
-      
-      {/* Container */}
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+    <footer className="w-full bg-white border-t border-gray-200 mt-20">
+      {/* MAIN CONTENT */}
+      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
 
-          {/* Themen */}
-          <div>
-            <h4 className="text-[#0F1C3F] text-sm font-semibold mb-3">
-              Themen
-            </h4>
-
-            <ul className="space-y-2">
-              {sections?.themen?.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.url}
-                    className="text-gray-600 hover:text-[#0F1C3F] transition text-sm"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Rechtliches */}
-          <div>
-            <h4 className="text-[#0F1C3F] text-sm font-semibold mb-3">
-              Rechtliches
-            </h4>
-
-            <ul className="space-y-2">
-              {sections?.rechtliches?.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.url}
-                    className="text-gray-600 hover:text-[#0F1C3F] transition text-sm"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
+        {/* LOGO + DESC */}
+        <div>
+          <img
+            src={footer.logo}
+            className="h-12 w-auto mb-4"
+            alt="Lobbium Logo"
+          />
+          <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
+            {footer.description}
+          </p>
         </div>
 
-        {/* Copy */}
-        <div className="mt-10 pt-6 border-t border-gray-100 text-center">
-          <p className="text-gray-500 text-xs">{copyright}</p>
+        {/* QUICK LINKS */}
+        <div>
+          <h3 className="text-gray-800 font-semibold mb-4">Navigation</h3>
+
+          <ul className="flex flex-col gap-2">
+            {footer.links.map((l, i) => (
+              <li key={i}>
+                <Link
+                  href={l.url}
+                  className="text-gray-600 hover:text-blue-600 transition text-sm"
+                >
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
+        {/* NEWSLETTER BUTTON */}
+        <div>
+          <h3 className="text-gray-800 font-semibold mb-4">
+            Newsletter
+          </h3>
+
+          <Link
+            href={footer.newsletter_button.url}
+            className="
+              px-5 py-3 rounded-xl
+              bg-blue-600 text-white
+              hover:bg-blue-700 transition
+              text-sm font-semibold
+            "
+          >
+            {footer.newsletter_button.label}
+          </Link>
+
+          <p className="text-gray-500 text-xs mt-3 max-w-xs">
+            Keine Werbung. Kein Spam. Jederzeit kündbar.
+          </p>
+        </div>
+      </div>
+
+      {/* COPYRIGHT */}
+      <div className="border-t border-gray-200 py-4 text-center text-xs text-gray-500">
+        © {new Date().getFullYear()} Lobbium – Smart Family Life
       </div>
     </footer>
   );

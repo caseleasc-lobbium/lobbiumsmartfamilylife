@@ -2,14 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import SectionHero from "../../components/SectionHero";
 
 export default function FamilienlebenClient() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Tabs Navigation wie auf allen Seiten
+  const categories = [
+    { key: "all", label: "Home", url: "/" },
+    { key: "finanzen", label: "Finanzen & Spartipps", url: "/finanzen-spartipps" },
+    { key: "familie", label: "Familienleben", url: "/familienleben" },
+    { key: "bildung", label: "Kinder & Bildung", url: "/kinder-bildung" },
+    { key: "lifestyle", label: "Lifestyle", url: "/lifestyle" },
+  ];
+
   const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates?category=familie&limit=9");
+      const res = await fetch("/api/affiliates?category=familie&limit=12");
       const data = await res.json();
       setItems(data || []);
     } catch (err) {
@@ -22,53 +32,81 @@ export default function FamilienlebenClient() {
     loadData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="p-10 text-center text-gray-500">
-        🔄 Inhalte werden geladen…
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-white px-5 py-10">
+    <div className="flex flex-col items-center w-full">
 
-      <h1 className="text-3xl font-bold text-center mb-6">
-        👨‍👩‍👧 Familienleben
-      </h1>
+      {/* HERO – Einheitlich & Premium */}
+      <SectionHero
+        title="Familienleben"
+        subtitle="Neue Inspirationen, Tools & Empfehlungen für ein modernes, glückliches und harmonisches Familienleben."
+      />
 
-      <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
-        Jeden Tag neue Ideen, Tools und Empfehlungen für ein glückliches,
-        organisiertes und modernes Familienleben.
-      </p>
+      {/* TABS – Apple Style */}
+      <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
+        {categories.map((cat) => {
+          const isActive = cat.key === "familie";
+          return (
+            <Link
+              key={cat.key}
+              href={cat.url}
+              className={`px-6 py-3 rounded-xl text-sm font-medium transition-all ${
+                isActive
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-200"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {cat.label}
+            </Link>
+          );
+        })}
+      </nav>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
-          <Link
-            key={item.id}
-            href={`/api/affiliates/click?partnerId=${item.id}&targetUrl=${encodeURIComponent(item.link)}`}
-            className="block bg-white border border-gray-200 rounded-3xl shadow hover:shadow-xl transition p-5"
-          >
-            {item.imageUrl ? (
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                className="w-full h-40 rounded-2xl object-cover mb-4"
-              />
-            ) : (
-              <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4" />
-            )}
+      {/* GRID – Premium Cards */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
 
-            <h2 className="text-lg font-bold mb-2 text-gray-800">
-              {item.title}
-            </h2>
+        {/* Loading Skeleton */}
+        {loading &&
+          [...Array(6)].map((_, i) => (
+            <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
+          ))}
 
-            <p className="text-gray-600 text-sm line-clamp-3">
-              {item.description || "Keine Beschreibung verfügbar."}
-            </p>
-          </Link>
-        ))}
-      </div>
+        {/* Keine items */}
+        {!loading && items.length === 0 && (
+          <p className="col-span-full text-center text-gray-500">
+            Noch keine Empfehlungen verfügbar.
+          </p>
+        )}
+
+        {/* Partnerkarten */}
+        {!loading &&
+          items.map((item) => (
+            <Link
+              key={item.id}
+              href={`/api/affiliates/click?partnerId=${item.id}&targetUrl=${encodeURIComponent(
+                item.link
+              )}`}
+              className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col text-center"
+            >
+              {item.imageUrl ? (
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  className="w-full h-40 rounded-2xl object-cover mb-4"
+                />
+              ) : (
+                <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4" />
+              )}
+
+              <h2 className="text-lg font-semibold text-gray-800">
+                {item.title}
+              </h2>
+
+              <p className="text-gray-500 text-sm mt-2 line-clamp-3">
+                {item.description || "Keine Beschreibung verfügbar."}
+              </p>
+            </Link>
+          ))}
+      </section>
     </div>
   );
 }

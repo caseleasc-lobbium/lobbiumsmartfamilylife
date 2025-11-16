@@ -2,132 +2,118 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 export default function Header() {
-  const [header, setHeader] = useState(null);
-  const [isOpen, setIsOpen] = useState(false); // Mobile Menu
-  const [isSticky, setIsSticky] = useState(false);
-  const pathname = usePathname();
+  const [data, setData] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // ❗ Startseite → KEIN Header
-  if (pathname === "/") return null;
-
-  // Header laden
+  // Header laden aus Supabase API
   useEffect(() => {
     const load = async () => {
       try {
         const res = await fetch("/api/header");
-        const data = await res.json();
-        setHeader(data);
-      } catch (err) {
-        console.error("Header Load Error:", err);
+        const d = await res.json();
+        setData(d);
+      } catch (e) {
+        console.error("Header Load Error:", e);
       }
     };
     load();
   }, []);
 
-  // Sticky-Effekt
-  useEffect(() => {
-    const onScroll = () => {
-      setIsSticky(window.scrollY > 10);
-    };
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  if (!header) return null;
+  if (!data) {
+    return null; // Header nicht anzeigen, bis geladen
+  }
 
   return (
-    <>
-      {/* HEADER */}
-      <header
-        className={`w-full bg-white border-b border-gray-100 z-50 transition-all duration-300 ${
-          isSticky ? "sticky top-0 shadow-sm" : ""
-        }`}
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-40 backdrop-blur-lg">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
 
-          {/* Logo */}
-          <Link href="/">
-            <img
-              src={header.logo_url}
-              alt="Logo"
-              className="h-10 w-auto object-contain"
-            />
+        {/* ----------------------------------------- */}
+        {/* LOGO */}
+        {/* ----------------------------------------- */}
+        <Link href="/" className="flex items-center gap-3">
+          <img
+            src={data.logo}
+            alt="Lobbium Logo"
+            className="h-10 w-auto object-contain"
+          />
+        </Link>
+
+        {/* ----------------------------------------- */}
+        {/* DESKTOP NAVIGATION */}
+        {/* ----------------------------------------- */}
+        <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium">
+          {data.menu.map((m, i) => (
+            <Link
+              key={i}
+              href={m.url}
+              className="text-gray-700 hover:text-blue-600 transition"
+            >
+              {m.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* ----------------------------------------- */}
+        {/* NEWSLETTER BUTTON */}
+        {/* ----------------------------------------- */}
+        <div className="hidden md:block">
+          <Link
+            href={data.newsletter_button.url}
+            className="
+              px-5 py-2 rounded-xl
+              bg-blue-600 text-white
+              hover:bg-blue-700 transition
+              text-sm font-semibold
+            "
+          >
+            {data.newsletter_button.label}
           </Link>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
-            {header.nav_items?.map((item) => {
-              const active = pathname.startsWith(item.url);
-              return (
-                <Link
-                  key={item.url}
-                  href={item.url}
-                  className={`text-sm font-medium transition ${
-                    active
-                      ? "text-[#0F1C3F] font-semibold"
-                      : "text-gray-600 hover:text-[#0F1C3F]"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Mobile Button */}
-          <button
-            className="md:hidden text-[#0F1C3F] text-3xl"
-            onClick={() => setIsOpen(true)}
-          >
-            ☰
-          </button>
         </div>
-      </header>
 
-      {/* MOBILE OVERLAY */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center px-10 animate-fade">
-          
-          {/* Close Button */}
-          <button
-            className="absolute top-6 right-6 text-3xl text-[#0F1C3F]"
-            onClick={() => setIsOpen(false)}
-          >
-            ✕
-          </button>
+        {/* ----------------------------------------- */}
+        {/* MOBILE MENU BUTTON */}
+        {/* ----------------------------------------- */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden text-gray-700"
+        >
+          <span className="text-3xl">☰</span>
+        </button>
+      </div>
 
-          {/* Navigation */}
-          <nav className="flex flex-col items-center gap-6 text-xl text-[#0F1C3F] font-semibold">
-            {header.nav_items?.map((item) => (
-              <button
-                key={item.url}
-                onClick={() => {
-                  setIsOpen(false);
-                  window.location.href = item.url;
-                }}
-                className="hover:text-blue-600 transition"
+      {/* ----------------------------------------- */}
+      {/* MOBILE MENU OVERLAY */}
+      {/* ----------------------------------------- */}
+      {mobileOpen && (
+        <div className="md:hidden bg-white border-t border-gray-200 px-6 py-4 shadow-xl">
+          <nav className="flex flex-col gap-4 text-lg font-medium">
+            {data.menu.map((m, i) => (
+              <Link
+                key={i}
+                href={m.url}
+                className="text-gray-700 hover:text-blue-600"
+                onClick={() => setMobileOpen(false)}
               >
-                {item.label}
-              </button>
+                {m.label}
+              </Link>
             ))}
-          </nav>
 
+            <Link
+              href={data.newsletter_button.url}
+              onClick={() => setMobileOpen(false)}
+              className="
+                mt-3 px-5 py-3 rounded-xl
+                bg-blue-600 text-white text-center
+                font-semibold
+              "
+            >
+              {data.newsletter_button.label}
+            </Link>
+          </nav>
         </div>
       )}
-
-      {/* Animation */}
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade {
-          animation: fadeIn 0.25s ease-out;
-        }
-      `}</style>
-    </>
+    </header>
   );
 }

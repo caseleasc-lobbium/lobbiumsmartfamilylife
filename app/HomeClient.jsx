@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SectionHero from "../components/SectionHero"; // ✅ Neuer Hero-Block
 
 export default function HomeClient() {
   const [partners, setPartners] = useState([]);
@@ -22,8 +23,7 @@ export default function HomeClient() {
   const loadPartners = async (cat) => {
     setLoading(true);
     try {
-      const url = `/api/affiliates?category=${cat}&limit=9`;
-      const res = await fetch(url);
+      const res = await fetch(`/api/affiliates?category=${cat}&limit=9`);
       const data = await res.json();
       setPartners(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -48,53 +48,25 @@ export default function HomeClient() {
           targetUrl: partner.link,
         }),
       });
-    } catch (err) {
-      console.warn("Click-Tracking Fehler:", err);
-    }
-
-    if (partner.link) {
-      window.open(
-        partner.link,
-        "_blank",
-        "noopener,noreferrer"
-      );
-    }
+    } catch {}
+    window.open(partner.link, "_blank", "noopener,noreferrer");
   };
 
   return (
     <div className="flex flex-col items-center w-full">
 
       {/* ------------------------------------------------------ */}
-      {/* HERO SECTION – APPLE STYLE */}
+      {/* 🔵 SECTION HERO – Einheitlich über alle Seiten */}
       {/* ------------------------------------------------------ */}
-      <section className="w-full flex flex-col items-center text-center pt-20 pb-12 px-4">
-
-        <h1 className="text-4xl md:text-5xl font-bold text-[#0F1C3F] tracking-tight">
-          Smart Family Life by Lobbium
-        </h1>
-
-        <p className="text-gray-600 mt-5 text-lg max-w-2xl leading-relaxed">
-          Clever sparen, den Alltag organisieren und Kinder spielerisch fördern — 
-          kompakt, praxiserprobt und schön aufbereitet.
-        </p>
-
-        {/* Apple-Style Highlight Box */}
-        <div className="
-          mt-8 px-6 py-4 rounded-2xl
-          bg-white/60 backdrop-blur-md
-          border border-gray-200 shadow-sm
-        ">
-          <p className="text-gray-700 text-sm">
-            🌟 Jeden Tag neue Empfehlungen – für Familien, Alltag & Sparen
-          </p>
-        </div>
-      </section>
+      <SectionHero
+        title="Smart Family Life by Lobbium"
+        subtitle="Clever sparen, den Alltag organisieren und Kinder spielerisch fördern — kompakt, modern & täglich aktualisiert."
+      />
 
       {/* ------------------------------------------------------ */}
-      {/* RUBRIKEN – Apple Style Clean Tabs */}
+      {/* RUBRIKEN – Apple Style Tabs */}
       {/* ------------------------------------------------------ */}
       <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
-
         {categories.map((cat) => {
           const isActive = category === cat.key;
           return (
@@ -114,7 +86,6 @@ export default function HomeClient() {
             </button>
           );
         })}
-
       </nav>
 
       {/* ------------------------------------------------------ */}
@@ -125,8 +96,7 @@ export default function HomeClient() {
           🌟 Partner des Tages – Empfehlungen für dich
         </h2>
         <p className="text-gray-600">
-          Jeden Tag neu ausgewählt — beliebte Marken, clevere Spartipps und
-          familienfreundliche Inspirationen aus allen Rubriken.
+          Jeden Tag neu ausgewählt — beliebte Marken, clevere Spartipps und familienfreundliche Inspirationen.
         </p>
       </section>
 
@@ -134,34 +104,23 @@ export default function HomeClient() {
       {/* KACHELN */}
       {/* ------------------------------------------------------ */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
-
-        {/* Loading Skeleton */}
         {loading &&
           [...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="h-48 bg-gray-100 animate-pulse rounded-3xl"
-            />
+            <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
           ))}
 
-        {/* Keine Partner */}
         {!loading && partners.length === 0 && (
           <p className="col-span-full text-center text-gray-500">
             Noch keine Partner verfügbar.
           </p>
         )}
 
-        {/* Partnerkarten */}
         {!loading &&
           partners.map((p) => (
             <button
               key={p.id}
               onClick={() => handlePartnerClick(p)}
-              className="
-                p-6 bg-white rounded-3xl border border-gray-100
-                shadow hover:shadow-xl transition-all
-                flex flex-col items-center text-center
-              "
+              className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col items-center text-center"
             >
               {p.imageUrl ? (
                 <img
@@ -178,8 +137,7 @@ export default function HomeClient() {
               </h3>
 
               <p className="text-gray-500 text-sm mt-2">
-                {p.description ||
-                  "Empfehlungen für deinen Alltag und deine Familie."}
+                {p.description || "Empfehlungen für deinen Alltag und deine Familie."}
               </p>
             </button>
           ))}

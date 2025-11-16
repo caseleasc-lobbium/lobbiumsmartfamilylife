@@ -3,22 +3,24 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from("site_footer")
-    .select("*")
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("site_footer")
+      .select("*")
+      .single();
 
-  if (error) {
-    console.error("Footer Load Error:", error);
-    return NextResponse.json(
-      { error: "Failed loading footer" },
-      { status: 500 }
-    );
+    if (error) {
+      console.error("Footer API error:", error);
+      return NextResponse.json({ error: "Load error" }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
-
-  return NextResponse.json(data);
 }
