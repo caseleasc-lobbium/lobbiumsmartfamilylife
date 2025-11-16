@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Footer() {
   const [footer, setFooter] = useState(null);
@@ -15,79 +16,69 @@ export default function Footer() {
         console.error("Footer Load Error:", err);
       }
     };
+
     load();
   }, []);
 
-  if (!footer) {
-    return null;
-  }
+  if (!footer) return null;
+
+  const { sections, copyright } = footer;
 
   return (
     <footer className="w-full border-t border-gray-200 bg-white mt-20">
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      
+      {/* Container */}
+      <div className="max-w-7xl mx-auto px-6 py-10">
         
-        {/* GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
 
-          {/* Spalte: Themen */}
+          {/* Themen */}
           <div>
-            <h3 className="text-sm font-semibold text-[#0F1C3F] mb-3">
+            <h4 className="text-[#0F1C3F] text-sm font-semibold mb-3">
               Themen
-            </h3>
+            </h4>
+
             <ul className="space-y-2">
-              {footer.sections?.themen?.map((item) => (
+              {sections?.themen?.map((item) => (
                 <li key={item.label}>
-                  <a
+                  <Link
                     href={item.url}
-                    className="text-gray-600 hover:text-[#0F1C3F] transition"
+                    className="text-gray-600 hover:text-[#0F1C3F] transition text-sm"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Spalte: Rechtliches */}
+          {/* Rechtliches */}
           <div>
-            <h3 className="text-sm font-semibold text-[#0F1C3F] mb-3">
+            <h4 className="text-[#0F1C3F] text-sm font-semibold mb-3">
               Rechtliches
-            </h3>
+            </h4>
+
             <ul className="space-y-2">
-              {footer.sections?.rechtliches?.map((item) => (
+              {sections?.rechtliches?.map((item) => (
                 <li key={item.label}>
-                  <a
+                  <Link
                     href={item.url}
-                    className="text-gray-600 hover:text-[#0F1C3F] transition"
+                    className="text-gray-600 hover:text-[#0F1C3F] transition text-sm"
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Spalte: Newsletter */}
-          <div>
-            <h3 className="text-sm font-semibold text-[#0F1C3F] mb-3">
-              Newsletter
-            </h3>
-            <p className="text-gray-600 text-sm mb-4">
-              Erhalte regelmäßig Tipps, Spartools & Inspirationen für deinen Alltag.
-            </p>
-            <a
-              href="/newsletter"
-              className="inline-block bg-[#0F1C3F] text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-opacity-90"
-            >
-              Jetzt abonnieren
-            </a>
-          </div>
         </div>
 
-        {/* COPYRIGHT */}
-        <div className="border-t border-gray-100 pt-6 text-sm text-gray-500 text-center">
-          {footer?.copyright || "© 2025 Lobbium – Smart Family Life"}
+        {/* Copy */}
+        <div className="mt-10 pt-6 border-t border-gray-100 text-center">
+          <p className="text-gray-500 text-xs">{copyright}</p>
         </div>
+
       </div>
     </footer>
   );
