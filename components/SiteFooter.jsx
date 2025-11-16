@@ -1,66 +1,92 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
-export default function SiteFooter() {
+export default function Footer() {
   const [footer, setFooter] = useState(null);
 
-  const loadFooter = async () => {
-    try {
-      const res = await fetch("/api/site/footer");
-      const data = await res.json();
-      setFooter(data);
-    } catch (err) {
-      console.error("Footer Load Error:", err);
-    }
-  };
-
   useEffect(() => {
-    loadFooter();
+    const load = async () => {
+      try {
+        const res = await fetch("/api/footer");
+        const data = await res.json();
+        setFooter(data);
+      } catch (err) {
+        console.error("Footer Load Error:", err);
+      }
+    };
+    load();
   }, []);
 
-  if (!footer) return null;
+  if (!footer) {
+    return null;
+  }
 
   return (
-    <footer className="w-full bg-white border-t border-gray-200 py-10 mt-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <footer className="w-full border-t border-gray-200 bg-white mt-20">
+      <div className="max-w-6xl mx-auto px-6 py-10">
+        
+        {/* GRID */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
 
-        {/* Sections */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 mb-10">
-
-          {/* Themen */}
+          {/* Spalte: Themen */}
           <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Themen</h3>
+            <h3 className="text-sm font-semibold text-[#0F1C3F] mb-3">
+              Themen
+            </h3>
             <ul className="space-y-2">
-              {footer.sections.themen.map((item) => (
-                <li key={item.url}>
-                  <Link href={item.url} className="text-gray-600 hover:text-blue-600">
+              {footer.sections?.themen?.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.url}
+                    className="text-gray-600 hover:text-[#0F1C3F] transition"
+                  >
                     {item.label}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Rechtliches */}
+          {/* Spalte: Rechtliches */}
           <div>
-            <h3 className="font-semibold text-gray-800 mb-4">Rechtliches</h3>
+            <h3 className="text-sm font-semibold text-[#0F1C3F] mb-3">
+              Rechtliches
+            </h3>
             <ul className="space-y-2">
-              {footer.sections.rechtliches.map((item) => (
-                <li key={item.url}>
-                  <Link href={item.url} className="text-gray-600 hover:text-blue-600">
+              {footer.sections?.rechtliches?.map((item) => (
+                <li key={item.label}>
+                  <a
+                    href={item.url}
+                    className="text-gray-600 hover:text-[#0F1C3F] transition"
+                  >
                     {item.label}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Spalte: Newsletter */}
+          <div>
+            <h3 className="text-sm font-semibold text-[#0F1C3F] mb-3">
+              Newsletter
+            </h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Erhalte regelmäßig Tipps, Spartools & Inspirationen für deinen Alltag.
+            </p>
+            <a
+              href="/newsletter"
+              className="inline-block bg-[#0F1C3F] text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-opacity-90"
+            >
+              Jetzt abonnieren
+            </a>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="text-center text-gray-500 text-sm">
-          {footer.copyright}
+        {/* COPYRIGHT */}
+        <div className="border-t border-gray-100 pt-6 text-sm text-gray-500 text-center">
+          {footer?.copyright || "© 2025 Lobbium – Smart Family Life"}
         </div>
       </div>
     </footer>
