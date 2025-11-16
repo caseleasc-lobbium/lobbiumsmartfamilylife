@@ -1,29 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import SectionHero from "../components/SectionHero"; // ✅ Neuer Hero-Block
+import SectionHero from "../components/SectionHero";
 
 export default function HomeClient() {
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Kategorie-Filter
-  const [category, setCategory] = useState("all");
-
-  // Navigation Rubriken
-  const categories = [
-    { key: "all", label: "Home" },
-    { key: "finanzen", label: "Finanzen & Spartipps" },
-    { key: "familie", label: "Familienleben" },
-    { key: "bildung", label: "Kinder & Bildung" },
-    { key: "lifestyle", label: "Lifestyle" },
-  ];
+  // Home lädt IMMER "all" → Vitrine
+  const category = "all";
 
   // Partner laden
-  const loadPartners = async (cat) => {
+  const loadPartners = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/affiliates?category=${cat}&limit=9`);
+      const res = await fetch(`/api/affiliates?category=${category}&limit=9`);
       const data = await res.json();
       setPartners(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -34,8 +25,8 @@ export default function HomeClient() {
   };
 
   useEffect(() => {
-    loadPartners(category);
-  }, [category]);
+    loadPartners();
+  }, []);
 
   // Klick-Handler
   const handlePartnerClick = async (partner) => {
@@ -56,37 +47,12 @@ export default function HomeClient() {
     <div className="flex flex-col items-center w-full">
 
       {/* ------------------------------------------------------ */}
-      {/* 🔵 SECTION HERO – Einheitlich über alle Seiten */}
+      {/* 🔵 HERO – Einheitlich, luxuriös, Apple-Style */}
       {/* ------------------------------------------------------ */}
       <SectionHero
         title="Smart Family Life by Lobbium"
         subtitle="Clever sparen, den Alltag organisieren und Kinder spielerisch fördern — kompakt, modern & täglich aktualisiert."
       />
-
-      {/* ------------------------------------------------------ */}
-      {/* RUBRIKEN – Apple Style Tabs */}
-      {/* ------------------------------------------------------ */}
-      <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
-        {categories.map((cat) => {
-          const isActive = category === cat.key;
-          return (
-            <button
-              key={cat.key}
-              onClick={() => setCategory(cat.key)}
-              className={`
-                px-6 py-3 rounded-xl text-sm font-medium transition-all
-                ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }
-              `}
-            >
-              {cat.label}
-            </button>
-          );
-        })}
-      </nav>
 
       {/* ------------------------------------------------------ */}
       {/* PARTNER DES TAGES */}
@@ -101,9 +67,11 @@ export default function HomeClient() {
       </section>
 
       {/* ------------------------------------------------------ */}
-      {/* KACHELN */}
+      {/* KACHELGRID */}
       {/* ------------------------------------------------------ */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
+
+        {/* Loading */}
         {loading &&
           [...Array(6)].map((_, i) => (
             <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
@@ -120,7 +88,11 @@ export default function HomeClient() {
             <button
               key={p.id}
               onClick={() => handlePartnerClick(p)}
-              className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col items-center text-center"
+              className="
+                p-6 bg-white rounded-3xl border border-gray-100
+                shadow hover:shadow-xl transition-all
+                flex flex-col items-center text-center
+              "
             >
               {p.imageUrl ? (
                 <img

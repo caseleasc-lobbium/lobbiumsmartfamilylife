@@ -8,7 +8,7 @@ export default function LifestyleClient() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Premium Navigation
+  // Premium Navigation (global identisch auf allen Rubriken)
   const categories = [
     { key: "all", label: "Home", url: "/" },
     { key: "finanzen", label: "Finanzen & Spartipps", url: "/finanzen-spartipps" },
@@ -17,6 +17,7 @@ export default function LifestyleClient() {
     { key: "lifestyle", label: "Lifestyle", url: "/lifestyle" },
   ];
 
+  // Lifestyle lädt immer lifestyle
   const loadData = async () => {
     try {
       const res = await fetch("/api/affiliates?category=lifestyle&limit=12");
@@ -35,13 +36,17 @@ export default function LifestyleClient() {
   return (
     <div className="flex flex-col items-center w-full">
 
-      {/* HERO – Einheitlich & luxuriös */}
+      {/* ------------------------------------------------------ */}
+      {/* HERO – Einheitlich für alle Rubriken */}
+      {/* ------------------------------------------------------ */}
       <SectionHero
         title="Lifestyle"
         subtitle="Täglich neue Empfehlungen aus Mode, Beauty, Reisen, Fitness, Gesundheit, Smarthome und modernen Trends."
       />
 
-      {/* Navigation */}
+      {/* ------------------------------------------------------ */}
+      {/* GLOBALE NAVIGATION – Top Tabs */}
+      {/* ------------------------------------------------------ */}
       <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
         {categories.map((cat) => {
           const isActive = cat.key === "lifestyle";
@@ -61,7 +66,9 @@ export default function LifestyleClient() {
         })}
       </nav>
 
-      {/* GRID – Apple Style */}
+      {/* ------------------------------------------------------ */}
+      {/* GRID – Apple-Style Cards */}
+      {/* ------------------------------------------------------ */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
 
         {/* Loading Placeholder */}

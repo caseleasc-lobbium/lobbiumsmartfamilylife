@@ -8,7 +8,7 @@ export default function KinderBildungClient() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Rubriken-Navigation (wie Home)
+  // Globale Premium-Navigation (Tabs)
   const categories = [
     { key: "all", label: "Home", url: "/" },
     { key: "finanzen", label: "Finanzen & Spartipps", url: "/finanzen-spartipps" },
@@ -17,11 +17,12 @@ export default function KinderBildungClient() {
     { key: "lifestyle", label: "Lifestyle", url: "/lifestyle" },
   ];
 
+  // Nur Kategorie "kinderbildung" laden
   const loadData = async () => {
     try {
       const res = await fetch("/api/affiliates?category=kinderbildung&limit=12");
       const data = await res.json();
-      setItems(data || []);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("❌ Fehler beim Laden von Kinder & Bildung:", err);
     }
@@ -35,13 +36,17 @@ export default function KinderBildungClient() {
   return (
     <div className="flex flex-col items-center w-full">
 
-      {/* HERO – Einheitlich */}
+      {/* ------------------------------------------------------ */}
+      {/* HERO – Einheitlich für alle Rubriken */}
+      {/* ------------------------------------------------------ */}
       <SectionHero
         title="Kinder & Bildung"
-        subtitle="Die besten Produkte, Lernmaterialien und modernen Tools für Kinder – täglich aktualisiert und stilvoll präsentiert."
+        subtitle="Die besten Produkte, Lernmaterialien und modernen Tools für Kinder – stilvoll präsentiert & täglich aktualisiert."
       />
 
-      {/* Tabs Navigation */}
+      {/* ------------------------------------------------------ */}
+      {/* GLOBALE NAVIGATION – Tabs identisch wie Home */}
+      {/* ------------------------------------------------------ */}
       <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
         {categories.map((cat) => {
           const isActive = cat.key === "bildung";
@@ -61,22 +66,25 @@ export default function KinderBildungClient() {
         })}
       </nav>
 
-      {/* GRID – Premium Cards */}
+      {/* ------------------------------------------------------ */}
+      {/* GRID – Apple-style Card Grid */}
+      {/* ------------------------------------------------------ */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
 
-        {/* Loading Effekt */}
+        {/* Loading-State */}
         {loading &&
           [...Array(6)].map((_, i) => (
             <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
           ))}
 
+        {/* Keine Ergebnisse */}
         {!loading && items.length === 0 && (
           <p className="col-span-full text-center text-gray-500">
             Noch keine Empfehlungen verfügbar.
           </p>
         )}
 
-        {/* Cards */}
+        {/* Partner-Karten */}
         {!loading &&
           items.map((item) => (
             <Link
@@ -86,6 +94,7 @@ export default function KinderBildungClient() {
               )}`}
               className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col text-center"
             >
+              {/* Bild */}
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}
@@ -96,10 +105,12 @@ export default function KinderBildungClient() {
                 <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4" />
               )}
 
+              {/* Titel */}
               <h2 className="text-lg font-semibold text-gray-800">
                 {item.title}
               </h2>
 
+              {/* Beschreibung */}
               <p className="text-gray-500 text-sm mt-2 line-clamp-3">
                 {item.description || "Keine Beschreibung verfügbar."}
               </p>

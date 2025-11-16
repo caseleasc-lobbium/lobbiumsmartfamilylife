@@ -8,7 +8,7 @@ export default function FinanzenSpartippsClient() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Tabs / Navigation wie überall
+  // Globale Premium Navigation
   const categories = [
     { key: "all", label: "Home", url: "/" },
     { key: "finanzen", label: "Finanzen & Spartipps", url: "/finanzen-spartipps" },
@@ -21,7 +21,7 @@ export default function FinanzenSpartippsClient() {
     try {
       const res = await fetch("/api/affiliates?category=finanzen&limit=12");
       const data = await res.json();
-      setItems(data || []);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("❌ Fehler beim Laden von Finanzen & Spartipps:", err);
     }
@@ -35,15 +35,19 @@ export default function FinanzenSpartippsClient() {
   return (
     <div className="flex flex-col items-center w-full">
 
-      {/* HERO – Einheitlich & Premium */}
+      {/* ------------------------------------------------------ */}
+      {/* HERO – Einheitlich für alle Rubriken */}
+      {/* ------------------------------------------------------ */}
       <SectionHero
         title="Finanzen & Spartipps"
         subtitle="Täglich neue Empfehlungen zu Geld sparen, clever investieren und smarten Tools für deine finanzielle Freiheit."
       />
 
-      {/* TABS – Einheitlich wie Home */}
+      {/* ------------------------------------------------------ */}
+      {/* NAVIGATION – globale Rubriken-Tabs */}
+      {/* ------------------------------------------------------ */}
       <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
-        {categories.map((cat) => {
+        {categories.map(cat => {
           const isActive = cat.key === "finanzen";
           return (
             <Link
@@ -61,7 +65,9 @@ export default function FinanzenSpartippsClient() {
         })}
       </nav>
 
-      {/* GRID – Premium Cards */}
+      {/* ------------------------------------------------------ */}
+      {/* GRID – Premium Apple-Style Cards */}
+      {/* ------------------------------------------------------ */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
 
         {/* Loading Skeleton */}
@@ -70,23 +76,22 @@ export default function FinanzenSpartippsClient() {
             <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
           ))}
 
-        {/* Keine Daten */}
+        {/* Keine Ergebnisse */}
         {!loading && items.length === 0 && (
           <p className="col-span-full text-center text-gray-500">
             Noch keine Empfehlungen verfügbar.
           </p>
         )}
 
-        {/* Partnerkarten */}
+        {/* Partner Cards */}
         {!loading &&
-          items.map((item) => (
+          items.map(item => (
             <Link
               key={item.id}
-              href={`/api/affiliates/click?partnerId=${item.id}&targetUrl=${encodeURIComponent(
-                item.link
-              )}`}
+              href={`/api/affiliates/click?partnerId=${item.id}&targetUrl=${encodeURIComponent(item.link)}`}
               className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col text-center"
             >
+              {/* Bild */}
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}
@@ -97,10 +102,12 @@ export default function FinanzenSpartippsClient() {
                 <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4" />
               )}
 
+              {/* Titel */}
               <h2 className="text-lg font-semibold text-gray-800">
                 {item.title}
               </h2>
 
+              {/* Beschreibung */}
               <p className="text-gray-500 text-sm mt-2 line-clamp-3">
                 {item.description || "Keine Beschreibung verfügbar."}
               </p>
