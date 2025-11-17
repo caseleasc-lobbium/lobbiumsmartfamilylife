@@ -30,32 +30,44 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-b from-[#eaf0ff] to-[#f8faff]">
-      <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md text-center">
+    <div className="flex items-center justify-center min-h-screen bg-[#f5f7fa]">
+      <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md">
 
-        <h1 className="text-2xl font-bold mb-6">🔐 Admin Login</h1>
+        {/* Branding */}
+        <h1 className="text-center text-3xl font-semibold mb-2 text-gray-900">
+          Lobbium Admin
+        </h1>
+        <p className="text-center text-gray-500 mb-8 text-sm">
+          Smart Family Life – Zugriff für Administrator
+        </p>
 
+        {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-6">
-          <input
-            type="email"
-            placeholder="Admin E-Mail eingeben"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
-          />
+          <div className="text-left">
+            <label className="block text-gray-700 font-medium mb-1">
+              Admin E-Mail
+            </label>
+            <input
+              type="email"
+              placeholder="info@lobbium.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-600 outline-none"
+            />
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl shadow hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-blue-700 transition disabled:bg-blue-400"
           >
-            {loading ? "Senden..." : "Magic Link anfordern"}
+            {loading ? "Senden…" : "Magic-Link anfordern"}
           </button>
         </form>
 
         {message && (
-          <p className="mt-4 text-gray-700 text-sm">{message}</p>
+          <p className="mt-5 text-center text-gray-700 text-sm">{message}</p>
         )}
       </div>
     </div>
