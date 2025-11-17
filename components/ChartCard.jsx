@@ -4,57 +4,68 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  BarElement,
   PointElement,
   LineElement,
+  ArcElement,
   Tooltip,
-  Legend,
+  Legend
 } from "chart.js";
-import { Bar, Line } from "react-chartjs-2";
+
+import { Line, Doughnut } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  BarElement,
   PointElement,
   LineElement,
+  ArcElement,
   Tooltip,
   Legend
 );
 
-export default function ChartCard({ title, labels = [], data = [], type = "bar" }) {
-  const chartData = {
+export default function ChartCard({ title, labels, data }) {
+  const lineData = {
     labels,
     datasets: [
       {
         label: title,
         data,
-        backgroundColor: "rgba(37, 99, 235, 0.6)", // Blau
-        borderColor: "rgba(37, 99, 235, 1)",
-        borderWidth: 2,
+        borderColor: "rgba(37, 99, 235, 0.8)",
+        backgroundColor: "rgba(37, 99, 235, 0.3)",
         tension: 0.3,
+        borderWidth: 2,
+        fill: true,
       },
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-    },
-    scales: {
-      y: { beginAtZero: true },
-    },
+  const doughnutData = {
+    labels,
+    datasets: [
+      {
+        label: title,
+        data,
+        backgroundColor: [
+          "rgba(37, 99, 235, 0.8)",
+          "rgba(16, 185, 129, 0.8)",
+          "rgba(249, 115, 22, 0.8)",
+          "rgba(139, 92, 246, 0.8)",
+        ],
+        borderWidth: 1,
+      },
+    ],
   };
 
-  return (
-    <div className="bg-white border border-gray-200 shadow-md rounded-2xl p-6">
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+  const isSmall = labels.length <= 4;
 
-      {type === "line" ? (
-        <Line data={chartData} options={options} />
+  return (
+    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-6">
+      <h3 className="text-lg font-semibold mb-4 text-gray-800">{title}</h3>
+
+      {isSmall ? (
+        <Doughnut data={doughnutData} />
       ) : (
-        <Bar data={chartData} options={options} />
+        <Line data={lineData} />
       )}
     </div>
   );
