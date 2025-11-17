@@ -1,44 +1,61 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import Chart from "chart.js/auto";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar, Line } from "react-chartjs-2";
 
-export default function ChartCard({ title, data, labels }) {
-  const canvasRef = useRef(null);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend
+);
 
-  useEffect(() => {
-    const ctx = canvasRef.current.getContext("2d");
-
-    new Chart(ctx, {
-      type: "line",
-      data: {
-        labels,
-        datasets: [
-          {
-            label: title,
-            data,
-            borderColor: "#2563eb",
-            backgroundColor: "rgba(37, 99, 235, 0.1)",
-            borderWidth: 2,
-            tension: 0.4,
-            pointRadius: 2,
-          },
-        ],
+export default function ChartCard({ title, labels = [], data = [], type = "bar" }) {
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: title,
+        data,
+        backgroundColor: "rgba(37, 99, 235, 0.6)", // Blau
+        borderColor: "rgba(37, 99, 235, 1)",
+        borderWidth: 2,
+        tension: 0.3,
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true },
-        },
-      },
-    });
-  }, [data, labels]);
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      y: { beginAtZero: true },
+    },
+  };
 
   return (
-    <div className="bg-white shadow rounded-3xl p-6">
+    <div className="bg-white border border-gray-200 shadow-md rounded-2xl p-6">
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
-      <canvas ref={canvasRef} height={120}></canvas>
+
+      {type === "line" ? (
+        <Line data={chartData} options={options} />
+      ) : (
+        <Bar data={chartData} options={options} />
+      )}
     </div>
   );
 }
