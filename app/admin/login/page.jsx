@@ -1,65 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import TopNav from "../components/TopNav";
+import SiteFooter from "../components/SiteFooter";
+import CookieConsent from "../components/CookieConsent";
+import { trackingAllowed } from "../utils/consent";
+import "../styles/globals.css";
 
-export default function AdminLogin() {
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function RootLayout({ children }) {
+  const pathname = usePathname();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setMessage("");
+  // 🔥 Login-Seite komplett blank – ohne Navigation, ohne Footer
+  const isLoginPage = pathname === "/admin/login";
 
-    setLoading(true);
-    const res = await fetch("/api/admin/magic-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+  // 🔥 Interne Admin-Bereiche (aber nicht Login)
+  const isInternalAdmin = pathname.startsWith("/admin") && !isLoginPage;
 
-    const data = await res.json();
-
-    if (data.error) {
-      setMessage(data.error);
-    } else {
-      setMessage("Magic-Link wurde gesendet. Bitte E-Mail prüfen.");
-    }
-
-    setLoading(false);
-  };
+  // Navigation & Footer nur für öffentliche Seiten
+  const showFrame = !isInternalAdmin && !isLoginPage;
+  const showFooter = showFrame;
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
-      <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
+    <html lang="de">
+      <body
+        style={{
+          fontFamily: "Inter, sans-serif",
+          backgroundColor: "#f9fafb",
+          minHeight: "100vh",
+        }}
+      >
+        {/* 🔵 Keine TopNav für Login */}
+        {showFrame && <TopNav />}
 
-        <h1 className="text-center text-2xl font-bold mb-6">
-          Admin Login
-        </h1>
+        {/* Seite */}
+        <main className={showFrame ? "pt-28" : ""} style={{ minHeight: "80vh" }}>
+          {children}
+        </main>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <input
-            type="email"
-            placeholder="Admin E-Mail eingeben"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-600 outline-none"
-          />
+        {/* 🔵 Cookie Banner */}
+        {showFooter && <CookieConsent />}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-blue-700 transition disabled:bg-blue-400"
-          >
-            {loading ? "Senden…" : "Magic-Link anfordern"}
-          </button>
-        </form>
+        {/* 🔵 Footer */}
+        {showFooter && <SiteFooter />}
 
-        {message && (
-          <p className="mt-4 text-center text-gray-700 text-sm">{message}</p>
+        {/* Google Analytics */}
+        {trackingAllowed() && (
+          <>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  gtag('consent', 'update', {
+                    ad_storage: 'granted',
+                    analytics_storage: 'granted'
+                  });
+                `,
+              }}
+            />
+
+            <script
+              async
+              src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"
+            ></script>
+
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'G-XXXXXXX');
+                `,
+              }}
+            />
+          </>
         )}
-      </div>
-    </div>
+      </body>
+    </html>
   );
 }
