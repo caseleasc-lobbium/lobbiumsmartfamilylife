@@ -31,33 +31,26 @@ export default function AdminLogin() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
 
-      <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md border border-gray-200">
-
-        {/* Titel */}
-        <h1 className="text-center text-2xl font-semibold mb-6 text-gray-900">
+        <h1 className="text-center text-2xl font-bold mb-6">
           Admin Login
         </h1>
 
-        {/* Login */}
-        <form onSubmit={handleLogin} className="space-y-5">
-
+        <form onSubmit={handleLogin} className="space-y-6">
           <input
             type="email"
             placeholder="Admin E-Mail eingeben"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl border border-gray-300
-                       focus:ring-2 focus:ring-blue-600 outline-none"
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-600 outline-none"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl
-                       font-semibold shadow hover:bg-blue-700 transition
-                       disabled:bg-blue-400"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-blue-700 transition disabled:bg-blue-400"
           >
             {loading ? "Senden…" : "Magic-Link anfordern"}
           </button>
@@ -66,7 +59,6 @@ export default function AdminLogin() {
         {message && (
           <p className="mt-4 text-center text-gray-700 text-sm">{message}</p>
         )}
-
       </div>
     </div>
   );
