@@ -1,29 +1,20 @@
 import { NextResponse } from "next/server";
-import { locales, defaultLocale } from "./app/i18n";
 
 export function middleware(req) {
   const url = req.nextUrl.clone();
   const host = req.headers.get("host") || "";
   const pathname = url.pathname;
 
-  // -------------------------------------------------
-  // 1️⃣ DEVELOPMENT & PREVIEW FREIGEBEN
-  // -------------------------------------------------
-  if (
-    host.includes("localhost") ||
-    host.includes("vercel.app")
-  ) {
+  // 1️⃣ DEV und Preview erlauben
+  if (host.includes("localhost") || host.includes("vercel.app")) {
     return NextResponse.next();
   }
 
-  // -------------------------------------------------
-  // ❌ 2️⃣ MAINTENANCE DEAKTIVIERT (komplett entfernt)
-  // -------------------------------------------------
-  // (Nichts tun – öffentliche Seiten sind frei)
+  // 2️⃣ Maintenance AUSGESCHALTET (weiterleiten NICHT mehr)
+  // -> wir entfernen die Maintenance-Redirect Zeile komplett
+  // -> Seite ist offiziell öffentlich
 
-  // -------------------------------------------------
-  // 3️⃣ ADMIN-BEREICH SCHÜTZEN (Supabase Session)
-  // -------------------------------------------------
+  // 3️⃣ Admin-Bereich schützen
   if (pathname.startsWith("/admin")) {
     const sbAccessToken = req.cookies.get("sb-access-token")?.value;
 
@@ -33,38 +24,12 @@ export function middleware(req) {
     }
   }
 
-  // -------------------------------------------------
-  // 4️⃣ ÖFFENTLICHE STATIC ROUTES
-  // -------------------------------------------------
-  if (
-    pathname.startsWith("/logo-test") ||
-    pathname.startsWith("/favicon") ||
-    pathname.startsWith("/logo.png")
-  ) {
-    return NextResponse.next();
-  }
-
-  // -------------------------------------------------
-  // 5️⃣ i18n AUTO-REDIRECT
-  // -------------------------------------------------
+  // 4️⃣ Öffentliche Dateien erlauben
   const PUBLIC_FILE = /\.(.*)$/;
   if (PUBLIC_FILE.test(pathname)) return NextResponse.next();
 
-  const hasLocale = locales.some(
-    (locale) =>
-      pathname.startsWith(`/${locale}/`) ||
-      pathname === `/${locale}`
-  );
-
-  if (!hasLocale) {
-    const langHeader = req.headers.get("accept-language") || "";
-    const detectedLocale =
-      locales.find((locale) => langHeader.includes(locale)) ||
-      defaultLocale;
-
-    const redirectUrl = new URL(`/${detectedLocale}${pathname}`, req.url);
-    return NextResponse.redirect(redirectUrl);
-  }
+  // ❌ 5️⃣ i18n Redirect wurde entfernt – KEIN "/de/" mehr
+  // (Frontend bleibt original, URLs bleiben sauber)
 
   return NextResponse.next();
 }
