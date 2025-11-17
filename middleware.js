@@ -17,15 +17,9 @@ export function middleware(req) {
   }
 
   // -------------------------------------------------
-  // 2️⃣ MAINTENANCE-MODUS DEAKTIVIERT
-  // (nur kommentiert – jederzeit wieder aktivierbar)
+  // ❌ 2️⃣ MAINTENANCE DEAKTIVIERT (komplett entfernt)
   // -------------------------------------------------
-  /*
-  if (host.includes("lobbium.com") && !pathname.startsWith("/maintenance")) {
-    url.pathname = "/maintenance";
-    return NextResponse.redirect(url);
-  }
-  */
+  // (Nichts tun – öffentliche Seiten sind frei)
 
   // -------------------------------------------------
   // 3️⃣ ADMIN-BEREICH SCHÜTZEN (Supabase Session)
@@ -33,7 +27,6 @@ export function middleware(req) {
   if (pathname.startsWith("/admin")) {
     const sbAccessToken = req.cookies.get("sb-access-token")?.value;
 
-    // Nicht eingeloggt → weiterleiten zum Admin Login
     if (!sbAccessToken && !pathname.startsWith("/admin/login")) {
       url.pathname = "/admin/login";
       return NextResponse.redirect(url);
@@ -41,11 +34,10 @@ export function middleware(req) {
   }
 
   // -------------------------------------------------
-  // 4️⃣ ÖFFENTLICHE SEITEN
+  // 4️⃣ ÖFFENTLICHE STATIC ROUTES
   // -------------------------------------------------
   if (
     pathname.startsWith("/logo-test") ||
-    pathname.startsWith("/maintenance") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/logo.png")
   ) {
@@ -53,20 +45,22 @@ export function middleware(req) {
   }
 
   // -------------------------------------------------
-  // 5️⃣ i18n AUTO-REDIRECT (DE / FR / EN…)
+  // 5️⃣ i18n AUTO-REDIRECT
   // -------------------------------------------------
   const PUBLIC_FILE = /\.(.*)$/;
   if (PUBLIC_FILE.test(pathname)) return NextResponse.next();
 
   const hasLocale = locales.some(
     (locale) =>
-      pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+      pathname.startsWith(`/${locale}/`) ||
+      pathname === `/${locale}`
   );
 
   if (!hasLocale) {
     const langHeader = req.headers.get("accept-language") || "";
     const detectedLocale =
-      locales.find((locale) => langHeader.includes(locale)) || defaultLocale;
+      locales.find((locale) => langHeader.includes(locale)) ||
+      defaultLocale;
 
     const redirectUrl = new URL(`/${detectedLocale}${pathname}`, req.url);
     return NextResponse.redirect(redirectUrl);
@@ -75,9 +69,6 @@ export function middleware(req) {
   return NextResponse.next();
 }
 
-// -------------------------------------------------
-// 6️⃣ MIDDLEWARE MATCHER
-// -------------------------------------------------
 export const config = {
   matcher: ["/((?!_next|api|static|favicon.ico).*)"],
 };
