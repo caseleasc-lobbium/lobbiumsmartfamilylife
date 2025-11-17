@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const { data, error } = await supabase
       .from("site_footer")
-      .select("*")
+      .select("sections, copyright")
       .single();
 
     if (error) {
@@ -18,9 +18,13 @@ export async function GET() {
       return NextResponse.json({ error: "Load error" }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    // Rückgabe sauber strukturiert
+    return NextResponse.json({
+      sections: data.sections || {},
+      copyright: data.copyright || "",
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Server error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
