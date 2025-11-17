@@ -1,60 +1,60 @@
+import SectionHero from "../../components/SectionHero";
+
 export default function KontaktPage() {
   return (
     <div className="flex flex-col items-center w-full">
-      {/* 🔵 Hero – gleiches Design wie Newsletter / Rubriken */}
+
+      {/* Hero – Einheitlich wie alle anderen Seiten */}
       <SectionHero
         title="Kontakt"
-        subtitle="Du hast Fragen zu Lobbium oder möchtest mit uns zusammenarbeiten? 
-                 Hier erreichst du uns direkt – ohne Umwege, ohne Kontaktformular."
+        subtitle="Du hast Fragen zu Lobbium oder möchtest mit uns zusammenarbeiten?"
       />
 
-      {/* 📩 Inhalt */}
-      <section className="max-w-3xl mx-auto px-6 py-16 text-gray-700 leading-relaxed space-y-8">
+      {/* Inhalt */}
+      <div className="max-w-xl px-6 pb-24 text-gray-700 leading-relaxed">
+
+        <p className="mb-8">
+          Wir sind jederzeit für dich erreichbar — direkt, persönlich & ohne Wartezeiten.
+        </p>
+
         {/* Ansprechpartner */}
-        <div>
-          <h2 className="text-2xl font-semibold text-[#0F1C3F] mb-3">
-            Ansprechpartner
-          </h2>
-          <p>
-            <strong>Lobbium – Smart Family Life</strong><br />
-            Inhaber: Sergino Elisha<br />
-            Deutschland
-          </p>
-        </div>
+        <h2 className="font-semibold text-xl mt-6 mb-3 text-[#1c3d6c]">
+          Ansprechpartner
+        </h2>
+        <p className="mb-6">
+          <strong>Lobbium – Smart Family Life</strong><br />
+          Inhaber: Sergino Elisha<br />
+          Deutschland
+        </p>
 
         {/* E-Mail */}
-        <div>
-          <h2 className="text-2xl font-semibold text-[#0F1C3F] mb-3">
-            E-Mail
-          </h2>
-          <p>
-            Am schnellsten erreichst du uns per E-Mail unter:
-          </p>
-          <p className="mt-2">
-            <a
-              href="mailto:info@lobbium.com"
-              className="text-blue-600 hover:text-blue-800 underline"
-            >
-              info@lobbium.com
-            </a>
-          </p>
-          <p className="text-sm text-gray-500 mt-3">
-            Kein Kontaktformular, kein Spam – du schreibst uns direkt und persönlich.
-          </p>
-        </div>
+        <h2 className="font-semibold text-xl mt-6 mb-3 text-[#1c3d6c]">
+          E-Mail
+        </h2>
+        <p>
+          Am schnellsten erreichst du uns unter:<br />
+          <a
+            href="mailto:info@lobbium.com"
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            info@lobbium.com
+          </a>
+        </p>
+        <p className="text-sm text-gray-500 mt-2 mb-8">
+          Keine Formulare, kein Spam — du schreibst uns direkt.
+        </p>
 
         {/* Kooperationen */}
-        <div>
-          <h2 className="text-2xl font-semibold text-[#0F1C3F] mb-3">
-            Kooperationen & Partnerschaften
-          </h2>
-          <p>
-            Für Affiliate-Partnerschaften, Sponsoring, exklusive Platzierungen
-            oder individuelle Family-Kampagnen melde dich mit dem Betreff{" "}
-            <strong>„Kooperation Lobbium“</strong> per E-Mail.
-          </p>
-        </div>
-      </section>
+        <h2 className="font-semibold text-xl mt-6 mb-3 text-[#1c3d6c]">
+          Kooperationen & Partnerschaften
+        </h2>
+        <p>
+          Für Affiliate-Partnerschaften, Sponsoring oder exklusive Platzierungen
+          sende uns bitte eine E-Mail mit dem Betreff{" "}
+          <strong>„Kooperation Lobbium“</strong>.
+        </p>
+
+      </div>
     </div>
   );
 }
