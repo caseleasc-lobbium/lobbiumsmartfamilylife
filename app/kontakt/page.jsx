@@ -1,5 +1,3 @@
-import SectionHero from "../components/SectionHero";
-
 export default function KontaktPage() {
   return (
     <div className="flex flex-col items-center w-full">
