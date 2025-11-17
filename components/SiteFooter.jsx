@@ -1,75 +1,47 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import Link from "next/link";
-
 export default function SiteFooter() {
-  const [footer, setFooter] = useState(null);
-
-  useEffect(() => {
-    const loadFooter = async () => {
-      try {
-        const res = await fetch("/api/site/footer");
-        const data = await res.json();
-        setFooter(data);
-      } catch (err) {
-        console.error("Footer Load Error:", err);
-      }
-    };
-    loadFooter();
-  }, []);
-
-  if (!footer) return null;
-
-  const safeLinks = Array.isArray(footer.links) ? footer.links : [];
-  const btn = footer.newsletter_button || { label: "Newsletter", url: "/newsletter" };
-
   return (
-    <footer className="w-full bg-white border-t border-gray-200 mt-20">
+    <footer className="w-full bg-white border-t border-gray-200 py-10 mt-20">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10">
 
-      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-10">
-
+        {/* Navigation */}
         <div>
-          {footer.logo && (
-            <img src={footer.logo} className="h-12 w-auto mb-4" alt="Lobbium Logo" />
-          )}
-          <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
-            {footer.description || ""}
-          </p>
-        </div>
-
-        <div>
-          <h3 className="text-gray-800 font-semibold mb-4">Navigation</h3>
-          <ul className="flex flex-col gap-2">
-            {safeLinks.map((l, i) => (
-              <li key={i}>
-                <Link href={l.url} className="text-gray-600 hover:text-blue-600 transition text-sm">
-                  {l.label}
-                </Link>
-              </li>
-            ))}
+          <h3 className="font-semibold text-gray-800 mb-4">Navigation</h3>
+          <ul className="space-y-2 text-gray-600">
+            <li><a href="/" className="hover:text-gray-900">Home</a></li>
+            <li><a href="/finanzen-spartipps" className="hover:text-gray-900">Finanzen & Spartipps</a></li>
+            <li><a href="/familienleben" className="hover:text-gray-900">Familienleben</a></li>
+            <li><a href="/kinder-bildung" className="hover:text-gray-900">Kinder & Bildung</a></li>
+            <li><a href="/lifestyle" className="hover:text-gray-900">Lifestyle</a></li>
+            <li><a href="/impressum" className="hover:text-gray-900">Impressum</a></li>
+            <li><a href="/datenschutz" className="hover:text-gray-900">Datenschutz</a></li>
           </ul>
         </div>
 
+        {/* Newsletter */}
         <div>
-          <h3 className="text-gray-800 font-semibold mb-4">Newsletter</h3>
-
-          <Link
-            href={btn.url}
-            className="px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition text-sm font-semibold"
+          <h3 className="font-semibold text-gray-800 mb-4">Newsletter</h3>
+          <a
+            href="/newsletter"
+            className="inline-block px-6 py-3 rounded-xl bg-blue-600 text-white font-medium shadow hover:shadow-lg transition"
           >
-            {btn.label}
-          </Link>
-
-          <p className="text-gray-500 text-xs mt-3 max-w-xs">
+            Newsletter
+          </a>
+          <p className="text-gray-500 text-sm mt-2">
             Keine Werbung. Kein Spam. Jederzeit kündbar.
           </p>
         </div>
 
-      </div>
-
-      <div className="border-t border-gray-200 py-4 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()} Lobbium – Smart Family Life
+        {/* Logo & Copyright */}
+        <div className="text-center md:text-right">
+          <img
+            src="https://pvmehyinzttpqasothxro.supabase.co/storage/v1/object/public/public-assets/logo/logo.png"
+            alt="Lobbium Logo"
+            className="w-20 h-auto mx-auto md:ml-auto mb-3"
+          />
+          <p className="text-gray-500 text-sm">
+            © 2025 Lobbium – Smart Family Life
+          </p>
+        </div>
       </div>
     </footer>
   );

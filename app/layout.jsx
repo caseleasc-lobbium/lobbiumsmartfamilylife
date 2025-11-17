@@ -38,8 +38,6 @@ export default function RootLayout({ children }) {
         {/* 🔵 DSGVO Cookie Banner */}
         {showFooter && <CookieConsent />}
 
-        {/* 🔵 Footer */}
-        {showFooter && <SiteFooter />}
 
         {/* 🔵 Google Analytics nur bei Consent */}
         {trackingAllowed() && (
