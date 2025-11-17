@@ -1,36 +1,38 @@
+import SectionHero from "../components/SectionHero";
+
 export default function KontaktPage() {
   return (
-    <>
-      {/* Hero-Bereich – gleiches Design wie Impressum/Datenschutz */}
-      <section className="bg-gradient-to-b from-[#eaf0ff] via-[#f3f6fb] to-[#f8faff] text-center py-28 md:py-32 px-6 mt-20 border-b border-[#e1e5ee]">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#1c3d6c] mb-4">
-          📩 Kontakt
-        </h1>
-        <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-          Du hast Fragen zu Lobbium oder möchtest mit uns zusammenarbeiten?
-        </p>
-      </section>
+    <div className="flex flex-col items-center w-full">
+      {/* 🔵 Hero – gleiches Design wie Newsletter / Rubriken */}
+      <SectionHero
+        title="Kontakt"
+        subtitle="Du hast Fragen zu Lobbium oder möchtest mit uns zusammenarbeiten? 
+                 Hier erreichst du uns direkt – ohne Umwege, ohne Kontaktformular."
+      />
 
-      {/* Inhalt */}
+      {/* 📩 Inhalt */}
       <section className="max-w-3xl mx-auto px-6 py-16 text-gray-700 leading-relaxed space-y-8">
+        {/* Ansprechpartner */}
         <div>
-          <h2 className="text-2xl font-semibold text-[#1c3d6c] mb-3">
+          <h2 className="text-2xl font-semibold text-[#0F1C3F] mb-3">
             Ansprechpartner
           </h2>
           <p>
             <strong>Lobbium – Smart Family Life</strong><br />
             Inhaber: Sergino Elisha<br />
-            {/* Passe diese Daten später an deine echte Anschrift an */}
             Deutschland
           </p>
         </div>
 
+        {/* E-Mail */}
         <div>
-          <h2 className="text-2xl font-semibold text-[#1c3d6c] mb-3">
+          <h2 className="text-2xl font-semibold text-[#0F1C3F] mb-3">
             E-Mail
           </h2>
           <p>
-            Am schnellsten erreichst du uns per E-Mail unter:<br />
+            Am schnellsten erreichst du uns per E-Mail unter:
+          </p>
+          <p className="mt-2">
             <a
               href="mailto:info@lobbium.com"
               className="text-blue-600 hover:text-blue-800 underline"
@@ -38,13 +40,14 @@ export default function KontaktPage() {
               info@lobbium.com
             </a>
           </p>
-          <p className="text-sm text-gray-500 mt-2">
-            Keine Kontaktformulare, kein Spam – du schreibst uns direkt.
+          <p className="text-sm text-gray-500 mt-3">
+            Kein Kontaktformular, kein Spam – du schreibst uns direkt und persönlich.
           </p>
         </div>
 
+        {/* Kooperationen */}
         <div>
-          <h2 className="text-2xl font-semibold text-[#1c3d6c] mb-3">
+          <h2 className="text-2xl font-semibold text-[#0F1C3F] mb-3">
             Kooperationen & Partnerschaften
           </h2>
           <p>
@@ -54,6 +57,6 @@ export default function KontaktPage() {
           </p>
         </div>
       </section>
-    </>
+    </div>
   );
 }
