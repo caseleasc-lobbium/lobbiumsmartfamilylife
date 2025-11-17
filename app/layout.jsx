@@ -10,9 +10,10 @@ import "../styles/globals.css";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
 
-  // Erkennen: Admin-Bereich oder öffentlich?
-  const isAdminPage = pathname?.startsWith("/admin");
-  const isFrameVisible = !isAdminPage; // TopNav + Footer nur öffentlich
+  const isAdminLogin = pathname === "/admin/login";          
+  const isAdminPage = pathname?.startsWith("/admin") && !isAdminLogin;
+
+  const isFrameVisible = !isAdminPage && !isAdminLogin;    
 
   return (
     <html lang="de">
@@ -24,11 +25,11 @@ export default function RootLayout({ children }) {
         }}
       >
 
-        {/* 🔵 PUBLIC TOP-NAV (frontend) */}
+        {/* 🔵 Frontend Navigation */}
         {isFrameVisible && <TopNav />}
 
-        {/* 🔥 ADMIN TOPBAR – nur im Admin-Bereich */}
-        {!isFrameVisible && (
+        {/* 🔴 Admin-Topbar – ABER NICHT für /admin/login */}
+        {isAdminPage && (
           <header className="w-full bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center shadow-sm fixed top-0 left-0 z-40">
             <h1 className="text-lg font-semibold text-blue-700">Lobbium Admin</h1>
 
@@ -41,9 +42,9 @@ export default function RootLayout({ children }) {
           </header>
         )}
 
-        {/* 🔵 Seiteninhalt */}
+        {/* 🧱 Hauptinhalt */}
         <main
-          className={isFrameVisible ? "pt-28" : "pt-20"}
+          className={isFrameVisible ? "pt-28" : isAdminPage ? "pt-20" : ""}
           style={{ minHeight: "80vh" }}
         >
           {children}
@@ -55,8 +56,8 @@ export default function RootLayout({ children }) {
         {/* 🔵 Footer */}
         {isFrameVisible && <SiteFooter />}
 
-        {/* 🔵 Google Analytics nur wenn erlaubt */}
-        {trackingAllowed() && (
+        {/* 🔵 Google Analytics */}
+        {trackingAllowed() && !isAdminLogin && !isAdminPage && (
           <>
             <script
               dangerouslySetInnerHTML={{
