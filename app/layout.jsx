@@ -10,13 +10,9 @@ import "../styles/globals.css";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
 
-  const isInternal =
-    pathname?.startsWith("/admin") ||
-    pathname?.startsWith("/auth") ||
-    pathname?.startsWith("/login");
-
-  const showFrame = !isInternal; // TopNav + Footer
-  const showFooter = showFrame;
+  // Erkennen: Admin-Bereich oder öffentlich?
+  const isAdminPage = pathname?.startsWith("/admin");
+  const isFrameVisible = !isAdminPage; // TopNav + Footer nur öffentlich
 
   return (
     <html lang="de">
@@ -27,24 +23,41 @@ export default function RootLayout({ children }) {
           minHeight: "100vh",
         }}
       >
-        {/* 🔵 Immer sichtbare Hauptnavigation (oben fixiert) */}
-        {showFrame && <TopNav />}
+
+        {/* 🔵 PUBLIC TOP-NAV (frontend) */}
+        {isFrameVisible && <TopNav />}
+
+        {/* 🔥 ADMIN TOPBAR – nur im Admin-Bereich */}
+        {!isFrameVisible && (
+          <header className="w-full bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center shadow-sm fixed top-0 left-0 z-40">
+            <h1 className="text-lg font-semibold text-blue-700">Lobbium Admin</h1>
+
+            <a
+              href="/admin/logout"
+              className="text-red-600 hover:text-red-800 font-medium"
+            >
+              Logout
+            </a>
+          </header>
+        )}
 
         {/* 🔵 Seiteninhalt */}
-        <main className="pt-28" style={{ minHeight: "80vh" }}>
+        <main
+          className={isFrameVisible ? "pt-28" : "pt-20"}
+          style={{ minHeight: "80vh" }}
+        >
           {children}
         </main>
 
         {/* 🔵 DSGVO Cookie Banner */}
-        {showFooter && <CookieConsent />}
+        {isFrameVisible && <CookieConsent />}
 
         {/* 🔵 Footer */}
-        {showFooter && <SiteFooter />}
+        {isFrameVisible && <SiteFooter />}
 
-        {/* 🔵 Google Analytics nur bei Consent */}
+        {/* 🔵 Google Analytics nur wenn erlaubt */}
         {trackingAllowed() && (
           <>
-            {/* Google Consent Mode */}
             <script
               dangerouslySetInnerHTML={{
                 __html: `
@@ -55,13 +68,10 @@ export default function RootLayout({ children }) {
                 `,
               }}
             />
-
-            {/* Google Analytics Script */}
             <script
               async
               src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"
-            ></script>
-
+            />
             <script
               dangerouslySetInnerHTML={{
                 __html: `

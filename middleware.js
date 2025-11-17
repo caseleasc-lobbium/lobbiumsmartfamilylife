@@ -6,49 +6,41 @@ export function middleware(req) {
   const host = req.headers.get("host") || "";
   const pathname = url.pathname;
 
-  // 1️⃣ Entwicklungs- & Preview-Umgebungen freigeben
+  // -------------------------------------------------
+  // 1️⃣ DEVELOPMENT & PREVIEW FREIGEBEN
+  // -------------------------------------------------
   if (
-    host.includes("localhost") || 
-    host.includes("vercel.app") // 🔓 Vercel Dev/Preview frei
+    host.includes("localhost") ||
+    host.includes("vercel.app")
   ) {
     return NextResponse.next();
   }
 
-  // 2️⃣ Maintenance-Schutz für Hauptdomain (nur lobbium.com)
+  // -------------------------------------------------
+  // 2️⃣ MAINTENANCE-MODUS SCHUTZ
+  // (nur aktiv wenn du es willst – deine bestehende Logik bleibt)
+  // -------------------------------------------------
   if (host.includes("lobbium.com") && !pathname.startsWith("/maintenance")) {
     url.pathname = "/maintenance";
     return NextResponse.redirect(url);
   }
 
-  // 3️⃣ Admin- & API-Schutz (nur bei aktiver Seite)
-  if (pathname.startsWith("/admin") || pathname.startsWith("/api/affiliates")) {
-    const isAdmin = req.cookies.get("lobbiumAdminAuth")?.value === "true";
+  // -------------------------------------------------
+  // 3️⃣ ADMIN-BEREICH SCHÜTZEN (NEU: Supabase Session)
+  // -------------------------------------------------
+  if (pathname.startsWith("/admin")) {
+    const sbAccessToken = req.cookies.get("sb-access-token")?.value;
 
-    if (!isAdmin && !pathname.startsWith("/admin/login")) {
-      // Für API-Anfragen: JSON-Fehler zurückgeben
-      if (pathname.startsWith("/api/")) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-
-      // Für normale Seiten: Weiterleitung auf Login
+    // Nicht eingeloggt → weiterleiten zum Admin Login
+    if (!sbAccessToken && !pathname.startsWith("/admin/login")) {
       url.pathname = "/admin/login";
       return NextResponse.redirect(url);
     }
   }
 
-  // 4️⃣ Autoren-Schutz (optional)
-  if (pathname.startsWith("/author")) {
-    const isAuthor = req.cookies.get("isAuthor")?.value === "true";
-    if (!isAuthor && !pathname.startsWith("/author/login")) {
-      url.pathname = "/author/login";
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // 5️⃣ Erlaubte öffentliche Seiten / Assets
+  // -------------------------------------------------
+  // 4️⃣ ÖFFENTLICHE SEITEN
+  // -------------------------------------------------
   if (
     pathname.startsWith("/logo-test") ||
     pathname.startsWith("/maintenance") ||
@@ -58,12 +50,15 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
-  // 6️⃣ Automatische Sprachweiterleitung (i18n)
+  // -------------------------------------------------
+  // 5️⃣ i18n AUTO-REDIRECT (DE / FR / EN…)
+  // -------------------------------------------------
   const PUBLIC_FILE = /\.(.*)$/;
   if (PUBLIC_FILE.test(pathname)) return NextResponse.next();
 
   const hasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    (locale) =>
+      pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
   if (!hasLocale) {
@@ -78,7 +73,9 @@ export function middleware(req) {
   return NextResponse.next();
 }
 
-// ✅ Nur relevante Pfade prüfen
+// -------------------------------------------------
+// 6️⃣ MIDDLEWARE MATCHER
+// -------------------------------------------------
 export const config = {
   matcher: ["/((?!_next|api|static|favicon.ico).*)"],
 };

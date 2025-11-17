@@ -1,81 +1,62 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function AdminLogin() {
-  const router = useRouter();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Prüfen, ob bereits eingeloggt
-  useEffect(() => {
-    const cookieCheck = document.cookie.includes("lobbium_admin_auth=true");
-    if (cookieCheck) {
-      router.replace("/admin");
-    }
-  }, [router]);
-
-  // Login-Handler
   const handleLogin = async (e) => {
     e.preventDefault();
+    setMessage("");
+
     setLoading(true);
-    setError("");
+    const res = await fetch("/api/admin/magic-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
 
-    try {
-      const res = await fetch("/api/check-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
+    const data = await res.json();
 
-      const data = await res.json();
-
-      if (data.success) {
-        localStorage.setItem("lobbiumAdminAuth", "true");
-        localStorage.setItem("lobbiumLoginTime", Date.now().toString());
-        router.replace("/admin");
-      } else {
-        setError("❌ Falsches Passwort. Bitte versuche es erneut.");
-      }
-    } catch (err) {
-      setError("❌ Serverfehler – bitte später erneut probieren.");
+    if (data.error) {
+      setMessage(data.error);
+    } else {
+      setMessage("Magic-Link wurde gesendet. Bitte E-Mail prüfen.");
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="bg-white shadow-xl rounded-3xl p-10 w-[90%] max-w-sm text-center">
-        <h1 className="text-2xl font-bold mb-6">🔒 Admin Login</h1>
+    <div className="flex items-center justify-center h-screen bg-gradient-to-b from-[#eaf0ff] to-[#f8faff]">
+      <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md text-center">
 
-        <form onSubmit={handleLogin}>
+        <h1 className="text-2xl font-bold mb-6">🔐 Admin Login</h1>
+
+        <form onSubmit={handleLogin} className="space-y-6">
           <input
-            type="password"
-            placeholder="Passwort eingeben"
-            className="w-full border border-gray-300 rounded-xl px-4 py-3 mb-4
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            type="email"
+            placeholder="Admin E-Mail eingeben"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
           />
-
-          {error && (
-            <p className="text-red-500 mb-3 text-sm">{error}</p>
-          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white w-full py-3 
-                       rounded-xl font-semibold transition"
+            className="w-full bg-blue-600 text-white py-3 rounded-xl shadow hover:bg-blue-700 transition"
           >
-            {loading ? "⏳ Einloggen..." : "Einloggen"}
+            {loading ? "Senden..." : "Magic Link anfordern"}
           </button>
         </form>
+
+        {message && (
+          <p className="mt-4 text-gray-700 text-sm">{message}</p>
+        )}
       </div>
     </div>
   );
