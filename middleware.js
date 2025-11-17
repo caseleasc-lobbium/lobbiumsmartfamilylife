@@ -17,16 +17,18 @@ export function middleware(req) {
   }
 
   // -------------------------------------------------
-  // 2️⃣ MAINTENANCE-MODUS SCHUTZ
-  // (nur aktiv wenn du es willst – deine bestehende Logik bleibt)
+  // 2️⃣ MAINTENANCE-MODUS DEAKTIVIERT
+  // (nur kommentiert – jederzeit wieder aktivierbar)
   // -------------------------------------------------
+  /*
   if (host.includes("lobbium.com") && !pathname.startsWith("/maintenance")) {
     url.pathname = "/maintenance";
     return NextResponse.redirect(url);
   }
+  */
 
   // -------------------------------------------------
-  // 3️⃣ ADMIN-BEREICH SCHÜTZEN (NEU: Supabase Session)
+  // 3️⃣ ADMIN-BEREICH SCHÜTZEN (Supabase Session)
   // -------------------------------------------------
   if (pathname.startsWith("/admin")) {
     const sbAccessToken = req.cookies.get("sb-access-token")?.value;
