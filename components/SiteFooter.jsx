@@ -1,6 +1,6 @@
 export default function SiteFooter() {
   return (
-    <footer className="w-full bg-white py-6 sm:py-8 mt-10 sm:mt-16">
+    <footer className="w-full bg-white py-4 sm:py-6 mt-6 sm:mt-10">
       <div
         className="
           max-w-6xl mx-auto 
