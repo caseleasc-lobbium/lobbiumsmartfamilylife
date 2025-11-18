@@ -1,12 +1,12 @@
 export default function SiteFooter() {
   return (
-    <footer className="w-full bg-white py-4 sm:py-6 mt-6 sm:mt-10">
+    <footer className="w-full bg-white py-2 sm:py-6 mt-4 sm:mt-10">
       <div
         className="
           max-w-6xl mx-auto 
           px-4 sm:px-6 
           grid grid-cols-1 md:grid-cols-3 
-          gap-6 sm:gap-10 
+          gap-4 sm:gap-10 
           items-center md:items-end
         "
       >
@@ -16,7 +16,7 @@ export default function SiteFooter() {
           <img
             src="https://pvmehyinztpqasothxro.supabase.co/storage/v1/object/public/public-assets/logo/logo%20.PNG"
             alt="Lobbium Logo"
-            className="w-20 sm:w-24 h-auto mb-1 md:mb-0"
+            className="w-20 sm:w-24 h-auto mb-0 md:mb-0"
           />
 
           {/* Mobile versteckt, Desktop sichtbar */}
@@ -49,8 +49,8 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        {/* NEWSLETTER BUTTON – Rechts auf Copyright Höhe */}
-        <div className="flex md:justify-end justify-center order-2 md:order-3 md:mt-0 mt-2">
+        {/* NEWSLETTER BUTTON – Mobile symmetrisch */}
+        <div className="flex md:justify-end justify-center order-2 md:order-3 mt-1 md:mt-0">
           <a
             href="/newsletter"
             className="
@@ -68,8 +68,8 @@ export default function SiteFooter() {
           </a>
         </div>
 
-        {/* MOBILE COPYRIGHT – bleibt wie vorher */}
-        <div className="md:hidden w-full text-center mt-3 order-4">
+        {/* MOBILE COPYRIGHT */}
+        <div className="md:hidden w-full text-center mt-2 order-4">
           <p className="text-gray-500 text-xs">
             © 2025 Lobbium – Smart Family Life
           </p>
