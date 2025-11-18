@@ -19,7 +19,7 @@ export default function FinanzenSpartippsClient() {
 
   const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates?category=finanzen&limit=12");
+      const res = await fetch("/api/affiliates?category=finanzen&limit=40");
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -70,9 +70,9 @@ export default function FinanzenSpartippsClient() {
       {/* ------------------------------------------------------ */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
 
-        {/* Loading Skeleton */}
+        {/* Loading Skeleton – auf 12 erhöht */}
         {loading &&
-          [...Array(6)].map((_, i) => (
+          [...Array(12)].map((_, i) => (
             <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
           ))}
 

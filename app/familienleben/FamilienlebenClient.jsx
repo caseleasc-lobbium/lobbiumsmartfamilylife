@@ -19,7 +19,7 @@ export default function FamilienlebenClient() {
 
   const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates?category=familie&limit=12");
+      const res = await fetch("/api/affiliates?category=familie&limit=40");
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -35,17 +35,12 @@ export default function FamilienlebenClient() {
   return (
     <div className="flex flex-col items-center w-full">
 
-      {/* ------------------------------------------------------ */}
-      {/* HERO – Einheitlich & luxuriös */}
-      {/* ------------------------------------------------------ */}
       <SectionHero
         title="Familienleben"
         subtitle="Neue Inspirationen, Tools und Empfehlungen für ein modernes, glückliches und harmonisches Familienleben."
       />
 
-      {/* ------------------------------------------------------ */}
-      {/* NAVIGATION – Premium Tabs */}
-      {/* ------------------------------------------------------ */}
+      {/* NAVIGATION */}
       <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
         {categories.map((cat) => {
           const isActive = cat.key === "familie";
@@ -65,15 +60,13 @@ export default function FamilienlebenClient() {
         })}
       </nav>
 
-      {/* ------------------------------------------------------ */}
-      {/* GRID – Premium Apple-Style Cards */}
-      {/* ------------------------------------------------------ */}
+      {/* GRID */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 
                           gap-6 w-full max-w-6xl px-6 pb-20">
 
-        {/* Loading Skeleton */}
+        {/* Loading Skeleton – auf 12 erhöht */}
         {loading &&
-          [...Array(6)].map((_, i) => (
+          [...Array(12)].map((_, i) => (
             <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
           ))}
 
@@ -95,7 +88,6 @@ export default function FamilienlebenClient() {
               className="p-6 bg-white rounded-3xl border border-gray-100 shadow
                          hover:shadow-xl transition-all flex flex-col text-center"
             >
-              {/* Bild */}
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}
@@ -106,12 +98,10 @@ export default function FamilienlebenClient() {
                 <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4" />
               )}
 
-              {/* Titel */}
               <h2 className="text-lg font-semibold text-gray-800">
                 {item.title}
               </h2>
 
-              {/* Beschreibung */}
               <p className="text-gray-500 text-sm mt-2 line-clamp-3">
                 {item.description || "Keine Beschreibung verfügbar."}
               </p>

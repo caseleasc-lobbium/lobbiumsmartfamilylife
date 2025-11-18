@@ -17,7 +17,7 @@ function dailyShuffle(array) {
 }
 
 // -----------------------------
-// GET – Partner abrufen
+// GET – Partner abrufen (40+ optimiert, schneller!)
 // -----------------------------
 export async function GET(request) {
   try {
@@ -25,11 +25,17 @@ export async function GET(request) {
     const category = searchParams.get("category");
     const limit = parseInt(searchParams.get("limit") || "0", 10);
 
-    // Alles aus Supabase lesen
-    const { data, error } = await supabase
-      .from("affiliates")
-      .select("*")
-      .order("created_at", { ascending: false });
+    let query = supabase.from("affiliates").select("*");
+
+    // Kategorie-Filter direkt in der Datenbank (viel schneller)
+    if (category && category !== "all") {
+      query = query.eq("category", category.toLowerCase());
+    }
+
+    // Sortierung (neuester zuerst)
+    query = query.order("created_at", { ascending: false });
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Supabase GET Error:", error);
@@ -38,20 +44,14 @@ export async function GET(request) {
 
     let affiliates = data || [];
 
-    // Kategorie-Filter
-    if (category && category !== "all") {
-      affiliates = affiliates.filter(
-        (a) => a.category?.toLowerCase() === category.toLowerCase()
-      );
-    }
-
     // Tägliche Rotation
     affiliates = dailyShuffle(affiliates);
 
-    // Limit anwenden
+    // Limit anwenden — 40 wird sauber unterstützt
     if (limit > 0) affiliates = affiliates.slice(0, limit);
 
     return NextResponse.json(affiliates);
+
   } catch (err) {
     console.error("GET /affiliates ERROR:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
@@ -78,13 +78,17 @@ export async function POST(request) {
       );
     }
 
-    const { data, error } = await supabase.from("affiliates").insert({
-      title,
-      category,
-      imageUrl,
-      link,
-      description,
-    }).select().single();
+    const { data, error } = await supabase
+      .from("affiliates")
+      .insert({
+        title,
+        category: category?.toLowerCase(),
+        imageUrl,
+        link,
+        description,
+      })
+      .select()
+      .single();
 
     if (error) {
       console.error("Supabase POST Error:", error);
@@ -92,6 +96,7 @@ export async function POST(request) {
     }
 
     return NextResponse.json(data);
+
   } catch (err) {
     console.error("POST /affiliates ERROR:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
@@ -126,6 +131,7 @@ export async function DELETE(request) {
     }
 
     return NextResponse.json({ success: true });
+
   } catch (err) {
     console.error("DELETE /affiliates ERROR:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
