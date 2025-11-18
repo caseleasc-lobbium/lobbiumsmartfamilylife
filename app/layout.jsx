@@ -10,10 +10,12 @@ import "../styles/globals.css";
 export default function RootLayout({ children }) {
   const pathname = usePathname();
 
-  const isAdminLogin = pathname === "/admin/login";          
-  const isAdminPage = pathname?.startsWith("/admin") && !isAdminLogin;
+  // Admin-Bereich erkennen (aber NICHT /admin/login!)
+  const isAdminArea =
+    pathname?.startsWith("/admin") && pathname !== "/admin/login" && !pathname.startsWith("/admin/login/");
 
-  const isFrameVisible = !isAdminPage && !isAdminLogin;    
+  // Öffentliche Seiten → TopNav + Footer
+  const isFrameVisible = !isAdminArea && !pathname?.startsWith("/admin/login");
 
   return (
     <html lang="de">
@@ -24,15 +26,15 @@ export default function RootLayout({ children }) {
           minHeight: "100vh",
         }}
       >
-
-        {/* 🔵 Frontend Navigation */}
+        {/* Public TopNav */}
         {isFrameVisible && <TopNav />}
 
-        {/* 🔴 Admin-Topbar – ABER NICHT für /admin/login */}
-        {isAdminPage && (
+        {/* Admin-Topbar – NICHT auf /admin/login */}
+        {isAdminArea && (
           <header className="w-full bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center shadow-sm fixed top-0 left-0 z-40">
-            <h1 className="text-lg font-semibold text-blue-700">Lobbium Admin</h1>
-
+            <h1 className="text-lg font-semibold text-blue-700">
+              Lobbium Admin
+            </h1>
             <a
               href="/admin/logout"
               className="text-red-600 hover:text-red-800 font-medium"
@@ -42,22 +44,20 @@ export default function RootLayout({ children }) {
           </header>
         )}
 
-        {/* 🧱 Hauptinhalt */}
+        {/* Inhalt */}
         <main
-          className={isFrameVisible ? "pt-28" : isAdminPage ? "pt-20" : ""}
+          className={isFrameVisible ? "pt-28" : isAdminArea ? "pt-20" : ""}
           style={{ minHeight: "80vh" }}
         >
           {children}
         </main>
 
-        {/* 🔵 DSGVO Cookie Banner */}
+        {/* Footer + Cookies */}
         {isFrameVisible && <CookieConsent />}
-
-        {/* 🔵 Footer */}
         {isFrameVisible && <SiteFooter />}
 
-        {/* 🔵 Google Analytics */}
-        {trackingAllowed() && !isAdminLogin && !isAdminPage && (
+        {/* Analytics */}
+        {trackingAllowed() && (
           <>
             <script
               dangerouslySetInnerHTML={{
