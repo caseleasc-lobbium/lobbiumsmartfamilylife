@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 export default function TopTabs() {
   const pathname = usePathname();
 
-  // MAPPING der Seiten → welcher Tab ist aktiv
   const activeKey =
     pathname === "/" ? "all" :
     pathname.startsWith("/finanzen-spartipps") ? "finanzen" :
@@ -24,7 +23,7 @@ export default function TopTabs() {
   ];
 
   return (
-    <nav className="flex flex-wrap justify-center gap-3 mb-12 px-4">
+    <nav className="hidden md:flex flex-wrap justify-center gap-3 mb-12 px-4">
       {categories.map((cat) => {
         const isActive = cat.key === activeKey;
 

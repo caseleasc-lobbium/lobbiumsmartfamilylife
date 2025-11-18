@@ -28,10 +28,11 @@ export default function TopNav() {
   return (
     <div
       className="
+        hidden md:flex
         fixed top-0 left-0 w-full z-50 
         bg-white/80 backdrop-blur-xl 
         border-b border-gray-200
-        flex justify-center
+        justify-center
       "
     >
       <nav className="flex gap-4 py-4 px-6">
