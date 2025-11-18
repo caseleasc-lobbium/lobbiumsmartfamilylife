@@ -18,16 +18,14 @@ export default function SharedTabs({ active, onChange }) {
 
   const handleClick = (cat) => {
     if (isHome) {
-      // 🔵 Auf Home = Filterfunktion
       onChange(cat.key);
     } else {
-      // 🔵 Auf Rubrikenseite = Navigation
       router.push(cat.url);
     }
   };
 
   return (
-    <nav className="flex flex-wrap justify-center gap-4 mb-12 px-4">
+    <nav className="shared-tabs flex flex-wrap justify-center gap-4 mb-12 px-4">
       {categories.map(cat => (
         <button
           key={cat.key}
