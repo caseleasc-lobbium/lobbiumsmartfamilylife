@@ -1,20 +1,33 @@
 export default function SiteFooter() {
   return (
     <footer className="w-full bg-white py-6 sm:py-8 mt-10 sm:mt-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10 items-end">
+      <div
+        className="
+          max-w-6xl mx-auto 
+          px-4 sm:px-6 
+          grid grid-cols-1 md:grid-cols-3 
+          gap-6 sm:gap-10 
+          items-center md:items-end
+        "
+      >
 
-        {/* Logo Block */}
-        <div className="flex flex-col items-start text-center sm:text-left order-1 md:order-1">
+        {/* BLOCK LINKS – Logo + Copyright */}
+        <div className="flex flex-col md:items-start items-center order-1">
           <img
             src="https://pvmehyinztpqasothxro.supabase.co/storage/v1/object/public/public-assets/logo/logo%20.PNG"
             alt="Lobbium Logo"
-            className="w-20 sm:w-24 h-auto mb-2 mx-auto sm:mx-0"
+            className="w-20 sm:w-24 h-auto mb-1 md:mb-0"
           />
+
+          {/* Mobile versteckt, Desktop sichtbar */}
+          <p className="hidden md:block text-gray-500 text-sm mt-1">
+            © 2025 Lobbium – Smart Family Life
+          </p>
         </div>
 
-        {/* Footer Nav */}
-        <div className="flex items-center sm:items-end justify-center order-2 md:order-2">
-          <div className="flex gap-2 sm:gap-3 pb-1">
+        {/* MITTLERE NAVIGATION – Desktop genau mittig */}
+        <div className="flex justify-center order-3 md:order-2">
+          <div className="flex gap-2 sm:gap-3">
             <a
               href="/impressum"
               className="px-4 py-2 sm:px-5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs sm:text-sm text-gray-700"
@@ -36,30 +49,31 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        {/* Newsletter Button */}
-        <div className="flex items-center sm:items-end justify-center sm:justify-end pb-1 mt-2 sm:mt-0 order-3 md:order-3">
+        {/* NEWSLETTER BUTTON – Rechts auf Copyright Höhe */}
+        <div className="flex md:justify-end justify-center order-2 md:order-3 md:mt-0 mt-2">
           <a
             href="/newsletter"
-            className="inline-block px-5 py-2 sm:px-6 sm:py-3 rounded-xl bg-blue-600 text-white font-medium text-sm sm:text-base shadow hover:shadow-lg transition"
+            className="
+              inline-block 
+              px-5 py-2 sm:px-6 sm:py-3 
+              rounded-xl 
+              bg-blue-600 text-white 
+              font-medium 
+              text-sm sm:text-base shadow 
+              hover:shadow-lg 
+              transition
+            "
           >
             Newsletter
           </a>
         </div>
 
-        {/* Copyright – Mobile unter Newsletter */}
-        <div className="order-4 w-full text-center md:hidden mt-3">
+        {/* MOBILE COPYRIGHT – bleibt wie vorher */}
+        <div className="md:hidden w-full text-center mt-3 order-4">
           <p className="text-gray-500 text-xs">
             © 2025 Lobbium – Smart Family Life
           </p>
         </div>
-
-        {/* Copyright – Desktop (unverändert) */}
-        <div className="hidden md:flex order-4 items-start">
-          <p className="text-gray-500 text-sm">
-            © 2025 Lobbium – Smart Family Life
-          </p>
-        </div>
-
       </div>
     </footer>
   );
