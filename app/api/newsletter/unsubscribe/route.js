@@ -3,17 +3,17 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// -----------------------------
-// Supabase Client
-// -----------------------------
+// ----------------------------------
+// Supabase Client (Service Role Key)
+// ----------------------------------
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// -----------------------------
-// GET → Newsletter bestätigen
-// -----------------------------
+// ----------------------------------
+// GET → Nutzer will sich abmelden
+// ----------------------------------
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -23,7 +23,7 @@ export async function GET(req) {
       return NextResponse.json({ error: "Token fehlt" }, { status: 400 });
     }
 
-    // 🔍 Token in newsletter_subscribers finden
+    // 🔍 Nutzer anhand des Tokens finden
     const { data: user, error: findError } = await supabase
       .from("newsletter_subscribers")
       .select("*")
@@ -32,39 +32,42 @@ export async function GET(req) {
 
     if (findError || !user) {
       return NextResponse.json(
-        { error: "Abo nicht gefunden" },
+        { error: "Newsletter-Eintrag nicht gefunden" },
         { status: 404 }
       );
     }
 
-    // 🚀 Bestätigung setzen
-    const { error: updateError } = await supabase
+    // 🚨 Nutzer in "newsletter_unsubscribed" verschieben (Backup)
+    await supabase.from("newsletter_unsubscribed").insert({
+      email: user.email,
+      name: user.name,
+      locale: user.locale,
+      unsubscribed_at: new Date().toISOString(),
+    });
+
+    // ❌ Original-Eintrag löschen
+    const { error: deleteError } = await supabase
       .from("newsletter_subscribers")
-      .update({
-        confirmed: true,
-        consent: true,
-        date_consent: new Date().toISOString()
-      })
+      .delete()
       .eq("id", user.id);
 
-    if (updateError) {
-      console.error("Supabase Update Error:", updateError);
+    if (deleteError) {
       return NextResponse.json(
-        { error: "Fehler beim Bestätigen" },
+        { error: "Fehler beim Entfernen" },
         { status: 500 }
       );
     }
 
-    // 🌍 Sprache erkennen (Fallback = en)
+    // 🌍 Sprache des Nutzers nutzen
     const locale = user.locale || "en";
 
-    // 🔁 Weiterleitung auf Erfolg-Seite
+    // ✔ Weiterleitung auf Abmelde-Seite
     return NextResponse.redirect(
-      `https://lobbium.com/${locale}/newsletter/bestaetigt`
+      `https://lobbium.com/${locale}/newsletter/abgemeldet`
     );
 
   } catch (err) {
-    console.error("❌ Bestätigung Fehler:", err);
+    console.error("❌ Fehler bei UNSUBSCRIBE:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

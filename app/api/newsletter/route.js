@@ -15,7 +15,7 @@ const supabase = createClient(
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lobbium.com";
 
 /* ============================================================================= */
-/*                                  POST – Subscribe                              */
+/*                         POST – New Subscriber (Queue + Email)                 */
 /* ============================================================================= */
 
 export async function POST(req) {
@@ -26,24 +26,48 @@ export async function POST(req) {
       return NextResponse.json({ error: "E-Mail fehlt" }, { status: 400 });
     }
 
+    // 🔐 Verschlüsseln
     const encryptedEmail = encrypt(email);
     const encryptedName = name ? encrypt(name) : null;
+
+    // 🔑 Token für Double-Opt-In
     const token = Math.random().toString(36).substring(2, 12);
 
-    // ❗ Speichern in Supabase statt Prisma
-    const { error: insertError } = await supabase.from("newsletter").insert({
-      email: encryptedEmail,
-      name: encryptedName,
-      token,
-      locale: locale || "en",
-      confirmed: false
-    });
+    /* ----------------------------------------------------------- */
+    /* 1) Speichern in newsletter_subscribers                      */
+    /* ----------------------------------------------------------- */
+    const { error: insertError } = await supabase
+      .from("newsletter_subscribers")
+      .insert({
+        email: encryptedEmail,
+        name: encryptedName,
+        token,
+        locale: locale || "en",
+        confirmed: false,
+      });
 
     if (insertError) {
       console.error("Supabase Insert ERROR:", insertError);
       return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
     }
 
+    /* ----------------------------------------------------------- */
+    /* 2) Email in Queue einfügen                                  */
+    /* ----------------------------------------------------------- */
+    await supabase.from("newsletter_queue").insert({
+      email: encryptedEmail,
+      payload: JSON.stringify({
+        type: "confirm",
+        token,
+        locale: locale || "en",
+        name,
+      }),
+      status: "pending",
+    });
+
+    /* ----------------------------------------------------------- */
+    /* 3) Double-Opt-In Email senden                               */
+    /* ----------------------------------------------------------- */
     const confirmUrl = `${BASE_URL}/${locale}/newsletter/confirm?token=${token}`;
 
     const texts = {
@@ -91,7 +115,7 @@ export async function POST(req) {
 }
 
 /* ============================================================================= */
-/*                                  GET – Fetch Newsletter                        */
+/*                                 GET – Admin View                              */
 /* ============================================================================= */
 
 export async function GET(req) {
@@ -99,26 +123,23 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter"); // today | all | recent
 
-    // 🔄 Alles laden aus Supabase
     let { data: entries, error } = await supabase
-      .from("newsletter")
+      .from("newsletter_subscribers")
       .select("*")
-      .order("createdAt", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Supabase GET Error:", error);
       return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
     }
 
-    // 📌 Filter: HEUTE
     if (filter === "today") {
       const today = new Date().toISOString().split("T")[0];
       entries = entries.filter((n) =>
-        n.createdAt && n.createdAt.startsWith(today)
+        n.created_at && n.created_at.startsWith(today)
       );
     }
 
-    // 📌 Filter: LETZTE 10
     if (filter === "recent") {
       entries = entries.slice(0, 10);
     }
