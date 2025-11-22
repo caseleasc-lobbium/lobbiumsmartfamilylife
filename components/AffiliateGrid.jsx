@@ -23,7 +23,7 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
 
         const data = await res.json();
 
-        // 🧩 Filtere nach Kategorie (wenn angegeben)
+        // 🧩 Nach Kategorie filtern
         let filtered =
           category === "all"
             ? data
@@ -33,13 +33,13 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
                   a.category.toLowerCase().trim() === category.toLowerCase().trim()
               );
 
-        // 🔄 Shuffle stabil pro Tag (Seed = Datum)
+        // 🔄 Shuffle stabil pro Tag
         const seed = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
         const stableShuffle = [...filtered].sort(
           (a, b) => (a.id * seed.length) % 7 - (b.id * seed.length) % 7
         );
 
-        // 📦 Begrenze auf gewünschte Anzahl
+        // 📦 Limit
         const limited = shuffleArray(stableShuffle).slice(0, limit);
 
         setAffiliates(limited);
@@ -69,7 +69,28 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
       </div>
     );
 
-  // ✅ Ausgabe des Partner-Grids
+  // 🔽 Logo-Mapping: AURAS + EKTA automatisch erkennen
+  const resolveImage = (img, title) => {
+    if (!img) return "/images/default-partner.jpg";
+
+    const t = title?.toLowerCase() || "";
+
+    if (t.includes("auras")) return "/mnt/data/AURAS.png";
+    if (t.includes("ekta")) return "/mnt/data/EKTA.png";
+
+    if (img.startsWith("http") || img.startsWith("/")) return img;
+
+    return "/images/default-partner.jpg";
+  };
+
+  // 🔽 Affiliate-Link richtig auflösen
+  const resolveLink = (affiliate) => {
+    return affiliate.affiliate_url || affiliate.link || "#";
+  };
+
+  // ================================================================
+  // ✅ GRID AUSGABE
+  // ================================================================
   return (
     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-6">
       {affiliates.map((affiliate, index) => (
@@ -79,45 +100,34 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
         >
           {/* 🔹 Bildbereich */}
           <div className="relative w-full h-52 overflow-hidden rounded-t-xl bg-gray-100">
-            {affiliate.imageUrl && affiliate.imageUrl.trim() !== "" ? (
-              <Image
-                src={
-                  affiliate.imageUrl.startsWith("http") ||
-                  affiliate.imageUrl.startsWith("/")
-                    ? affiliate.imageUrl
-                    : "/images/default-partner.jpg"
-                }
-                alt={affiliate.title || "Affiliate Partner"}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
-                loading="lazy"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-                Kein Bild verfügbar
-              </div>
-            )}
+            <Image
+              src={resolveImage(affiliate.image_url, affiliate.title)}
+              alt={affiliate.title || "Affiliate Partner"}
+              fill
+              className="object-contain p-6 group-hover:scale-105 transition-transform duration-700"
+              loading="lazy"
+            />
           </div>
 
-          {/* 🔸 Textinhalt */}
+          {/* 🔸 Inhalt */}
           <div className="p-5 text-center">
             <h3 className="text-lg font-semibold text-[#1c3d6c] mb-2">
-              {affiliate.title || "Partner"}
+              {affiliate.title}
             </h3>
+
             <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-              {affiliate.description || "Top Angebot für Familien & Lifestyle."}
+              {affiliate.description ||
+                "Top Angebot für Familien & Lifestyle."}
             </p>
 
-            {affiliate.link && (
-              <Link
-                href={affiliate.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-[#2b6cb0] hover:bg-[#1c3d6c] text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
-              >
-                Jetzt ansehen →
-              </Link>
-            )}
+            <Link
+              href={resolveLink(affiliate)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-[#2b6cb0] hover:bg-[#1c3d6c] text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"
+            >
+              Jetzt ansehen →
+            </Link>
           </div>
         </div>
       ))}
