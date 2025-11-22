@@ -1,9 +1,10 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Einfaches Shuffle
+// Zufällige Reihenfolge
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
@@ -20,7 +21,7 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
 
         const data = await res.json();
 
-        // Kategorie-Filter
+        // Kategorie filtern
         let filtered =
           category === "all"
             ? data
@@ -30,12 +31,13 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
                   a.category.toLowerCase().trim() === category.toLowerCase().trim()
               );
 
-        // Stabiler Shuffle pro Tag
+        // Stabiles Daily Shuffle
         const seed = new Date().toISOString().slice(0, 10);
         const stableShuffle = [...filtered].sort(
           (a, b) => (a.id * seed.length) % 7 - (b.id * seed.length) % 7
         );
 
+        // Limit
         const limited = shuffleArray(stableShuffle).slice(0, limit);
 
         setAffiliates(limited);
@@ -49,7 +51,7 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
     fetchAffiliates();
   }, [category, limit]);
 
-  // Loading
+  // Loading UI
   if (loading)
     return (
       <div className="flex justify-center py-10">
@@ -57,7 +59,7 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
       </div>
     );
 
-  // Keine Partner
+  // Keine Ergebnisse
   if (!affiliates.length)
     return (
       <div className="text-center text-gray-500 py-10">
@@ -65,34 +67,37 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
       </div>
     );
 
-  // 🔽 KORREKTES Logo-Mapping
+  // ----------------------------------------------------------
+  //  LOGO-MAPPING (AURAS / EKTA)
+  // ----------------------------------------------------------
   const resolveImage = (affiliate) => {
-    const title = affiliate.title?.toLowerCase() || "";
+    const title = affiliate?.title?.toLowerCase() || "";
 
     if (title.includes("auras")) return "/affiliates/AURAS.png";
     if (title.includes("ekta")) return "/affiliates/EKTA.png";
 
-    // Falls Supabase-Bild existiert
     if (affiliate.image_url?.startsWith("http")) return affiliate.image_url;
 
-    // Fallback
     return "/images/default-partner.jpg";
   };
 
-  // 🔽 Tracking-Link absolut korrekt
+  // ----------------------------------------------------------
+  //  KORREKTE TRACKING-URL
+  // ----------------------------------------------------------
   const resolveTracking = (affiliate) => {
-    if (!affiliate.affiliate_url) return "#";
-
     return `/api/affiliates/click?partnerId=${affiliate.id}&targetUrl=${encodeURIComponent(
       affiliate.affiliate_url
     )}`;
   };
 
+  // ----------------------------------------------------------
+  //  RENDER
+  // ----------------------------------------------------------
   return (
     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-6">
-      {affiliates.map((affiliate) => (
+      {affiliates.map((affiliate, index) => (
         <div
-          key={affiliate.id}
+          key={affiliate.id || index}
           className="group bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 duration-300"
         >
           {/* Bild */}
@@ -105,14 +110,15 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
             />
           </div>
 
-          {/* Inhalt */}
+          {/* Text */}
           <div className="p-5 text-center">
             <h3 className="text-lg font-semibold text-[#1c3d6c] mb-2">
               {affiliate.title}
             </h3>
 
             <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-              {affiliate.description || ""}
+              {affiliate.description ||
+                "Top Angebot für Familien & Lifestyle."}
             </p>
 
             <Link
