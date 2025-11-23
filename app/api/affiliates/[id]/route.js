@@ -1,107 +1,55 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Supabase Client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// 🔐 Admin Auth
-function isAuthorized(request) {
-  return request.headers.get("authorization") === "lobbiumAdminAuth:true";
-}
-
-// --------------------------------------------------
-// GET – Einzelnen Partner abrufen
-// --------------------------------------------------
-export async function GET(request, { params }) {
+// ------------------------------------------------------
+// FINAL CLEAN CLICK-ROUTE
+// ------------------------------------------------------
+export async function GET(req, { params }) {
   try {
-    const { id } = params;
+    const id = Number(params.id);
 
+    if (!id) {
+      return NextResponse.json({ error: "Ungültige Partner-ID" }, { status: 400 });
+    }
+
+    // Partner-LInk holen
     const { data, error } = await supabase
       .from("affiliates")
-      .select("*")
-      .eq("id", Number(id))
+      .select("affiliate_url")
+      .eq("id", id)
       .single();
 
-    if (error || !data) {
+    if (error || !data?.affiliate_url) {
       return NextResponse.json(
-        { error: "Partner nicht gefunden" },
-        { status: 404 }
+        { error: "Affiliate-Link nicht vorhanden" },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json(data);
+    const affiliateUrl = data.affiliate_url;
+
+    // Klick speichern
+    await supabase.from("affiliate_clicks").insert({
+      partner_id: id,
+      ip_address:
+        req.headers.get("x-forwarded-for") ||
+        req.headers.get("x-real-ip") ||
+        "unknown",
+      user_agent: req.headers.get("user-agent") || "unknown",
+      created_at: new Date().toISOString()
+    });
+
+    // Weiterleiten zum Partner
+    return NextResponse.redirect(affiliateUrl);
   } catch (err) {
-    console.error("GET /affiliates/[id] ERROR:", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
-  }
-}
-
-// --------------------------------------------------
-// PUT – Partner bearbeiten
-// --------------------------------------------------
-export async function PUT(request, { params }) {
-  try {
-    if (!isAuthorized(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { id } = params;
-    const body = await request.json();
-
-    const { title, category, imageUrl, link, description } = body;
-
-    const { data, error } = await supabase
-      .from("affiliates")
-      .update({
-        title,
-        category,
-        imageUrl,
-        link,
-        description,
-      })
-      .eq("id", Number(id))
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Supabase UPDATE ERROR:", error);
-      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
-    }
-
-    return NextResponse.json(data);
-  } catch (err) {
-    console.error("PUT /affiliates/[id] ERROR:", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
-  }
-}
-
-// --------------------------------------------------
-// DELETE – Partner löschen
-// --------------------------------------------------
-export async function DELETE(request, { params }) {
-  try {
-    if (!isAuthorized(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { id } = params;
-
-    const { error } = await supabase
-      .from("affiliates")
-      .delete()
-      .eq("id", Number(id));
-
-    if (error) {
-      console.error("Supabase DELETE ERROR:", error);
-      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("DELETE /affiliates/[id] ERROR:", err);
+    console.error("Click Route Error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }

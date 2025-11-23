@@ -1,10 +1,8 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
-// Zufällige Reihenfolge
+// Zufällige Reihenfolge erzeugen
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
@@ -16,33 +14,19 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
   useEffect(() => {
     async function fetchAffiliates() {
       try {
-        const res = await fetch("/api/affiliates", { cache: "no-store" });
-        if (!res.ok) throw new Error(`Fehler beim Laden: ${res.status}`);
-
-        const data = await res.json();
-
-        // Kategorie filtern
-        let filtered =
+        const res = await fetch(
           category === "all"
-            ? data
-            : data.filter(
-                (a) =>
-                  a.category &&
-                  a.category.toLowerCase().trim() === category.toLowerCase().trim()
-              );
-
-        // Stabiles Daily Shuffle
-        const seed = new Date().toISOString().slice(0, 10);
-        const stableShuffle = [...filtered].sort(
-          (a, b) => (a.id * seed.length) % 7 - (b.id * seed.length) % 7
+            ? `/api/affiliates?limit=${limit}`
+            : `/api/affiliates?category=${category}&limit=${limit}`,
+          { cache: "no-store" }
         );
 
-        // Limit
-        const limited = shuffleArray(stableShuffle).slice(0, limit);
+        if (!res.ok) throw new Error("API Fehler");
 
-        setAffiliates(limited);
+        const data = await res.json();
+        setAffiliates(Array.isArray(data) ? shuffleArray(data) : []);
       } catch (error) {
-        console.error("❌ AffiliateGrid Error:", error);
+        console.error("AffiliateGrid Error:", error);
       } finally {
         setLoading(false);
       }
@@ -51,7 +35,6 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
     fetchAffiliates();
   }, [category, limit]);
 
-  // Loading UI
   if (loading)
     return (
       <div className="flex justify-center py-10">
@@ -59,7 +42,6 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
       </div>
     );
 
-  // Keine Ergebnisse
   if (!affiliates.length)
     return (
       <div className="text-center text-gray-500 py-10">
@@ -67,62 +49,52 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
       </div>
     );
 
-  // ----------------------------------------------------------
-  //  LOGO-MAPPING (AURAS / EKTA)
-  // ----------------------------------------------------------
-  const resolveImage = (affiliate) => {
-    const title = affiliate?.title?.toLowerCase() || "";
+  // Bild-Resolver (manuelle Fallbacks)
+  const resolveImage = (a) => {
+    const t = a.title?.toLowerCase() || "";
+    if (t.includes("auras")) return "/affiliates/AURAS.png";
+    if (t.includes("ekta")) return "/affiliates/EKTA.png";
 
-    if (title.includes("auras")) return "/affiliates/AURAS.png";
-    if (title.includes("ekta")) return "/affiliates/EKTA.png";
-
-    if (affiliate.image_url?.startsWith("http")) return affiliate.image_url;
+    if (a.image_url?.startsWith("http")) return a.image_url;
+    if (a.image_url?.startsWith("/")) return a.image_url;
 
     return "/images/default-partner.jpg";
   };
 
-  // ----------------------------------------------------------
-  //  KORREKTE TRACKING-URL
-  // ----------------------------------------------------------
-  const resolveTracking = (affiliate) => {
-    return `/api/affiliates/click?partnerId=${affiliate.id}&targetUrl=${encodeURIComponent(
-      affiliate.affiliate_url
-    )}`;
-  };
-
-  // ----------------------------------------------------------
-  //  RENDER
-  // ----------------------------------------------------------
   return (
     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto px-6">
-      {affiliates.map((affiliate, index) => (
+      {affiliates.map((a) => (
         <div
-          key={affiliate.id || index}
+          key={a.id}
           className="group bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-transform hover:-translate-y-1 duration-300"
         >
-          {/* Bild */}
-          <div className="relative w-full h-52 flex items-center justify-center overflow-hidden rounded-t-xl bg-gray-100">
-            <Image
-              src={resolveImage(affiliate)}
-              alt={affiliate.title}
-              fill
-              className="object-contain p-6 group-hover:scale-105 transition-transform duration-700"
+          {/* IMAGE – perfekter Logo-Frame */}
+          <div className="w-full h-40 flex items-center justify-center bg-gray-100 rounded-t-xl p-6">
+            <img
+              src={resolveImage(a)}
+              alt={a.title}
+              className="
+                max-h-20       /* maximale Höhe → immer gleich */
+                max-w-[70%]    /* NIE breiter als Box */
+                object-contain /* NIE verzerren */
+                mx-auto
+              "
             />
           </div>
 
-          {/* Text */}
+          {/* TEXT */}
           <div className="p-5 text-center">
             <h3 className="text-lg font-semibold text-[#1c3d6c] mb-2">
-              {affiliate.title}
+              {a.title}
             </h3>
 
             <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-              {affiliate.description ||
-                "Top Angebot für Familien & Lifestyle."}
+              {a.description}
             </p>
 
+            {/* Sicherheit: Click über ID */}
             <Link
-              href={resolveTracking(affiliate)}
+              href={`/api/affiliates/${a.id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-[#2b6cb0] hover:bg-[#1c3d6c] text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors"

@@ -12,8 +12,10 @@ export default function FinanzenSpartippsClient() {
     try {
       const res = await fetch("/api/affiliates?category=finanzen&limit=12");
       const data = await res.json();
-      setItems(data || []);
-    } catch {}
+      setItems(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("Finanzen API Fehler:", e);
+    }
     setLoading(false);
   };
 
@@ -29,29 +31,43 @@ export default function FinanzenSpartippsClient() {
         subtitle="Täglich neue Wege Geld zu sparen, clever zu investieren und den Alltag günstiger zu gestalten."
       />
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 
+        gap-6 w-full max-w-6xl px-6 pb-20">
 
+        {/* Ladeanimation */}
         {loading &&
           [...Array(6)].map((_, i) => (
-            <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
+            <div 
+              key={i} 
+              className="h-48 bg-gray-100 animate-pulse rounded-3xl" 
+            />
           ))}
 
+        {/* Keine Partner */}
         {!loading && items.length === 0 && (
           <p className="col-span-full text-center text-gray-500">
             Noch keine Partner verfügbar.
           </p>
         )}
 
+        {/* Partnerkarten */}
         {!loading &&
           items.map((item) => (
             <Link
               key={item.id}
-              href={`/api/affiliates/click?partnerId=${item.id}&targetUrl=${encodeURIComponent(item.link)}`}
+              /** 🔥 Neue sichere Click-Route */
+              href={`/api/affiliates/${item.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col text-center"
             >
-              {item.imageUrl ? (
+              {item.image_url ? (
                 <img
-                  src={item.imageUrl}
+                  src={
+                    item.image_url.startsWith("http")
+                      ? item.image_url
+                      : `/${item.image_url}`
+                  }
                   alt={item.title}
                   className="w-full h-40 rounded-2xl object-cover mb-4"
                 />

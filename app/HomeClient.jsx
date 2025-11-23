@@ -34,14 +34,7 @@ export default function HomeClient() {
   }, [category]);
 
   const handleClick = async (p) => {
-    try {
-      await fetch("/api/affiliates/click", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ partnerId: p.id, targetUrl: p.link }),
-      });
-    } catch {}
-    window.open(p.link, "_blank");
+    window.open(`/api/affiliates/${p.id}`, "_blank");
   };
 
   return (
@@ -52,7 +45,7 @@ export default function HomeClient() {
         subtitle="Clever sparen, den Alltag organisieren und Kinder spielerisch fördern — kompakt, modern & täglich aktualisiert."
       />
 
-      {/* FILTER – nur Home */}
+      {/* FILTER */}
       <nav className="flex flex-wrap justify-center gap-3 mb-14 px-4">
         {categories.map((cat) => {
           const isActive = cat.key === category;
@@ -72,6 +65,7 @@ export default function HomeClient() {
         })}
       </nav>
 
+      {/* HEADER */}
       <section className="w-full max-w-4xl text-center mb-10 px-4">
         <h2 className="text-2xl font-semibold text-[#0F1C3F]">
           🌟 Partner des Tages – Empfehlungen für dich
@@ -81,8 +75,8 @@ export default function HomeClient() {
         </p>
       </section>
 
+      {/* GRID */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl px-6 pb-20">
-
         {loading &&
           [...Array(12)].map((_, i) => (
             <div key={i} className="h-48 bg-gray-100 animate-pulse rounded-3xl" />
@@ -101,13 +95,13 @@ export default function HomeClient() {
               onClick={() => handleClick(p)}
               className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col items-center text-center"
             >
-              {p.imageUrl ? (
+              {p.image_url ? (
                 <img
-                  src={p.imageUrl}
-                  className="w-20 h-20 rounded-xl object-cover shadow mb-3"
+                  src={p.image_url.startsWith("http") ? p.image_url : `/${p.image_url}`}
+                  className="w-32 h-32 rounded-xl object-contain shadow mb-3 bg-white"
                 />
               ) : (
-                <div className="w-20 h-20 bg-gray-100 rounded-xl mb-3" />
+                <div className="w-32 h-32 bg-gray-100 rounded-xl mb-3" />
               )}
 
               <h3 className="mt-1 font-semibold text-lg text-gray-800">
