@@ -7,7 +7,7 @@ const MESSAGES_DIR = path.join(process.cwd(), "data", "contact_fallbacks");
 
 // 🔒 Admin-Cookie prüfen
 function isAuthorized() {
-  const cookie = cookies().get("admin_auth");
+  const cookie = cookies().get("lobbium_admin_auth");
   return cookie?.value === "true";
 }
 

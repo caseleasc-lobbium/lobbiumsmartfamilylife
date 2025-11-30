@@ -45,23 +45,29 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetch("/api/newsletter?filter=today")
       .then((r) => r.json())
-      .then((d) => setNewsletterToday(d.length || 0));
+      .then((d) => setNewsletterToday(d.length || 0))
+      .catch((err) => console.error("Newsletter Error:", err));
 
-    fetch("/api/affiliate/clicks?filter=today")
+    // ✅ FIXED: Korrekter Endpoint für Affiliate Klicks
+    fetch("/api/affiliates/stats")
       .then((r) => r.json())
-      .then((d) => setClicksToday(d.length || 0));
+      .then((d) => setClicksToday(d.today || 0))
+      .catch((err) => console.error("Clicks Error:", err));
 
     fetch("/api/contact?filter=today")
       .then((r) => r.json())
-      .then((d) => setContactsToday(d.length || 0));
+      .then((d) => setContactsToday(d.length || 0))
+      .catch((err) => console.error("Contact Error:", err));
 
     fetch("/api/newsletter?filter=recent")
       .then((r) => r.json())
-      .then((d) => setRecentNewsletter(d));
+      .then((d) => setRecentNewsletter(d))
+      .catch((err) => console.error("Newsletter Recent Error:", err));
 
     fetch("/api/contact?filter=recent")
       .then((r) => r.json())
-      .then((d) => setRecentContacts(d));
+      .then((d) => setRecentContacts(d))
+      .catch((err) => console.error("Contact Recent Error:", err));
   }, []);
 
   const logout = () => {

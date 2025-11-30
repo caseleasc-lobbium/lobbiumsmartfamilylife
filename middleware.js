@@ -5,20 +5,43 @@ export function middleware(req) {
   const host = req.headers.get("host") || "";
   const pathname = url.pathname;
 
+  // 🛡️ Security Headers für alle Responses
+  const response = NextResponse.next();
+  
+  // Security Headers hinzufügen
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  
+  // CSP Header (Content Security Policy)
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://pvmehyinztpqasothxro.supabase.co https://api.brevo.com",
+    "frame-ancestors 'none'"
+  ].join("; ");
+  
+  response.headers.set("Content-Security-Policy", csp);
+
   // 1️⃣ DEV und Preview erlauben
   if (host.includes("localhost") || host.includes("vercel.app")) {
-    return NextResponse.next();
+    return response;
   }
 
-  // 2️⃣ Maintenance AUSGESCHALTET (weiterleiten NICHT mehr)
-  // -> wir entfernen die Maintenance-Redirect Zeile komplett
-  // -> Seite ist offiziell öffentlich
-
-  // 3️⃣ Admin-Bereich schützen
+  // 3️⃣ Admin-Bereich schützen - VERBESSERT
   if (pathname.startsWith("/admin")) {
-    const sbAccessToken = req.cookies.get("sb-access-token")?.value;
+    // Prüfe admin_auth Cookie (konsistent mit unserem System)
+    const adminAuth = req.cookies.get("lobbium_admin_auth")?.value;
 
-    if (!sbAccessToken && !pathname.startsWith("/admin/login")) {
+    // Allow login page and verify page
+    if (!adminAuth && 
+        !pathname.startsWith("/admin/login") && 
+        !pathname.startsWith("/admin/verify")) {
       url.pathname = "/admin/login";
       return NextResponse.redirect(url);
     }
@@ -26,12 +49,9 @@ export function middleware(req) {
 
   // 4️⃣ Öffentliche Dateien erlauben
   const PUBLIC_FILE = /\.(.*)$/;
-  if (PUBLIC_FILE.test(pathname)) return NextResponse.next();
+  if (PUBLIC_FILE.test(pathname)) return response;
 
-  // ❌ 5️⃣ i18n Redirect wurde entfernt – KEIN "/de/" mehr
-  // (Frontend bleibt original, URLs bleiben sauber)
-
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

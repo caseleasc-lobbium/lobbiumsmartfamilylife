@@ -1,11 +1,16 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { sendEmail } from "@/lib/email";
+import { Resend } from "resend";
 import { encrypt } from "@/lib/encryption";
-import { getSupabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = getSupabase();
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lobbium.com";
 
@@ -69,9 +74,8 @@ export async function POST(req) {
 
     const t = texts[locale] || texts.en;
 
-    // Email via Brevo senden
-    await sendEmail({
-      from: { name: "Lobbium Newsletter", email: "info@lobbium.com" },
+    await resend.emails.send({
+      from: "Lobbium <info@lobbium.com>",
       to: email,
       subject: t.subject,
       html: t.body,

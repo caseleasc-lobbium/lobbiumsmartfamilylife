@@ -1,16 +1,11 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/email";
 import { encrypt } from "@/lib/encryption";
-import { createClient } from "@supabase/supabase-js";
+import { getSupabase } from "@/lib/supabase";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = getSupabase();
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lobbium.com";
 
@@ -74,33 +69,88 @@ export async function POST(req) {
       de: {
         subject: "Bitte bestätige deine Anmeldung bei Lobbium",
         body: `
-          <h2>Hallo ${name || ""},</h2>
-          <p>Bitte bestätige dein Newsletter-Abo:</p>
-          <p><a href="${confirmUrl}">👉 Jetzt bestätigen</a></p>
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Lobbium Newsletter</h1>
+              </div>
+              <div style="padding: 40px;">
+                <h2 style="color: #333;">Hallo ${name || ""}! 👋</h2>
+                <p style="color: #666; line-height: 1.6;">Vielen Dank für dein Interesse an unserem Newsletter!</p>
+                <p style="color: #666; line-height: 1.6;">Bitte bestätige deine E-Mail-Adresse, um regelmäßig Updates zu erhalten.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${confirmUrl}" style="background: #667eea; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                    ✅ Jetzt bestätigen
+                  </a>
+                </div>
+                <p style="color: #999; font-size: 12px; text-align: center;">Falls der Button nicht funktioniert, kopiere diesen Link:<br>${confirmUrl}</p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       },
       fr: {
         subject: "Veuillez confirmer votre inscription à Lobbium",
         body: `
-          <h2>Bonjour ${name || ""},</h2>
-          <p>Merci de confirmer ton inscription :</p>
-          <p><a href="${confirmUrl}">👉 Confirmer maintenant</a></p>
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Lobbium Newsletter</h1>
+              </div>
+              <div style="padding: 40px;">
+                <h2 style="color: #333;">Bonjour ${name || ""}! 👋</h2>
+                <p style="color: #666; line-height: 1.6;">Merci de ton intérêt pour notre newsletter!</p>
+                <p style="color: #666; line-height: 1.6;">Confirme ton adresse e-mail pour recevoir nos mises à jour.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${confirmUrl}" style="background: #667eea; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                    ✅ Confirmer maintenant
+                  </a>
+                </div>
+                <p style="color: #999; font-size: 12px; text-align: center;">Si le bouton ne fonctionne pas, copie ce lien:<br>${confirmUrl}</p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       },
       en: {
         subject: "Please confirm your subscription to Lobbium",
         body: `
-          <h2>Hello ${name || ""},</h2>
-          <p>Please confirm your subscription:</p>
-          <p><a href="${confirmUrl}">👉 Confirm now</a></p>
+          <!DOCTYPE html>
+          <html>
+          <body style="font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Lobbium Newsletter</h1>
+              </div>
+              <div style="padding: 40px;">
+                <h2 style="color: #333;">Hello ${name || ""}! 👋</h2>
+                <p style="color: #666; line-height: 1.6;">Thank you for your interest in our newsletter!</p>
+                <p style="color: #666; line-height: 1.6;">Please confirm your email address to receive regular updates.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${confirmUrl}" style="background: #667eea; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                    ✅ Confirm now
+                  </a>
+                </div>
+                <p style="color: #999; font-size: 12px; text-align: center;">If the button doesn't work, copy this link:<br>${confirmUrl}</p>
+              </div>
+            </div>
+          </body>
+          </html>
         `,
       },
     };
 
     const t = texts[locale] || texts.en;
 
-    await resend.emails.send({
-      from: "Lobbium <info@lobbium.com>",
+    // Email via Brevo senden
+    await sendEmail({
+      from: { name: "Lobbium Newsletter", email: "info@lobbium.com" },
       to: email,
       subject: t.subject,
       html: t.body,

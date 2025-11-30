@@ -1,7 +1,9 @@
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export async function GET() {
-  const session = cookies().get("admin_session");
-  const authorized = session?.value === "active";
-  return Response.json({ authorized });
+  // ✅ Konsistenter Cookie-Name: lobbium_admin_auth
+  const session = cookies().get("lobbium_admin_auth");
+  const authorized = session?.value === "true";
+  return NextResponse.json({ authorized });
 }

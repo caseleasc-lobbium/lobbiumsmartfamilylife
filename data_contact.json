@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1764507295533,
+    "name": "Test User",
+    "email": "test@example.com",
+    "message": "Test Nachricht",
+    "createdAt": "2025-11-30T12:54:55.533Z"
+  },
+  {
+    "id": 1764511892498,
+    "name": "Test User",
+    "email": "test@example.com",
+    "message": "Test Nachricht via Brevo",
+    "createdAt": "2025-11-30T14:11:32.498Z"
+  }
+]

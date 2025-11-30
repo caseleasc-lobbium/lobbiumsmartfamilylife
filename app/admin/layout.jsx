@@ -10,7 +10,7 @@ export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Alle Login-Pfade korrekt erkennen
+  // Login-Seite korrekt erkennen
   const isLoginPage =
     pathname === "/admin/login" || pathname.startsWith("/admin/login");
 
@@ -18,7 +18,7 @@ export default function AdminLayout({ children }) {
     const auth = localStorage.getItem("lobbiumAdminAuth");
     const loginTime = localStorage.getItem("lobbiumLoginTime");
 
-    // 🚫 Nur Admin geschützte Seiten blockieren
+    // Nur Admin-Seiten schützen, aber NICHT die Login-Seite
     const isProtected = pathname.startsWith("/admin") && !isLoginPage;
 
     if (isProtected && auth !== "true") {
@@ -26,7 +26,7 @@ export default function AdminLayout({ children }) {
       return;
     }
 
-    // ⏳ Session Timeout (30 min)
+    // Session Timeout (30 Minuten)
     if (auth === "true" && loginTime) {
       const now = Date.now();
       const diff = now - parseInt(loginTime);
@@ -40,6 +40,12 @@ export default function AdminLayout({ children }) {
     }
   }, [pathname, router, isLoginPage]);
 
+  // ❗ LOGIN – KEIN LAYOUT, KEIN BACKGROUND, KEINE SIDEBAR
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  // ❗ ALLE ADMIN-SEITEN (Sidebar + Layout)
   return (
     <div
       style={{
@@ -49,12 +55,9 @@ export default function AdminLayout({ children }) {
       }}
       className="flex"
     >
-      {/* Sidebar nur zeigen, wenn NICHT auf der Login-Seite */}
-      {!isLoginPage && <Sidebar />}
+      <Sidebar />
 
-      <main className="flex-1 flex justify-center items-start p-4">
-        {children}
-      </main>
+      <main className="flex-1 p-4">{children}</main>
     </div>
   );
 }
