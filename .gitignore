@@ -7,3 +7,4 @@ dist
 
 /lib/generated/prisma
 .env.local
+.env.local
