@@ -8,7 +8,15 @@ import { newsletterSchema, parseBody } from "@/lib/validation";
 
 const supabase = getSupabase();
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lobbium.com";
+// Basis-URL zuverlässig aus dem Request ableiten (funktioniert lokal & live).
+function getOrigin(req) {
+  const host = req.headers.get("host");
+  if (!host) return process.env.NEXT_PUBLIC_SITE_URL || "https://www.lobbium.com";
+  const proto =
+    req.headers.get("x-forwarded-proto") ||
+    (host.includes("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
 
 /* ============================================================================= */
 /*                         POST – New Subscriber (Queue + Email)                 */
@@ -64,7 +72,7 @@ export async function POST(req) {
     /* ----------------------------------------------------------- */
     /* 3) Double-Opt-In Email senden                               */
     /* ----------------------------------------------------------- */
-    const confirmUrl = `${BASE_URL}/${locale}/newsletter/confirm?token=${token}`;
+    const confirmUrl = `${getOrigin(req)}/api/newsletter/confirm?token=${token}`;
 
     const texts = {
       de: {

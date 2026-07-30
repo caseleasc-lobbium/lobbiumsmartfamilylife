@@ -52,13 +52,16 @@ export async function GET(req) {
       );
     }
 
-    // 🌍 Sprache erkennen (Fallback = en)
-    const locale = user.locale || "en";
+    // 🔁 Weiterleitung auf Erfolg-Seite (Origin aus dem Request)
+    const host = req.headers.get("host");
+    const proto =
+      req.headers.get("x-forwarded-proto") ||
+      (host && host.includes("localhost") ? "http" : "https");
+    const origin = host
+      ? `${proto}://${host}`
+      : process.env.NEXT_PUBLIC_SITE_URL || "https://www.lobbium.com";
 
-    // 🔁 Weiterleitung auf Erfolg-Seite
-    return NextResponse.redirect(
-      `https://lobbium.com/${locale}/newsletter/bestaetigt`
-    );
+    return NextResponse.redirect(`${origin}/newsletter/bestaetigt`);
 
   } catch (err) {
     console.error("❌ Bestätigung Fehler:", err);
