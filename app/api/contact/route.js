@@ -22,9 +22,16 @@ function loadMessages() {
   }
 }
 
-// Sicheres Schreiben
+// Sicheres Schreiben – auf Serverless (read-only FS) darf das nicht crashen.
 function saveMessages(messages) {
-  fs.writeFileSync(filePath, JSON.stringify(messages, null, 2));
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(messages, null, 2));
+    return true;
+  } catch (e) {
+    // z. B. EROFS auf Vercel: Persistenz nicht möglich, aber Mailversand geht weiter.
+    console.warn("⚠️ Kontakt-Persistenz nicht möglich (read-only FS):", e.message);
+    return false;
+  }
 }
 
 /* ============================================================================= */
