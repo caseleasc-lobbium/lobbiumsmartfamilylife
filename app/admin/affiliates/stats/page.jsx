@@ -9,6 +9,10 @@ export default function AffiliateStatsPage() {
   const [latestClicks, setLatestClicks] = useState([]);
   const [totalPartners, setTotalPartners] = useState(0);
   const [totalClicks, setTotalClicks] = useState(0);
+  const [today, setToday] = useState(0);
+  const [yesterday, setYesterday] = useState(0);
+  const [perDay, setPerDay] = useState([]);
+  const [perCategory, setPerCategory] = useState({});
 
   useEffect(() => {
     async function loadStats() {
@@ -21,6 +25,10 @@ export default function AffiliateStatsPage() {
           setLatestClicks(data.latestClicks || []);
           setTotalPartners(data.totalPartners || 0);
           setTotalClicks(data.totalClicks || 0);
+          setToday(data.today || 0);
+          setYesterday(data.yesterday || 0);
+          setPerDay(data.perDay || []);
+          setPerCategory(data.perCategory || {});
         }
       } catch (err) {
         console.error("Stats load error:", err);
@@ -30,6 +38,16 @@ export default function AffiliateStatsPage() {
 
     loadStats();
   }, []);
+
+  // Kategorie-Slugs → schöne Labels
+  const CATEGORIES = [
+    { slug: "finanzen-spartipps", label: "Finanzen" },
+    { slug: "familienleben", label: "Familie" },
+    { slug: "kinder-bildung", label: "Bildung" },
+    { slug: "lifestyle", label: "Lifestyle" },
+  ];
+  const fmtDay = (d) =>
+    new Date(d).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
 
   if (loading) {
     return (
@@ -48,7 +66,7 @@ export default function AffiliateStatsPage() {
       </h1>
 
       {/* KPI CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
 
         <div className="bg-gray-50 p-6 border border-gray-200 rounded-2xl shadow-sm text-center">
           <h2 className="text-4xl font-bold text-blue-700">{totalPartners}</h2>
@@ -61,10 +79,13 @@ export default function AffiliateStatsPage() {
         </div>
 
         <div className="bg-gray-50 p-6 border border-gray-200 rounded-2xl shadow-sm text-center">
-          <h2 className="text-xl font-semibold text-blue-700">
-            {stats.length > 0 ? stats[0]?.title : "–"}
-          </h2>
-          <p className="text-gray-600 text-sm mt-1">Meistgeklickter Partner</p>
+          <h2 className="text-4xl font-bold text-green-600">{today}</h2>
+          <p className="text-gray-600 text-sm mt-1">Klicks heute</p>
+        </div>
+
+        <div className="bg-gray-50 p-6 border border-gray-200 rounded-2xl shadow-sm text-center">
+          <h2 className="text-4xl font-bold text-gray-500">{yesterday}</h2>
+          <p className="text-gray-600 text-sm mt-1">Klicks gestern</p>
         </div>
 
       </div>
@@ -74,21 +95,24 @@ export default function AffiliateStatsPage() {
 
         <ChartCard
           title="Klicks der letzten 7 Tage"
-          labels={stats.map((s) => s.day || "")}
-          data={stats.map((s) => s.totalClicks || 0)}
+          labels={perDay.map((d) => fmtDay(d.day))}
+          data={perDay.map((d) => d.count || 0)}
         />
 
         <ChartCard
           title="Klicks pro Kategorie"
-          labels={["Finanzen", "Familie", "Bildung", "Lifestyle"]}
-          data={[
-            stats.filter(s => s.category === "finanzen").reduce((a,b)=>a+b.totalClicks,0),
-            stats.filter(s => s.category === "familie").reduce((a,b)=>a+b.totalClicks,0),
-            stats.filter(s => s.category === "bildung").reduce((a,b)=>a+b.totalClicks,0),
-            stats.filter(s => s.category === "lifestyle").reduce((a,b)=>a+b.totalClicks,0),
-          ]}
+          labels={CATEGORIES.map((c) => c.label)}
+          data={CATEGORIES.map((c) => perCategory[c.slug] || 0)}
         />
 
+      </div>
+
+      {/* Meistgeklickter Partner */}
+      <div className="mb-16 p-6 bg-blue-50 border border-blue-100 rounded-2xl text-center">
+        <p className="text-gray-600 text-sm">🏆 Meistgeklickter Partner</p>
+        <h2 className="text-2xl font-bold text-blue-700 mt-1">
+          {stats.length > 0 && stats[0]?.totalClicks > 0 ? stats[0].title : "– noch keine Klicks –"}
+        </h2>
       </div>
 
       {/* TABLE: CLICK PER PARTNER */}

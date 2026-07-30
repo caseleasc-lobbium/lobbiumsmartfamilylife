@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import SectionHero from "../../components/SectionHero";
 import Link from "next/link";
+import { useI18n } from "../../components/i18n/LanguageProvider";
 
 export default function FamilienlebenClient() {
+  const { t } = useI18n();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,8 +29,8 @@ export default function FamilienlebenClient() {
     <div className="flex flex-col items-center w-full">
 
       <SectionHero
-        title="Familienleben"
-        subtitle="Neue Inspirationen, Tools & Empfehlungen für ein modernes, glückliches und harmonisches Familienleben."
+        title={t("familie", "title")}
+        subtitle={t("familie", "subtitle")}
       />
 
       <section
@@ -47,7 +49,7 @@ export default function FamilienlebenClient() {
         {/* Keine Items */}
         {!loading && items.length === 0 && (
           <p className="col-span-full text-center text-gray-500">
-            Noch keine Empfehlungen verfügbar.
+            {t("common", "empty")}
           </p>
         )}
 

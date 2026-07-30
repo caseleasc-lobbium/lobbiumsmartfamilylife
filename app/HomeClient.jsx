@@ -2,20 +2,34 @@
 
 import { useEffect, useState } from "react";
 import SectionHero from "../components/SectionHero";
+import { useI18n } from "../components/i18n/LanguageProvider";
 
 export default function HomeClient() {
+  const { t } = useI18n();
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [category, setCategory] = useState("all");
 
   const categories = [
-    { key: "all", label: "Alle Rubriken" },
-    { key: "finanzen-spartipps", label: "Finanzen & Spartipps" },
-    { key: "familienleben", label: "Familienleben" },
-    { key: "kinder-bildung", label: "Kinder & Bildung" },
-    { key: "lifestyle", label: "Lifestyle" },
+    { key: "all" },
+    { key: "finanzen-spartipps" },
+    { key: "familienleben" },
+    { key: "kinder-bildung" },
+    { key: "lifestyle" },
   ];
+
+  // DB-Slug → Übersetzungs-Key
+  const catLabel = (key) => {
+    if (key === "all") return t("home", "filterAll");
+    const map = {
+      "finanzen-spartipps": "finanzen",
+      familienleben: "familie",
+      "kinder-bildung": "bildung",
+      lifestyle: "lifestyle",
+    };
+    return t("nav", map[key] || key);
+  };
 
   const loadPartners = async (cat) => {
     setLoading(true);
@@ -41,8 +55,8 @@ export default function HomeClient() {
     <div className="flex flex-col items-center w-full">
 
       <SectionHero
-        title="Smart Family Life by Lobbium"
-        subtitle="Clever sparen, den Alltag organisieren und Kinder spielerisch fördern — kompakt, modern & täglich aktualisiert."
+        title={t("home", "title")}
+        subtitle={t("home", "subtitle")}
       />
 
       {/* FILTER */}
@@ -59,7 +73,7 @@ export default function HomeClient() {
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              {cat.label}
+              {catLabel(cat.key)}
             </button>
           );
         })}
@@ -68,10 +82,10 @@ export default function HomeClient() {
       {/* HEADER */}
       <section className="w-full max-w-4xl text-center mb-10 px-4">
         <h2 className="text-2xl font-semibold text-[#0F1C3F]">
-          🌟 Partner des Tages – Empfehlungen für dich
+          {t("home", "partnerTitle")}
         </h2>
         <p className="text-gray-600">
-          Jeden Tag neu ausgewählt — beliebte Marken, clevere Spartipps und familienfreundliche Inspirationen.
+          {t("home", "partnerSubtitle")}
         </p>
       </section>
 
@@ -84,7 +98,7 @@ export default function HomeClient() {
 
         {!loading && partners.length === 0 && (
           <p className="col-span-full text-center text-gray-500">
-            Noch keine Partner verfügbar.
+            {t("home", "empty")}
           </p>
         )}
 

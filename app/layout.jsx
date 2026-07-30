@@ -4,8 +4,30 @@ import { usePathname } from "next/navigation";
 import TopNav from "../components/TopNav";
 import SiteFooter from "../components/SiteFooter";
 import CookieConsent from "../components/CookieConsent";
+import { LanguageProvider } from "../components/i18n/LanguageProvider";
 import { trackingAllowed } from "../utils/consent";
 import "../styles/globals.css";
+
+// Strukturierte Daten (Schema.org) für Suchmaschinen & Rich Results
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: "Lobbium — Smart Family Life",
+      url: "https://www.lobbium.com",
+      logo: "https://www.lobbium.com/logo.png",
+    },
+    {
+      "@type": "WebSite",
+      name: "Smart Family Life by Lobbium",
+      url: "https://www.lobbium.com",
+      inLanguage: "de-DE",
+      description:
+        "Clever sparen, den Alltag organisieren und Kinder spielerisch fördern — kompakt, modern & täglich aktualisiert.",
+    },
+  ],
+};
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
@@ -26,6 +48,14 @@ export default function RootLayout({ children }) {
           minHeight: "100vh",
         }}
       >
+        {/* Strukturierte Daten für Suchmaschinen */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
+
+        <LanguageProvider>
+
         {/* Public TopNav */}
         {isFrameVisible && <TopNav />}
 
@@ -55,6 +85,8 @@ export default function RootLayout({ children }) {
         {/* Footer + Cookies */}
         {isFrameVisible && <CookieConsent />}
         {isFrameVisible && <SiteFooter />}
+
+        </LanguageProvider>
 
         {/* Analytics */}
         {trackingAllowed() && (

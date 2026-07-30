@@ -4,7 +4,8 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { sendEmail } from "@/lib/email";
-import { rateLimit, getClientIp, isValidEmail, sanitizeInput, SECURITY_HEADERS } from "@/lib/security";
+import { rateLimit, getClientIp, sanitizeInput, SECURITY_HEADERS } from "@/lib/security";
+import { contactSchema, parseBody } from "@/lib/validation";
 
 // Datei-Pfad
 const filePath = path.join(process.cwd(), "data_contact.json");
@@ -43,31 +44,14 @@ export async function POST(req) {
       );
     }
 
-    const { name, email, message } = await req.json();
-
-    // Input Validierung
-    if (!name || !email || !message) {
+    const parsed = parseBody(contactSchema, await req.json());
+    if (!parsed.ok) {
       return NextResponse.json(
-        { error: "Alle Felder sind erforderlich." },
+        { error: parsed.error },
         { status: 400, headers: SECURITY_HEADERS }
       );
     }
-
-    // Email Validierung
-    if (!isValidEmail(email)) {
-      return NextResponse.json(
-        { error: "Ungültige E-Mail-Adresse." },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
-
-    // Längen-Validierung (gegen Missbrauch)
-    if (name.length > 100 || email.length > 100 || message.length > 5000) {
-      return NextResponse.json(
-        { error: "Eingabe zu lang." },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
+    const { name, email, message } = parsed.data;
 
     // XSS Protection durch Sanitizing
     const safeName = sanitizeInput(name);

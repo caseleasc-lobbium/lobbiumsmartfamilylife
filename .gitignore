@@ -9,3 +9,9 @@ dist
 .env.local
 .env.local
 .env.local
+
+# Admin magic-link tokens (nie committen)
+data/magic_tokens.json
+
+# Claude Code Session-Config
+.claude/

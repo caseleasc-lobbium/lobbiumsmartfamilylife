@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { rateLimit, getClientIp, SECURITY_HEADERS } from "@/lib/security";
+import { verifyPassword } from "@/lib/password";
+import { loginSchema, parseBody } from "@/lib/validation";
 
 export async function POST(req) {
   try {
@@ -24,37 +26,32 @@ export async function POST(req) {
       );
     }
 
-    const { password } = await req.json();
-
-    if (!password || typeof password !== "string") {
+    const parsed = parseBody(loginSchema, await req.json());
+    if (!parsed.ok) {
       return NextResponse.json(
         { success: false, error: "Passwort fehlt" },
         { status: 400, headers: SECURITY_HEADERS }
       );
     }
+    const { password } = parsed.data;
 
-    // Passwort-Länge validieren
-    if (password.length > 100) {
-      return NextResponse.json(
-        { success: false, error: "Ungültiges Passwort" },
-        { status: 400, headers: SECURITY_HEADERS }
-      );
-    }
-
-    // 🔐 Passwort aus ENV (sicher!)
+    // 🔐 Bevorzugt gehashtes Passwort (scrypt); Klartext nur als Legacy-Fallback
+    const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH;
     const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-    if (!ADMIN_PASSWORD) {
-      console.error("❌ ERROR: ADMIN_PASSWORD fehlt in .env!");
+    if (!ADMIN_PASSWORD_HASH && !ADMIN_PASSWORD) {
+      console.error("❌ ERROR: ADMIN_PASSWORD_HASH/ADMIN_PASSWORD fehlt in ENV!");
       return NextResponse.json(
         { success: false, error: "Serverfehler" },
         { status: 500, headers: SECURITY_HEADERS }
       );
     }
 
-    // Passwort-Vergleich (Timing-Safe)
-    const isValid = password === ADMIN_PASSWORD;
-    
+    // Passwort prüfen (Timing-Safe via scrypt + timingSafeEqual)
+    const isValid = ADMIN_PASSWORD_HASH
+      ? verifyPassword(password, ADMIN_PASSWORD_HASH)
+      : password === ADMIN_PASSWORD;
+
     // Künstliche Verzögerung gegen Timing Attacks (500ms)
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -79,9 +76,6 @@ export async function POST(req) {
       path: "/",
     });
 
-    // Rate Limit für erfolgreichen Login zurücksetzen
-    rateLimitStore.delete(`login:${clientIp}`);
-
     return response;
   } catch (err) {
     console.error("❌ Login API Error:", err);
@@ -92,6 +86,3 @@ export async function POST(req) {
     );
   }
 }
-
-// Rate Limit Store (sollte in lib/security.js sein, aber für Zugriff hier)
-const rateLimitStore = new Map();

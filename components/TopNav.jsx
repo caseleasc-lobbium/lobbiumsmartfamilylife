@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useI18n } from "./i18n/LanguageProvider";
+import LanguageSwitcher from "./i18n/LanguageSwitcher";
 
 export default function TopNav() {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   const tabs = [
-    { key: "home", label: "Home", url: "/" },
-    { key: "finanzen", label: "Finanzen & Spartipps", url: "/finanzen-spartipps" },
-    { key: "familie", label: "Familienleben", url: "/familienleben" },
-    { key: "bildung", label: "Kinder & Bildung", url: "/kinder-bildung" },
-    { key: "lifestyle", label: "Lifestyle", url: "/lifestyle" },
+    { key: "home", url: "/" },
+    { key: "finanzen", url: "/finanzen-spartipps" },
+    { key: "familie", url: "/familienleben" },
+    { key: "bildung", url: "/kinder-bildung" },
+    { key: "lifestyle", url: "/lifestyle" },
   ];
 
   const getActive = () => {
@@ -60,9 +63,12 @@ export default function TopNav() {
               }
             `}
           >
-            {tab.label}
+            {t("nav", tab.key)}
           </Link>
         ))}
+        <div className="flex items-center pl-2 ml-1 border-l border-gray-200">
+          <LanguageSwitcher />
+        </div>
       </nav>
     </div>
   );

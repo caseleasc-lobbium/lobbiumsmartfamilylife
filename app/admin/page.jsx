@@ -70,9 +70,12 @@ export default function AdminDashboard() {
       .catch((err) => console.error("Contact Recent Error:", err));
   }, []);
 
-  const logout = () => {
+  const logout = async () => {
     localStorage.removeItem("lobbiumAdminAuth");
     localStorage.removeItem("lobbiumLoginTime");
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {}
     router.replace("/admin/login");
   };
 

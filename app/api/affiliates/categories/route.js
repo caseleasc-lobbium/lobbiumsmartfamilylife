@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { validateAdminAuth } from "@/lib/security";
 
 const supabase = getSupabase();
 
@@ -38,6 +39,10 @@ export async function GET() {
 // --------------------------------------------------
 export async function POST(request) {
   try {
+    if (!validateAdminAuth(request.cookies)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { name } = await request.json();
 
     if (!name) {
@@ -70,6 +75,10 @@ export async function POST(request) {
 // --------------------------------------------------
 export async function DELETE(request) {
   try {
+    if (!validateAdminAuth(request.cookies)) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

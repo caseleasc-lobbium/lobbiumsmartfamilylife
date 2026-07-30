@@ -8,7 +8,11 @@ export default function Logout() {
 
   useEffect(() => {
     async function doLogout() {
-      await fetch("/api/admin/logout", { method: "POST" });
+      localStorage.removeItem("lobbiumAdminAuth");
+      localStorage.removeItem("lobbiumLoginTime");
+      try {
+        await fetch("/api/admin/logout", { method: "POST" });
+      } catch {}
       router.push("/admin/login");
     }
     doLogout();

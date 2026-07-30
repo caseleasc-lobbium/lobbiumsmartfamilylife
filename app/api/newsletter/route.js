@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email";
 import { encrypt } from "@/lib/encryption";
 import { getSupabase } from "@/lib/supabase";
+import { newsletterSchema, parseBody } from "@/lib/validation";
 
 const supabase = getSupabase();
 
@@ -15,11 +16,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://lobbium.com";
 
 export async function POST(req) {
   try {
-    const { email, name, locale } = await req.json();
-
-    if (!email) {
-      return NextResponse.json({ error: "E-Mail fehlt" }, { status: 400 });
+    const parsed = parseBody(newsletterSchema, await req.json());
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
+    const { email, name, locale } = parsed.data;
 
     // 🔐 Verschlüsseln
     const encryptedEmail = encrypt(email);

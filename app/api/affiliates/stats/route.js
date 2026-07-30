@@ -27,15 +27,39 @@ export async function GET() {
       return NextResponse.json({ error: "DB error" }, { status: 500 });
     }
 
-    // 📌 Klicks gruppieren pro Partner
-    const stats = affiliates.map((a) => {
-      const filtered = clicks.filter((c) => c.partner_id === a.id);
-      return {
-        id: a.id,
-        title: a.title,
-        totalClicks: filtered.length,
-        lastClick: filtered[0]?.clicked_at || null,
-      };
+    // Kategorie je Partner (für Kategorie-Aggregation)
+    const catByPartner = {};
+    affiliates.forEach((a) => {
+      catByPartner[a.id] = (a.category || "").trim().toLowerCase();
+    });
+
+    // 📌 Klicks gruppieren pro Partner (nach Klicks absteigend sortiert)
+    const stats = affiliates
+      .map((a) => {
+        const filtered = clicks.filter((c) => c.partner_id === a.id);
+        return {
+          id: a.id,
+          title: a.title,
+          category: catByPartner[a.id],
+          totalClicks: filtered.length,
+          lastClick: filtered[0]?.clicked_at || null,
+        };
+      })
+      .sort((a, b) => b.totalClicks - a.totalClicks);
+
+    // 📌 Zeitreihe: Klicks der letzten 7 Tage
+    const perDay = [];
+    for (let i = 6; i >= 0; i--) {
+      const day = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      const count = clicks.filter((c) => String(c.clicked_at).startsWith(day)).length;
+      perDay.push({ day, count });
+    }
+
+    // 📌 Klicks pro Kategorie (über den Partner gejoint)
+    const perCategory = {};
+    clicks.forEach((c) => {
+      const cat = catByPartner[c.partner_id] || "unbekannt";
+      perCategory[cat] = (perCategory[cat] || 0) + 1;
     });
 
     // 📌 Letzte 50 Klicks
@@ -74,6 +98,8 @@ export async function GET() {
       today: todayClicks,
       yesterday: yesterdayClicks,
       stats,
+      perDay,
+      perCategory,
       ranking,
       latestClicks,
     });

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { validateAdminAuth } from "@/lib/security";
+import { affiliateSchema, parseBody } from "@/lib/validation";
 
 // Supabase Client
 const supabase = getSupabase();
@@ -64,29 +66,31 @@ export async function GET(request) {
 // -----------------------------
 export async function POST(request) {
   try {
-    const auth = request.headers.get("authorization");
-    if (auth !== "lobbiumAdminAuth:true") {
+    if (!validateAdminAuth(request.cookies)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { title, category, imageUrl, link, description } = body;
-
-    if (!title || !link) {
-      return NextResponse.json(
-        { error: "Pflichtfelder fehlen" },
-        { status: 400 }
-      );
+    const parsed = parseBody(affiliateSchema, await request.json());
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
+    const body = parsed.data;
+    // Formular sendet imageUrl/link; alternativ image_url/affiliate_url akzeptieren
+    const title = body.title;
+    const category = body.category;
+    const description = body.description;
+    const image_url = body.image_url ?? body.imageUrl ?? null;
+    const affiliate_url = body.affiliate_url ?? body.link ?? null;
 
     const { data, error } = await supabase
       .from("affiliates")
       .insert({
         title,
-        category: category?.toLowerCase(),
-        imageUrl,
-        link,
+        category: (category || "").trim().toLowerCase(),
+        image_url,
+        affiliate_url,
         description,
+        is_active: true,
       })
       .select()
       .single();
@@ -109,8 +113,7 @@ export async function POST(request) {
 // -----------------------------
 export async function DELETE(request) {
   try {
-    const auth = request.headers.get("authorization");
-    if (auth !== "lobbiumAdminAuth:true") {
+    if (!validateAdminAuth(request.cookies)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

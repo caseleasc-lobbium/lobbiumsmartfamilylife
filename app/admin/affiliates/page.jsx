@@ -92,9 +92,9 @@ export default function AdminAffiliatesPage() {
                 <td className="p-3 capitalize">{a.category}</td>
 
                 <td className="p-3">
-                  {a.imageUrl ? (
+                  {a.image_url ? (
                     <img
-                      src={a.imageUrl}
+                      src={a.image_url.startsWith("http") ? a.image_url : `/${a.image_url}`}
                       alt="preview"
                       className="w-16 h-16 rounded-md object-cover"
                     />
@@ -105,9 +105,10 @@ export default function AdminAffiliatesPage() {
 
                 <td className="p-3">
                   <a
-                    href={a.link}
+                    href={a.affiliate_url}
                     className="text-blue-600 underline"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     öffnen
                   </a>

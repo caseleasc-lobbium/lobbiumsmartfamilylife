@@ -22,9 +22,12 @@ export default function Sidebar() {
   const isActive = (itemPath) =>
     pathname === itemPath || pathname.startsWith(itemPath + "/");
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     localStorage.removeItem("lobbiumAdminAuth");
     localStorage.removeItem("lobbiumLoginTime");
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {}
     router.push("/admin/login");
   };
 

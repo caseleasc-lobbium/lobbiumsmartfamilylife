@@ -16,13 +16,17 @@ export default function EditAffiliatePage({ params }) {
   const [link, setLink] = useState("");
   const [description, setDescription] = useState("");
 
-  // 🔄 Laden des Partners
+  // 🔄 Laden des Partners (aus der Listen-API, da /api/affiliates/[id] eine
+  // Klick-Redirect-Route ist und kein JSON liefert)
   const loadAffiliate = async () => {
     try {
-      const res = await fetch(`/api/affiliates/${id}`);
-      const data = await res.json();
+      const res = await fetch(`/api/affiliates?category=all`);
+      const list = await res.json();
+      const data = Array.isArray(list)
+        ? list.find((a) => String(a.id) === String(id))
+        : null;
 
-      if (data.error) {
+      if (!data) {
         alert("Partner nicht gefunden");
         router.push("/admin/affiliates");
         return;
@@ -31,9 +35,9 @@ export default function EditAffiliatePage({ params }) {
       setAffiliate(data);
 
       setTitle(data.title || "");
-      setCategory(data.category || "");
-      setImageUrl(data.imageUrl || "");
-      setLink(data.link || "");
+      setCategory((data.category || "").trim());
+      setImageUrl(data.image_url || "");
+      setLink(data.affiliate_url || "");
       setDescription(data.description || "");
     } catch (err) {
       console.error("LOAD ERROR:", err);
