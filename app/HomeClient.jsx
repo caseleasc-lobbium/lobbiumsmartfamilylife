@@ -11,9 +11,9 @@ export default function HomeClient() {
 
   const categories = [
     { key: "all", label: "Alle Rubriken" },
-    { key: "finanzen", label: "Finanzen & Spartipps" },
-    { key: "familie", label: "Familienleben" },
-    { key: "bildung", label: "Kinder & Bildung" },
+    { key: "finanzen-spartipps", label: "Finanzen & Spartipps" },
+    { key: "familienleben", label: "Familienleben" },
+    { key: "kinder-bildung", label: "Kinder & Bildung" },
     { key: "lifestyle", label: "Lifestyle" },
   ];
 

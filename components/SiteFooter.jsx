@@ -21,7 +21,7 @@ export default function SiteFooter() {
 
           {/* Mobile versteckt, Desktop sichtbar */}
           <p className="hidden md:block text-gray-500 text-sm mt-1">
-            © 2025 Lobbium – Smart Family Life
+            © {new Date().getFullYear()} Lobbium – Smart Family Life
           </p>
         </div>
 
@@ -71,7 +71,7 @@ export default function SiteFooter() {
         {/* MOBILE COPYRIGHT */}
         <div className="md:hidden w-full text-center mt-2 order-4">
           <p className="text-gray-500 text-xs">
-            © 2025 Lobbium – Smart Family Life
+            © {new Date().getFullYear()} Lobbium – Smart Family Life
           </p>
         </div>
       </div>

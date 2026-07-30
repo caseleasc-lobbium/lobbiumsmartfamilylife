@@ -10,7 +10,7 @@ export default function FamilienlebenClient() {
 
   const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates?category=familie&limit=12");
+      const res = await fetch("/api/affiliates?category=familienleben&limit=12");
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {

@@ -10,7 +10,7 @@ export default function FinanzenSpartippsClient() {
 
   const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates?category=finanzen&limit=12");
+      const res = await fetch("/api/affiliates?category=finanzen-spartipps&limit=12");
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {

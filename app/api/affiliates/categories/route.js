@@ -18,7 +18,15 @@ export async function GET() {
       return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    // Name/Slug bereinigen (entfernt u. a. Zeilenumbrüche aus Altdaten),
+    // damit Dropdown-Anzeige und gespeicherter Kategorie-Wert sauber sind.
+    const cleaned = (data || []).map((c) => ({
+      ...c,
+      name: (c.name || "").trim(),
+      slug: (c.slug || "").trim(),
+    }));
+
+    return NextResponse.json(cleaned);
   } catch (err) {
     console.error("GET categories error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
@@ -36,11 +44,12 @@ export async function POST(request) {
       return NextResponse.json({ error: "Name fehlt" }, { status: 400 });
     }
 
-    const slug = name.toLowerCase().replace(/ /g, "-");
+    const cleanName = name.trim();
+    const slug = cleanName.toLowerCase().replace(/\s+/g, "-");
 
     const { data, error } = await supabase
       .from("affiliate_categories")
-      .insert({ name, slug })
+      .insert({ name: cleanName, slug })
       .select()
       .single();
 

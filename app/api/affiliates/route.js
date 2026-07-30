@@ -22,17 +22,15 @@ export async function GET(request) {
     const category = searchParams.get("category");
     const limit = parseInt(searchParams.get("limit") || "0", 10);
 
-    let query = supabase.from("affiliates").select("*");
+    // Kategorie normalisieren (trimmt u. a. \n aus fehlerhaften DB-Slugs)
+    const normalize = (v) => (v || "").trim().toLowerCase();
 
-    // Kategorie-Filter direkt in der Datenbank (viel schneller)
-    if (category && category !== "all") {
-      query = query.eq("category", category.toLowerCase());
-    }
-
-    // Sortierung (neuester zuerst)
-    query = query.order("created_at", { ascending: false });
-
-    const { data, error } = await query;
+    // Immer alle laden und robust in JS filtern, damit Whitespace/Newlines
+    // in den gespeicherten Kategorie-Werten den Abgleich nicht brechen.
+    const { data, error } = await supabase
+      .from("affiliates")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Supabase GET Error:", error);
@@ -40,6 +38,12 @@ export async function GET(request) {
     }
 
     let affiliates = data || [];
+
+    // Kategorie-Filter (normalisierter Vergleich)
+    if (category && normalize(category) !== "all") {
+      const wanted = normalize(category);
+      affiliates = affiliates.filter((a) => normalize(a.category) === wanted);
+    }
 
     // Tägliche Rotation
     affiliates = dailyShuffle(affiliates);

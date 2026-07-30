@@ -10,7 +10,7 @@ export default function KinderBildungClient() {
 
   const loadData = async () => {
     try {
-      const res = await fetch("/api/affiliates?category=kinderbildung&limit=12");
+      const res = await fetch("/api/affiliates?category=kinder-bildung&limit=12");
       const data = await res.json();
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
