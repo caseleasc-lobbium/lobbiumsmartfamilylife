@@ -9,17 +9,19 @@ export default function NewsletterPage() {
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    setSuccess(false);
 
     if (!email) {
-      setMessage("Bitte E-Mail-Adresse eingeben.");
+      setMessage("Bitte gib deine E-Mail-Adresse ein.");
       return;
     }
     if (!consent) {
-      setMessage("Bitte stimme der Datenschutzerklärung zu.");
+      setMessage("Bitte setze das Häkchen zur Datenschutzerklärung, um fortzufahren.");
       return;
     }
 
@@ -40,7 +42,7 @@ export default function NewsletterPage() {
       if (!res.ok || data.error) {
         setMessage("Etwas ist schiefgelaufen. Bitte später erneut versuchen.");
       } else {
-        setMessage("Danke! Bitte bestätige deine Anmeldung in deiner E-Mail.");
+        setSuccess(true);
         setEmail("");
         setName("");
         setConsent(false);
@@ -63,6 +65,20 @@ export default function NewsletterPage() {
       {/* FORMULAR – Apple Style Clean */}
       <section className="w-full max-w-xl px-6 pb-24">
 
+        {success ? (
+          <div className="bg-green-50 border border-green-200 rounded-3xl p-8 text-center shadow-sm">
+            <div className="text-5xl mb-3">✅</div>
+            <h2 className="text-xl font-bold text-green-700 mb-2">Fast geschafft!</h2>
+            <p className="text-gray-700 leading-relaxed">
+              Danke für deine Anmeldung. Wir haben dir eine{" "}
+              <b>Bestätigungs-E-Mail</b> geschickt — bitte klicke darin auf
+              „Jetzt bestätigen", um deine Anmeldung abzuschließen.
+            </p>
+            <p className="text-gray-500 text-sm mt-3">
+              Keine Mail erhalten? Bitte schau auch im <b>Spam-Ordner</b> nach.
+            </p>
+          </div>
+        ) : (
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100"
@@ -114,9 +130,11 @@ export default function NewsletterPage() {
             </label>
           </div>
 
-          {/* Nachricht */}
+          {/* Fehler-/Hinweismeldung – deutlich sichtbar */}
           {message && (
-            <p className="text-sm text-gray-700 mb-4">{message}</p>
+            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {message}
+            </div>
           )}
 
           {/* Button */}
@@ -128,6 +146,7 @@ export default function NewsletterPage() {
             {loading ? "Wird gesendet..." : "Jetzt kostenlos anmelden"}
           </button>
         </form>
+        )}
       </section>
     </div>
   );
