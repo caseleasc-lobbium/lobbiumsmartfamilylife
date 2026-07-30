@@ -6,6 +6,7 @@
 
 Eine moderne Affiliate‑Content‑Plattform: kuratierte Partner‑Empfehlungen mit täglicher Rotation, mehrsprachig angelegt, inklusive gehärtetem Admin‑Dashboard, Newsletter und Klick‑Tracking.
 
+[![CI](https://github.com/caseleasc-lobbium/lobbiumsmartfamilylife/actions/workflows/ci.yml/badge.svg)](https://github.com/caseleasc-lobbium/lobbiumsmartfamilylife/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-18-61dafb)](https://react.dev)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20RLS-3ecf8e)](https://supabase.com)
