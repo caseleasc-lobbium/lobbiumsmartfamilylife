@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # npm-Abhängigkeiten wöchentlich auf Sicherheits-/Versions-Updates prüfen
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+
+  # GitHub-Actions-Versionen aktuell halten
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci"
