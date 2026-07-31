@@ -7,6 +7,7 @@ import {
   getClientIp,
   SECURITY_HEADERS,
 } from "./security";
+import { createSessionToken } from "./session";
 
 describe("isValidEmail", () => {
   it("akzeptiert gültige Adressen", () => {
@@ -44,8 +45,9 @@ describe("validateAdminAuth", () => {
   const store = (val?: string) => ({
     get: (_name: string) => (val === undefined ? undefined : { value: val }),
   });
-  it("akzeptiert nur den korrekten Cookie-Wert", () => {
-    expect(validateAdminAuth(store("true"))).toBe(true);
+  it("akzeptiert nur ein gültiges signiertes Session-Token", () => {
+    expect(validateAdminAuth(store(createSessionToken()))).toBe(true);
+    expect(validateAdminAuth(store("true"))).toBe(false); // alter statischer Wert ungültig
     expect(validateAdminAuth(store("false"))).toBe(false);
     expect(validateAdminAuth(store())).toBe(false);
   });

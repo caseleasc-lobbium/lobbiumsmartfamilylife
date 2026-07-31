@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getClientIp, SECURITY_HEADERS } from "@/lib/security";
 import { rateLimitDb } from "@/lib/ratelimit";
 import { verifyPassword } from "@/lib/password";
+import { createSessionToken } from "@/lib/session";
 import { loginSchema, parseBody } from "@/lib/validation";
 
 export async function POST(req) {
@@ -69,7 +70,7 @@ export async function POST(req) {
       { headers: SECURITY_HEADERS }
     );
     
-    response.cookies.set("lobbium_admin_auth", "true", {
+    response.cookies.set("lobbium_admin_auth", createSessionToken(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",

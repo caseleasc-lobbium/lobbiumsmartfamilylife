@@ -1,4 +1,5 @@
 // Security Utilities
+import { verifySessionToken } from "./session";
 
 interface RateLimitRecord {
   count: number;
@@ -92,10 +93,10 @@ export function isValidEmail(email: string): boolean {
 // Minimaler Typ für Cookie-Stores (RequestCookies / next/headers cookies()).
 type CookieStore = { get(name: string): { value?: string } | undefined };
 
-/** Admin-Cookie validieren. */
+/** Admin-Cookie validieren (signiertes, ablaufendes Session-Token). */
 export function validateAdminAuth(cookies: CookieStore): boolean {
   const authCookie = cookies.get("lobbium_admin_auth");
-  return authCookie?.value === "true";
+  return verifySessionToken(authCookie?.value ?? null);
 }
 
 /** Standard-Security-Header. */

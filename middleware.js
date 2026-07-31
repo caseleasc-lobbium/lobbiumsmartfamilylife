@@ -1,6 +1,43 @@
 import { NextResponse } from "next/server";
 
-export function middleware(req) {
+// Edge-kompatible Verifikation des signierten Session-Tokens (Web Crypto).
+function toB64Url(bytes) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function fromB64Url(s) {
+  let t = s.replace(/-/g, "+").replace(/_/g, "/");
+  while (t.length % 4) t += "=";
+  return atob(t);
+}
+async function verifyEdgeToken(token) {
+  try {
+    if (!token) return false;
+    const [payload, sig] = token.split(".");
+    if (!payload || !sig) return false;
+    const secret =
+      process.env.ADMIN_SESSION_SECRET ||
+      process.env.ENCRYPTION_KEY ||
+      "dev-only-insecure-secret-change-me";
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+    const sigBuf = await crypto.subtle.sign("HMAC", key, enc.encode(payload));
+    if (toB64Url(new Uint8Array(sigBuf)) !== sig) return false;
+    const json = JSON.parse(fromB64Url(payload));
+    return typeof json.exp === "number" && Date.now() < json.exp;
+  } catch {
+    return false;
+  }
+}
+
+export async function middleware(req) {
   const url = req.nextUrl.clone();
   const host = req.headers.get("host") || "";
   const pathname = url.pathname;
@@ -33,15 +70,10 @@ export function middleware(req) {
     return response;
   }
 
-  // 3️⃣ Admin-Bereich schützen - VERBESSERT
-  if (pathname.startsWith("/admin")) {
-    // Prüfe admin_auth Cookie (konsistent mit unserem System)
-    const adminAuth = req.cookies.get("lobbium_admin_auth")?.value;
-
-    // Allow login page and verify page
-    if (!adminAuth && 
-        !pathname.startsWith("/admin/login") && 
-        !pathname.startsWith("/admin/verify")) {
+  // 3️⃣ Admin-Bereich schützen – signiertes Token verifizieren
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
+    const token = req.cookies.get("lobbium_admin_auth")?.value;
+    if (!(await verifyEdgeToken(token))) {
       url.pathname = "/admin/login";
       return NextResponse.redirect(url);
     }
