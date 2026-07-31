@@ -7,6 +7,7 @@ export default function AdminAffiliatesPage() {
   const router = useRouter();
   const [affiliates, setAffiliates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
   // 🔄 Daten laden aus Supabase API
   const loadData = async () => {
@@ -46,6 +47,31 @@ export default function AdminAffiliatesPage() {
     loadData();
   };
 
+  // 🔁 Admitad-Sync: freigeschaltete Programme automatisch mit Tracking-Link scharfschalten
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/admin/admitad/sync", { method: "POST" });
+      const d = await res.json();
+      if (d.error) {
+        alert("Sync-Fehler: " + (d.detail || d.error));
+      } else {
+        const lines = [
+          `Geprüfte Verbindungen: ${d.connectionsChecked}`,
+          `Scharfgeschaltet (Tracking-Link): ${d.activated?.join(", ") || "—"}`,
+          `Entfernt (abgelehnt): ${d.removed?.join(", ") || "—"}`,
+          `Pending (abwarten): ${d.pending?.join(", ") || "—"}`,
+          `Aktiv, aber nicht auf Seite: ${(d.activeNotOnSite || []).map((x) => x.name).join(", ") || "—"}`,
+        ];
+        alert("✅ Admitad-Sync fertig\n\n" + lines.join("\n"));
+        loadData();
+      }
+    } catch (e) {
+      alert("Sync-Fehler: " + e.message);
+    }
+    setSyncing(false);
+  };
+
   if (loading) {
     return (
       <div className="text-center p-10 text-gray-500">
@@ -61,12 +87,22 @@ export default function AdminAffiliatesPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">🤝 Affiliate Partner</h1>
 
-        <button
-          onClick={() => router.push("/admin/affiliates/new")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold"
-        >
-          + Neuer Partner
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            title="Freigeschaltete Admitad-Programme automatisch mit Tracking-Link scharfschalten"
+            className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-5 py-3 rounded-xl font-semibold"
+          >
+            {syncing ? "🔄 Sync läuft…" : "🔁 Admitad-Sync"}
+          </button>
+          <button
+            onClick={() => router.push("/admin/affiliates/new")}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold"
+          >
+            + Neuer Partner
+          </button>
+        </div>
       </div>
 
       {/* Tabelle */}
