@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 export default function AdminLogin() {
   const router = useRouter();
   const [password, setPassword] = useState("");
+  const [totp, setTotp] = useState("");
+  const [need2fa, setNeed2fa] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,12 +20,13 @@ export default function AdminLogin() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, totp }),
       });
 
       const data = await res.json();
 
       if (!res.ok || !data.success) {
+        if (data.need2fa) setNeed2fa(true);
         setError(data.error || "Login fehlgeschlagen");
         setLoading(false);
         return;
@@ -56,6 +59,18 @@ export default function AdminLogin() {
             required
             autoFocus
             className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+
+          <input
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder={need2fa ? "2FA-Code (6-stellig) *" : "2FA-Code (falls aktiviert)"}
+            value={totp}
+            onChange={(e) => setTotp(e.target.value)}
+            className={`w-full px-4 py-3 rounded-xl border outline-none tracking-widest text-center ${
+              need2fa ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-300 focus:ring-2 focus:ring-blue-500"
+            }`}
           />
 
           <button

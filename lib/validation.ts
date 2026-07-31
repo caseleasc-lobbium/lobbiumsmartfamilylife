@@ -28,6 +28,7 @@ export const newsletterSchema = z.object({
 
 export const loginSchema = z.object({
   password: z.string().min(1).max(200),
+  totp: z.string().trim().max(10).optional(),
 });
 
 export const affiliateSchema = z

@@ -4,6 +4,7 @@ import { getClientIp, SECURITY_HEADERS } from "@/lib/security";
 import { rateLimitDb } from "@/lib/ratelimit";
 import { verifyPassword } from "@/lib/password";
 import { createSessionToken } from "@/lib/session";
+import { verifyTotp } from "@/lib/totp";
 import { loginSchema, parseBody } from "@/lib/validation";
 
 export async function POST(req) {
@@ -62,6 +63,23 @@ export async function POST(req) {
         { success: false, error: "Falsches Passwort" },
         { status: 401, headers: SECURITY_HEADERS }
       );
+    }
+
+    // 🔐 Zwei-Faktor (TOTP) – nur erzwingen, wenn aktiviert (kein Lockout vorher)
+    if (process.env.ADMIN_2FA_ENABLED === "true" && process.env.ADMIN_TOTP_SECRET) {
+      const code = parsed.data.totp;
+      if (!code) {
+        return NextResponse.json(
+          { success: false, error: "2FA-Code erforderlich", need2fa: true },
+          { status: 401, headers: SECURITY_HEADERS }
+        );
+      }
+      if (!verifyTotp(process.env.ADMIN_TOTP_SECRET, code)) {
+        return NextResponse.json(
+          { success: false, error: "Falscher 2FA-Code", need2fa: true },
+          { status: 401, headers: SECURITY_HEADERS }
+        );
+      }
     }
 
     // 🎉 Login erfolgreich - Sicherer Cookie
