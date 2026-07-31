@@ -24,6 +24,11 @@ function img(url) {
   return url.startsWith("http") ? url : `/${url}`;
 }
 
+const COVER_CATS = new Set(["finanzen-spartipps", "familienleben", "kinder-bildung", "lifestyle"]);
+function coverFor(category) {
+  return `/blog/cover-${COVER_CATS.has(category) ? category : "familienleben"}.svg`;
+}
+
 export default async function BlogPage() {
   const supabase = getSupabase();
   const { data } = await supabase
@@ -54,17 +59,13 @@ export default async function BlogPage() {
             href={`/blog/${p.slug}`}
             className="group bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all overflow-hidden flex flex-col"
           >
-            {img(p.image_url) ? (
-              <img
-                src={img(p.image_url)}
-                alt={p.title}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-44 object-cover bg-gray-50"
-              />
-            ) : (
-              <div className="w-full h-44 bg-gray-100" />
-            )}
+            <img
+              src={img(p.image_url) || coverFor(p.category)}
+              alt={p.title}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-44 object-cover bg-gray-50"
+            />
             <div className="p-6 flex flex-col gap-2">
               <span className="text-xs font-medium text-blue-600">
                 {CATEGORY_LABEL[p.category] || "Ratgeber"}

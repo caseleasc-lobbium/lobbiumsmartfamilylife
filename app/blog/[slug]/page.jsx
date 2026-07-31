@@ -37,6 +37,11 @@ function img(url) {
   return url.startsWith("http") ? url : `/${url}`;
 }
 
+const COVER_CATS = new Set(["finanzen-spartipps", "familienleben", "kinder-bildung", "lifestyle"]);
+function coverFor(category) {
+  return `/blog/cover-${COVER_CATS.has(category) ? category : "familienleben"}.svg`;
+}
+
 export async function generateMetadata({ params }) {
   const post = await getPost(params.slug);
   if (!post) return buildMeta({ title: "Artikel nicht gefunden", path: `/blog/${params.slug}` });
@@ -121,13 +126,11 @@ export default async function BlogPostPage({ params }) {
 
       {post.excerpt && <p className="mt-3 text-lg text-gray-500">{post.excerpt}</p>}
 
-      {img(post.image_url) && (
-        <img
-          src={img(post.image_url)}
-          alt={post.title}
-          className="mt-6 w-full h-64 object-cover rounded-2xl bg-gray-50"
-        />
-      )}
+      <img
+        src={img(post.image_url) || coverFor(post.category)}
+        alt={post.title}
+        className="mt-6 w-full h-64 object-cover rounded-2xl bg-gray-50"
+      />
 
       <div className="blog-content mt-8" dangerouslySetInnerHTML={{ __html: post.content || "" }} />
 
