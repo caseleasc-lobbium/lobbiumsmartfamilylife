@@ -27,7 +27,19 @@ export default function SiteFooter() {
 
         {/* MITTLERE NAVIGATION – Desktop genau mittig */}
         <div className="flex justify-center order-3 md:order-2">
-          <div className="flex gap-2 sm:gap-3">
+          <div className="flex gap-2 sm:gap-3 flex-wrap justify-center">
+            <a
+              href="/blog"
+              className="px-4 py-2 sm:px-5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs sm:text-sm text-gray-700"
+            >
+              Ratgeber
+            </a>
+            <a
+              href="/tools"
+              className="px-4 py-2 sm:px-5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs sm:text-sm text-gray-700"
+            >
+              Tools
+            </a>
             <a
               href="/impressum"
               className="px-4 py-2 sm:px-5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs sm:text-sm text-gray-700"

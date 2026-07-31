@@ -15,6 +15,7 @@ export default function TopNav() {
     { key: "familie", url: "/familienleben" },
     { key: "bildung", url: "/kinder-bildung" },
     { key: "lifestyle", url: "/lifestyle" },
+    { key: "blog", url: "/blog" },
     { key: "tools", url: "/tools" },
   ];
 
@@ -24,6 +25,7 @@ export default function TopNav() {
     if (pathname.includes("familien")) return "familie";
     if (pathname.includes("kinder")) return "bildung";
     if (pathname.includes("lifestyle")) return "lifestyle";
+    if (pathname.includes("blog")) return "blog";
     if (pathname.includes("tools")) return "tools";
     return null;
   };
