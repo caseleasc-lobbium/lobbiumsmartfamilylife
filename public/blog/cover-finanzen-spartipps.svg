@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Finanzen & Spartipps">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Finanzen &amp; Spartipps">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#eaf2fb"/>
@@ -10,7 +10,7 @@
   <g fill="#1c3d6c" opacity="0.16"><circle cx="1010" cy="470" r="70"/><circle cx="1090" cy="360" r="46"/><circle cx="930" cy="380" r="34"/></g>
   <g transform="translate(90,250)">
     <text x="0" y="0" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="700" letter-spacing="8" fill="#1c3d6c" opacity="0.85">LOBBIUM</text>
-    <text x="0" y="72" font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="700" fill="#0F1C3F">Finanzen & Spartipps</text>
+    <text x="0" y="72" font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="700" fill="#0F1C3F">Finanzen &amp; Spartipps</text>
     <text x="0" y="120" font-family="Inter, system-ui, sans-serif" font-size="24" fill="#0F1C3F" opacity="0.65">Smart Family Life</text>
   </g>
   <text x="90" y="560" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#1c3d6c" opacity="0.7">lobbium.com</text>
