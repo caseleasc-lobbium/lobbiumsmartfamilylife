@@ -53,7 +53,13 @@ export async function GET(request) {
     // Limit anwenden — 40 wird sauber unterstützt
     if (limit > 0) affiliates = affiliates.slice(0, limit);
 
-    return NextResponse.json(affiliates);
+    // CDN-Caching: Partnerdaten ändern sich selten (tägliche Rotation) →
+    // 2 Min am Edge cachen, 5 Min stale-while-revalidate = deutlich schneller + weniger DB-Last.
+    return NextResponse.json(affiliates, {
+      headers: {
+        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300",
+      },
+    });
 
   } catch (err) {
     console.error("GET /affiliates ERROR:", err);

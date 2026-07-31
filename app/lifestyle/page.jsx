@@ -65,6 +65,8 @@ export default function LifestyleClient() {
                 <img
                   src={item.image_url.startsWith("http") ? item.image_url : `/${item.image_url}`}
                   alt={item.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-40 rounded-2xl object-cover mb-4"
                 />
               ) : (

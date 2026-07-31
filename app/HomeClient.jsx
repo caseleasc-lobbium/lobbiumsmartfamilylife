@@ -112,6 +112,9 @@ export default function HomeClient() {
               {p.image_url ? (
                 <img
                   src={p.image_url.startsWith("http") ? p.image_url : `/${p.image_url}`}
+                  alt={p.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-32 h-32 rounded-xl object-contain shadow mb-3 bg-white"
                 />
               ) : (

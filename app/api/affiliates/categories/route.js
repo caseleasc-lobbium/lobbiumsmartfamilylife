@@ -27,7 +27,11 @@ export async function GET() {
       slug: (c.slug || "").trim(),
     }));
 
-    return NextResponse.json(cleaned);
+    return NextResponse.json(cleaned, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (err) {
     console.error("GET categories error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });

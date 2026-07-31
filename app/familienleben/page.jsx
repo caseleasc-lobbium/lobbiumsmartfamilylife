@@ -72,6 +72,8 @@ export default function FamilienlebenClient() {
                       : `/${item.image_url}`
                   }
                   alt={item.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-40 rounded-2xl object-cover mb-4"
                 />
               ) : (
