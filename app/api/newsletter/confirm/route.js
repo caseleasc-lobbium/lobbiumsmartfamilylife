@@ -2,25 +2,34 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { decrypt } from "@/lib/encryption";
+import { sendTemplateEmail } from "@/lib/email";
 
-// -----------------------------
-// Supabase Client
-// -----------------------------
 const supabase = getSupabase();
 
-// -----------------------------
-// GET → Newsletter bestätigen
-// -----------------------------
+const TEMPLATE_WELCOME = 5; // "Lobbium – Willkommen"
+
+function getOrigin(req) {
+  const host = req.headers.get("host");
+  if (!host) return process.env.NEXT_PUBLIC_SITE_URL || "https://www.lobbium.com";
+  const proto =
+    req.headers.get("x-forwarded-proto") ||
+    (host.includes("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
+// GET → Newsletter bestätigen (Double-Opt-In)
 export async function GET(req) {
+  const origin = getOrigin(req);
   try {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
 
     if (!token) {
-      return NextResponse.json({ error: "Token fehlt" }, { status: 400 });
+      return NextResponse.redirect(`${origin}/`);
     }
 
-    // 🔍 Token in newsletter_subscribers finden
+    // Token finden
     const { data: user, error: findError } = await supabase
       .from("newsletter_subscribers")
       .select("*")
@@ -28,43 +37,47 @@ export async function GET(req) {
       .single();
 
     if (findError || !user) {
-      return NextResponse.json(
-        { error: "Abo nicht gefunden" },
-        { status: 404 }
-      );
+      // Ungültiger/abgelaufener Link → freundlich zur Startseite statt roher 404
+      return NextResponse.redirect(`${origin}/`);
     }
 
-    // 🚀 Bestätigung setzen
+    const wasConfirmed = user.confirmed === true;
+
+    // Bestätigung setzen
     const { error: updateError } = await supabase
       .from("newsletter_subscribers")
       .update({
         confirmed: true,
         consent: true,
-        date_consent: new Date().toISOString()
+        date_consent: new Date().toISOString(),
       })
       .eq("id", user.id);
 
     if (updateError) {
       console.error("Supabase Update Error:", updateError);
-      return NextResponse.json(
-        { error: "Fehler beim Bestätigen" },
-        { status: 500 }
-      );
     }
 
-    // 🔁 Weiterleitung auf Erfolg-Seite (Origin aus dem Request)
-    const host = req.headers.get("host");
-    const proto =
-      req.headers.get("x-forwarded-proto") ||
-      (host && host.includes("localhost") ? "http" : "https");
-    const origin = host
-      ? `${proto}://${host}`
-      : process.env.NEXT_PUBLIC_SITE_URL || "https://www.lobbium.com";
+    // Willkommens-Mail (Brevo-Template) nur bei der ERSTEN Bestätigung
+    if (!wasConfirmed) {
+      try {
+        const email = decrypt(user.email);
+        const name = user.name ? decrypt(user.name) : "";
+        if (email && email.includes("@")) {
+          await sendTemplateEmail({
+            to: email,
+            templateId: TEMPLATE_WELCOME,
+            params: { SITE_URL: origin, NAME: name, LOCALE: user.locale || "de" },
+          });
+        }
+      } catch (e) {
+        console.warn("⚠️ Willkommens-Mail übersprungen:", e.message);
+      }
+    }
 
-    return NextResponse.redirect(`${origin}/newsletter/bestaetigt`);
-
+    const lang = user.locale || "de";
+    return NextResponse.redirect(`${origin}/newsletter/bestaetigt/?lang=${lang}`);
   } catch (err) {
     console.error("❌ Bestätigung Fehler:", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    return NextResponse.redirect(`${origin}/`);
   }
 }
