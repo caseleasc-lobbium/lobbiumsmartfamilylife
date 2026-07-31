@@ -51,10 +51,6 @@ export default function AffiliateGrid({ category = "all", limit = 9 }) {
 
   // Bild-Resolver (manuelle Fallbacks)
   const resolveImage = (a) => {
-    const t = a.title?.toLowerCase() || "";
-    if (t.includes("auras")) return "/affiliates/AURAS.png";
-    if (t.includes("ekta")) return "/affiliates/EKTA.png";
-
     if (a.image_url?.startsWith("http")) return a.image_url;
     if (a.image_url?.startsWith("/")) return a.image_url;
 
