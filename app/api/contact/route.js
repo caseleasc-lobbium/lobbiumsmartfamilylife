@@ -1,50 +1,25 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
 import { sendEmail } from "@/lib/email";
-import { rateLimit, getClientIp, sanitizeInput, SECURITY_HEADERS } from "@/lib/security";
+import { getSupabase } from "@/lib/supabase";
+import { getClientIp, sanitizeInput, SECURITY_HEADERS } from "@/lib/security";
+import { rateLimitDb } from "@/lib/ratelimit";
+import { logError } from "@/lib/errorlog";
 import { contactSchema, parseBody } from "@/lib/validation";
 
-// Datei-Pfad
-const filePath = path.join(process.cwd(), "data_contact.json");
-
-// Sicheres Lesen
-function loadMessages() {
-  try {
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify([], null, 2));
-    }
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
-  } catch {
-    return [];
-  }
-}
-
-// Sicheres Schreiben – auf Serverless (read-only FS) darf das nicht crashen.
-function saveMessages(messages) {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(messages, null, 2));
-    return true;
-  } catch (e) {
-    // z. B. EROFS auf Vercel: Persistenz nicht möglich, aber Mailversand geht weiter.
-    console.warn("⚠️ Kontakt-Persistenz nicht möglich (read-only FS):", e.message);
-    return false;
-  }
-}
+const supabase = getSupabase();
 
 /* ============================================================================= */
-/*                                  POST – Nachricht speichern                   */
+/*                          POST – Kontaktanfrage speichern                      */
 /* ============================================================================= */
 
 export async function POST(req) {
   try {
-    // 🛡️ Rate Limiting: Max 3 Kontaktanfragen pro Stunde
+    // 🛡️ Durables Rate-Limit: max 3 Anfragen / Stunde je IP
     const clientIp = getClientIp(req);
-    const rateLimitResult = rateLimit(`contact:${clientIp}`, 3, 3600000);
-    
-    if (!rateLimitResult.allowed) {
+    const rl = await rateLimitDb(`contact:${clientIp}`, 3, 3600);
+    if (!rl.allowed) {
       return NextResponse.json(
         { error: "Zu viele Anfragen. Bitte warten Sie eine Stunde." },
         { status: 429, headers: SECURITY_HEADERS }
@@ -60,32 +35,19 @@ export async function POST(req) {
     }
     const { name, email, message } = parsed.data;
 
-    // XSS Protection durch Sanitizing
     const safeName = sanitizeInput(name);
     const safeEmail = sanitizeInput(email);
     const safeMessage = sanitizeInput(message);
 
-    if (!safeName || !safeEmail || !safeMessage) {
-      return NextResponse.json(
-        { error: "Alle Felder sind erforderlich." },
-        { status: 400 }
-      );
+    // Persistent in Supabase (serverless-fest)
+    const { error: insErr } = await supabase
+      .from("contact_messages")
+      .insert({ name, email, message });
+    if (insErr) {
+      await logError("contact.insert", insErr.message, { email });
     }
 
-    const messages = loadMessages();
-
-    const newMessage = {
-      id: Date.now(),
-      name,
-      email,
-      message,
-      createdAt: new Date().toISOString(),
-    };
-
-    messages.push(newMessage);
-    saveMessages(messages);
-
-    // Admin-Notification via Brevo
+    // Admin-Benachrichtigung via Brevo
     if (process.env.CONTACT_RECEIVER) {
       await sendEmail({
         from: { name: "Lobbium Kontaktformular", email: "info@lobbium.com" },
@@ -117,13 +79,13 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Kontakt API Fehler:", err);
+    await logError("contact.POST", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
 
 /* ============================================================================= */
-/*                                  GET – Nachrichten abrufen                    */
+/*                          GET – Kontaktanfragen abrufen                        */
 /* ============================================================================= */
 
 export async function GET(req) {
@@ -131,29 +93,38 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter"); // today | recent | all
 
-    let messages = loadMessages()
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime()
-      );
+    const { data, error } = await supabase
+      .from("contact_messages")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    // HEUTE
+    if (error) {
+      await logError("contact.GET", error.message);
+      return NextResponse.json([], { status: 200 });
+    }
+
+    let messages = (data || []).map((m) => ({
+      id: m.id,
+      name: m.name,
+      email: m.email,
+      message: m.message,
+      createdAt: m.created_at,
+    }));
+
     if (filter === "today") {
       const today = new Date().toISOString().split("T")[0];
-      messages = messages.filter((m) =>
-        m.createdAt.startsWith(today)
+      messages = messages.filter(
+        (m) => m.createdAt && String(m.createdAt).startsWith(today)
       );
     }
 
-    // LETZTE 5
     if (filter === "recent") {
       messages = messages.slice(0, 5);
     }
 
     return NextResponse.json(messages, { status: 200 });
   } catch (err) {
-    console.error("Contact GET Error:", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    await logError("contact.GET", err);
+    return NextResponse.json([], { status: 200 });
   }
 }

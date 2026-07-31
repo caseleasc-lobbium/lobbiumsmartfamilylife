@@ -5,6 +5,9 @@ import { sendTemplateEmail } from "@/lib/email";
 import { encrypt } from "@/lib/encryption";
 import { getSupabase } from "@/lib/supabase";
 import { newsletterSchema, parseBody } from "@/lib/validation";
+import { getClientIp } from "@/lib/security";
+import { rateLimitDb } from "@/lib/ratelimit";
+import { logError } from "@/lib/errorlog";
 
 const supabase = getSupabase();
 
@@ -27,6 +30,15 @@ function getOrigin(req) {
 
 export async function POST(req) {
   try {
+    // 🛡️ Rate-Limit gegen Spam-Anmeldungen: max 5 / Stunde je IP
+    const rl = await rateLimitDb(`newsletter:${getClientIp(req)}`, 5, 3600);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Zu viele Anmeldungen. Bitte später erneut versuchen." },
+        { status: 429 }
+      );
+    }
+
     const parsed = parseBody(newsletterSchema, await req.json());
     if (!parsed.ok) {
       return NextResponse.json({ error: parsed.error }, { status: 400 });
@@ -78,7 +90,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("❌ Fehler in POST /api/newsletter:", error);
+    await logError("newsletter.POST", error);
     return NextResponse.json({ error: "Interner Fehler" }, { status: 500 });
   }
 }

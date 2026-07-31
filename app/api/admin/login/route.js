@@ -1,15 +1,16 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { rateLimit, getClientIp, SECURITY_HEADERS } from "@/lib/security";
+import { getClientIp, SECURITY_HEADERS } from "@/lib/security";
+import { rateLimitDb } from "@/lib/ratelimit";
 import { verifyPassword } from "@/lib/password";
 import { loginSchema, parseBody } from "@/lib/validation";
 
 export async function POST(req) {
   try {
-    // 🛡️ Rate Limiting: Max 5 Login-Versuche pro Minute
+    // 🛡️ Durables Rate Limiting: Max 5 Login-Versuche pro Minute
     const clientIp = getClientIp(req);
-    const rateLimitResult = rateLimit(`login:${clientIp}`, 5, 60000);
-    
+    const rateLimitResult = await rateLimitDb(`login:${clientIp}`, 5, 60);
+
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { 
