@@ -15,7 +15,9 @@ export function LanguageProvider({ children }) {
   // Gespeicherte Sprache laden (nach Mount → keine Hydration-Mismatch)
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("lobbium_locale");
+      const cookieMatch = document.cookie.match(/(?:^|; )lobbium_locale=([^;]+)/);
+      const fromCookie = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+      const saved = fromCookie || localStorage.getItem("lobbium_locale");
       if (saved && SUPPORTED_LOCALES.includes(saved)) setLocaleState(saved);
     } catch {}
   }, []);
@@ -32,6 +34,8 @@ export function LanguageProvider({ children }) {
     setLocaleState(l);
     try {
       localStorage.setItem("lobbium_locale", l);
+      // Cookie, damit Server-Komponenten (Blog) die Sprache kennen
+      document.cookie = `lobbium_locale=${l}; path=/; max-age=31536000; samesite=lax`;
     } catch {}
   };
 
