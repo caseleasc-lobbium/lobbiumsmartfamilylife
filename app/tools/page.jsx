@@ -38,6 +38,13 @@ const TOOLS = [
     desc: "5 Fragen, dein persönlicher Spartyp – mit Tipps, die wirklich passen.",
     tag: "Quiz",
   },
+  {
+    href: "/tools/druckvorlagen",
+    emoji: "🖨️",
+    title: "Gratis Druckvorlagen",
+    desc: "Budget-Planer, Wochenplan, Packliste & Sparziel-Tracker zum Ausdrucken.",
+    tag: "Downloads",
+  },
 ];
 
 export default function ToolsPage() {

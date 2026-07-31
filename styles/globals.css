@@ -108,3 +108,31 @@ a {
 a:hover {
   color: var(--main-dark);
 }
+
+/* Druck-Optimierung: beim Drucken/PDF nur das Blatt (.print-sheet) zeigen */
+@media print {
+  body {
+    background: #fff !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .print-sheet,
+  .print-sheet * {
+    visibility: visible;
+  }
+  .print-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}
