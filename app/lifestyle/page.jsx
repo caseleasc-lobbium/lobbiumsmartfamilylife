@@ -67,7 +67,7 @@ export default function LifestyleClient() {
                   alt={item.title}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-40 rounded-2xl object-cover mb-4"
+                  className="w-full h-40 rounded-2xl object-contain bg-white p-4 mb-4"
                 />
               ) : (
                 <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4" />

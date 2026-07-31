@@ -22,15 +22,25 @@ export default function SharedGrid({ category }) {
     load();
   }, [category]);
 
+  // API liefert Felder snake_case (image_url/affiliate_url); ältere Daten evtl. camelCase.
+  const linkOf = (p) => p.affiliate_url || p.link || null;
+  const imageOf = (p) => {
+    const src = p.image_url || p.imageUrl;
+    if (!src) return null;
+    return src.startsWith("http") || src.startsWith("/") ? src : `/${src}`;
+  };
+
   const clickPartner = async (p) => {
+    const target = linkOf(p);
+    if (!target) return;
     try {
       await fetch("/api/affiliates/click", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ partnerId: p.id, targetUrl: p.link }),
+        body: JSON.stringify({ partnerId: p.id, targetUrl: target }),
       });
     } catch {}
-    window.open(p.link, "_blank");
+    window.open(target, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -53,8 +63,14 @@ export default function SharedGrid({ category }) {
             onClick={() => clickPartner(p)}
             className="p-6 bg-white rounded-3xl shadow hover:shadow-xl transition-all border border-gray-100 flex flex-col items-center text-center"
           >
-            {p.imageUrl ? (
-              <img src={p.imageUrl} className="w-20 h-20 rounded-xl object-cover mb-3" />
+            {imageOf(p) ? (
+              <img
+                src={imageOf(p)}
+                alt={p.title || "Partner"}
+                loading="lazy"
+                decoding="async"
+                className="w-20 h-20 rounded-xl object-contain bg-white mb-3"
+              />
             ) : (
               <div className="w-20 h-20 bg-gray-100 rounded-xl mb-3" />
             )}
