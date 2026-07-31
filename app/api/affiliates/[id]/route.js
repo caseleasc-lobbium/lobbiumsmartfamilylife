@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { validateAdminAuth } from "@/lib/security";
+import { sovrnWrap, sovrnEnabled } from "@/lib/sovrn";
 
 const supabase = getSupabase();
 
@@ -17,21 +18,29 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "Ungültige Partner-ID" }, { status: 400 });
     }
 
-    // Partner-LInk holen
+    // Partner-Link holen (tracking_url = Admitad-Provisionslink, falls freigeschaltet)
     const { data, error } = await supabase
       .from("affiliates")
-      .select("affiliate_url")
+      .select("affiliate_url, tracking_url")
       .eq("id", id)
       .single();
 
-    if (error || !data?.affiliate_url) {
+    if (error || !(data?.tracking_url || data?.affiliate_url)) {
       return NextResponse.json(
         { error: "Affiliate-Link nicht vorhanden" },
         { status: 400 }
       );
     }
 
-    const affiliateUrl = data.affiliate_url;
+    // Hybrid-Strategie:
+    // 1) Admitad-Provisionslink (tracking_url) hat Vorrang – höhere Provision.
+    // 2) Sonst über Sovrn schleusen (Auto-Affiliate), falls aktiviert.
+    // 3) Sonst direkt zur Partner-URL.
+    const affiliateUrl = data.tracking_url
+      ? data.tracking_url
+      : sovrnEnabled()
+      ? sovrnWrap(data.affiliate_url, id)
+      : data.affiliate_url;
 
     // Klick speichern (Spalte clicked_at hat DB-Default now(); KEIN created_at!)
     const { error: clickError } = await supabase.from("affiliate_clicks").insert({

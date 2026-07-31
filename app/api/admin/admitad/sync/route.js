@@ -31,7 +31,7 @@ async function runSync() {
   // Vorhandene Partner mit Admitad-Zuordnung
   const { data: existing } = await supabase
     .from("affiliates")
-    .select("id, title, admitad_id, affiliate_url")
+    .select("id, title, admitad_id, affiliate_url, tracking_url")
     .not("admitad_id", "is", null);
   const byAdmitad = new Map((existing || []).map((a) => [Number(a.admitad_id), a]));
 
@@ -44,11 +44,12 @@ async function runSync() {
     const row = byAdmitad.get(Number(c.id));
     if (c.status === "active") {
       if (row) {
-        // Echten Tracking-Link (gotolink) scharfschalten – nur bei Änderung schreiben.
-        if (c.gotolink && row.affiliate_url !== c.gotolink) {
+        // Admitad-Provisionslink in tracking_url ablegen (hat in der Route Vorrang
+        // vor Sovrn). Ziel-URL (affiliate_url) bleibt als Fallback erhalten.
+        if (c.gotolink && row.tracking_url !== c.gotolink) {
           await supabase
             .from("affiliates")
-            .update({ affiliate_url: c.gotolink, is_active: true })
+            .update({ tracking_url: c.gotolink, is_active: true })
             .eq("id", row.id);
           activated.push(c.name);
         }
