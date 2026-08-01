@@ -18,6 +18,7 @@ const STR = {
     subtitle: "Kostenlose Helfer für den Familienalltag – schnell, verständlich und ehrlich. Kein Login, keine Daten-Weitergabe.",
     cta: "Jetzt ausprobieren →",
     tools: [
+      { tag: "Finanzen", title: "Kindergeld & Familienleistungen", desc: "Welche Leistungen stehen deiner Familie zu? In 1 Minute prüfen." },
       { tag: "Finanzen", title: "Familienbudget-Rechner", desc: "Teile dein Einkommen mit der 50-30-20-Methode auf – in Sekunden." },
       { tag: "Finanzen", title: "Was kostet ein Kind?", desc: "Schätze die Kosten bis zum 18. Geburtstag – pro Monat, Jahr und gesamt." },
       { tag: "Familie", title: "Taschengeld-Rechner", desc: "Wie viel Taschengeld passt zum Alter deines Kindes? Sofort-Empfehlung." },
@@ -30,6 +31,7 @@ const STR = {
     subtitle: "Free helpers for everyday family life – fast, clear and honest. No login, no data sharing.",
     cta: "Try it now →",
     tools: [
+      { tag: "Finance", title: "German Family Benefits", desc: "Which benefits might your family get? Check in 1 minute." },
       { tag: "Finance", title: "Family Budget Calculator", desc: "Split your income with the 50-30-20 method – in seconds." },
       { tag: "Finance", title: "What does a child cost?", desc: "Estimate the costs until age 18 – per month, year and in total." },
       { tag: "Family", title: "Pocket Money Calculator", desc: "How much pocket money suits your child's age? Instant recommendation." },
@@ -42,6 +44,7 @@ const STR = {
     subtitle: "Des aides gratuites pour le quotidien familial – rapides, claires et honnêtes. Sans compte, sans partage de données.",
     cta: "Essayer maintenant →",
     tools: [
+      { tag: "Finances", title: "Aides familiales (Allemagne)", desc: "À quelles aides votre famille a droit ? Vérifiez en 1 minute." },
       { tag: "Finances", title: "Calculateur de budget familial", desc: "Répartissez vos revenus avec la méthode 50-30-20 – en quelques secondes." },
       { tag: "Finances", title: "Combien coûte un enfant ?", desc: "Estimez les coûts jusqu'à 18 ans – par mois, par an et au total." },
       { tag: "Famille", title: "Calculateur d'argent de poche", desc: "Quel montant selon l'âge de votre enfant ? Recommandation immédiate." },
@@ -51,8 +54,8 @@ const STR = {
   },
 };
 
-const HREFS = ["/tools/familienbudget", "/tools/was-kostet-ein-kind", "/tools/taschengeld", "/tools/spartyp-test", "/tools/druckvorlagen"];
-const EMOJIS = ["💰", "🍼", "🐷", "🧭", "🖨️"];
+const HREFS = ["/tools/kindergeld-checker", "/tools/familienbudget", "/tools/was-kostet-ein-kind", "/tools/taschengeld", "/tools/spartyp-test", "/tools/druckvorlagen"];
+const EMOJIS = ["🧾", "💰", "🍼", "🐷", "🧭", "🖨️"];
 
 export default function ToolsPage() {
   const loc = cookies().get("lobbium_locale")?.value;
