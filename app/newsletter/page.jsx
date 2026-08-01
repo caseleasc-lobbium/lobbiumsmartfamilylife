@@ -1,152 +1,86 @@
 "use client";
 
-import { useState } from "react";
 import SectionHero from "../../components/SectionHero";
+import NewsletterSignup from "../../components/NewsletterSignup";
+import { useI18n } from "../../components/i18n/LanguageProvider";
+
+const STR = {
+  de: {
+    title: "Der Familien-Spar-Brief",
+    subtitle: "Einmal pro Woche das Beste für Familien – kompakt, ehrlich, in 2 Minuten gelesen. Kostenlos.",
+    getTitle: "Das bekommst du jede Woche",
+    items: [
+      { e: "🏷️", t: "Die besten Familien-Deals", d: "Handverlesene Angebote, die sich wirklich lohnen – kein Werbe-Wust." },
+      { e: "💡", t: "1 konkreter Spartipp", d: "Umsetzbar im Alltag – vom Haushaltsbudget bis zum günstigen Familienurlaub." },
+      { e: "🧮", t: "1 nützliches Tool oder Ratgeber", d: "Rechner, Checkliste oder Ratgeber – passend zur Woche." },
+    ],
+    whyTitle: "Warum es sich lohnt",
+    why: ["Kompakt: in 2 Minuten gelesen, kein Blabla.", "Ehrlich: wir empfehlen nur, was wir selbst nutzen würden.", "Sicher: Double-Opt-in, DSGVO-konform, jederzeit abbestellbar."],
+  },
+  en: {
+    title: "The Family Savings Letter",
+    subtitle: "Once a week, the best for families – compact, honest, read in 2 minutes. Free.",
+    getTitle: "What you get every week",
+    items: [
+      { e: "🏷️", t: "The best family deals", d: "Hand-picked offers that are truly worth it – no ad clutter." },
+      { e: "💡", t: "1 concrete saving tip", d: "Doable in daily life – from the household budget to cheap family holidays." },
+      { e: "🧮", t: "1 useful tool or guide", d: "A calculator, checklist or guide – matching the week." },
+    ],
+    whyTitle: "Why it's worth it",
+    why: ["Compact: read in 2 minutes, no waffle.", "Honest: we only recommend what we'd use ourselves.", "Safe: double opt-in, GDPR-compliant, unsubscribe anytime."],
+  },
+  fr: {
+    title: "La Lettre d'économies famille",
+    subtitle: "Une fois par semaine, le meilleur pour les familles – concis, honnête, lu en 2 minutes. Gratuit.",
+    getTitle: "Ce que vous recevez chaque semaine",
+    items: [
+      { e: "🏷️", t: "Les meilleures offres famille", d: "Des offres sélectionnées qui valent vraiment le coup – sans surcharge pub." },
+      { e: "💡", t: "1 astuce d'économie concrète", d: "Applicable au quotidien – du budget aux vacances pas chères." },
+      { e: "🧮", t: "1 outil ou guide utile", d: "Un calculateur, une checklist ou un guide – adapté à la semaine." },
+    ],
+    whyTitle: "Pourquoi ça vaut le coup",
+    why: ["Concis : lu en 2 minutes, sans blabla.", "Honnête : nous ne recommandons que ce que nous utiliserions.", "Sûr : double opt-in, conforme RGPD, désinscription à tout moment."],
+  },
+};
 
 export default function NewsletterPage() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [consent, setConsent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-    setSuccess(false);
-
-    if (!email) {
-      setMessage("Bitte gib deine E-Mail-Adresse ein.");
-      return;
-    }
-    if (!consent) {
-      setMessage("Bitte setze das Häkchen zur Datenschutzerklärung, um fortzufahren.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          name,
-          locale: "de",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        setMessage("Etwas ist schiefgelaufen. Bitte später erneut versuchen.");
-      } else {
-        setSuccess(true);
-        setEmail("");
-        setName("");
-        setConsent(false);
-      }
-    } catch {
-      setMessage("Netzwerkfehler. Bitte später erneut versuchen.");
-    }
-    setLoading(false);
-  };
+  const { locale } = useI18n();
+  const s = STR[locale] || STR.de;
 
   return (
     <div className="flex flex-col items-center w-full">
+      <SectionHero title={s.title} subtitle={s.subtitle} />
 
-      {/* HERO – Einheitlich wie alle Rubrik-Seiten */}
-      <SectionHero
-        title="Newsletter"
-        subtitle="Erhalte täglich moderne Tipps & Empfehlungen für Finanzen, Familienleben, Kinder & Lifestyle – direkt in dein Postfach."
-      />
-
-      {/* FORMULAR – Apple Style Clean */}
-      <section className="w-full max-w-xl px-6 pb-24">
-
-        {success ? (
-          <div className="bg-green-50 border border-green-200 rounded-3xl p-8 text-center shadow-sm">
-            <div className="text-5xl mb-3">✅</div>
-            <h2 className="text-xl font-bold text-green-700 mb-2">Fast geschafft!</h2>
-            <p className="text-gray-700 leading-relaxed">
-              Danke für deine Anmeldung. Wir haben dir eine{" "}
-              <b>Bestätigungs-E-Mail</b> geschickt — bitte klicke darin auf
-              „Jetzt bestätigen", um deine Anmeldung abzuschließen.
-            </p>
-            <p className="text-gray-500 text-sm mt-3">
-              Keine Mail erhalten? Bitte schau auch im <b>Spam-Ordner</b> nach.
-            </p>
-          </div>
-        ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100"
-        >
-          {/* Name */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Name (optional)
-            </label>
-            <input
-              type="text"
-              placeholder="Wie dürfen wir dich ansprechen?"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* Email */}
-          <div className="mb-5">
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              E-Mail-Adresse *
-            </label>
-            <input
-              type="email"
-              placeholder="deine@email.de"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          {/* DSGVO Checkbox */}
-          <div className="flex items-start gap-3 mb-5">
-            <input
-              id="consent"
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              className="mt-1"
-            />
-            <label htmlFor="consent" className="text-xs text-gray-600 leading-relaxed">
-              Ich stimme zu, dass meine Daten für den Versand des Newsletters
-              verarbeitet werden. Mehr dazu in der{" "}
-              <a href="/datenschutz" className="text-blue-600 underline">
-                Datenschutzerklärung
-              </a>.
-            </label>
-          </div>
-
-          {/* Fehler-/Hinweismeldung – deutlich sichtbar */}
-          {message && (
-            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              {message}
+      <section className="w-full max-w-4xl px-6 pb-24">
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
+          <div>
+            <h2 className="text-xl font-bold text-[#0F1C3F] mb-4">{s.getTitle}</h2>
+            <div className="space-y-4">
+              {s.items.map((it, i) => (
+                <div key={i} className="flex gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <span className="text-3xl">{it.e}</span>
+                  <div>
+                    <h3 className="font-semibold text-[#0F1C3F]">{it.t}</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">{it.d}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
 
-          {/* Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-2 px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition disabled:opacity-60"
-          >
-            {loading ? "Wird gesendet..." : "Jetzt kostenlos anmelden"}
-          </button>
-        </form>
-        )}
+            <h2 className="text-xl font-bold text-[#0F1C3F] mt-8 mb-3">{s.whyTitle}</h2>
+            <ul className="space-y-2">
+              {s.why.map((w, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                  <span className="text-emerald-600 mt-0.5">✓</span>{w}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="lg:sticky lg:top-24">
+            <NewsletterSignup />
+          </div>
+        </div>
       </section>
     </div>
   );

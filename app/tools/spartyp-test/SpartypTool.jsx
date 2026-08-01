@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import SectionHero from "../../../components/SectionHero";
 import { useI18n } from "../../../components/i18n/LanguageProvider";
+import NewsletterSignup from "../../../components/NewsletterSignup";
 
 const TYPE_KEYS = ["planer", "fuchs", "geniesser", "spontan"];
 const CTA_HREF = {
@@ -130,6 +131,12 @@ export default function SpartypTool() {
             <div className="mt-4">
               <button onClick={reset} className="text-sm text-gray-500 hover:text-blue-600">{s.again}</button>
             </div>
+          </div>
+        )}
+
+        {done && (
+          <div className="mt-6">
+            <NewsletterSignup />
           </div>
         )}
 

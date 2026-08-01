@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { generateMetadata as buildMeta } from "../../../lib/seo";
+import NewsletterSignup from "../../../components/NewsletterSignup";
 
 export const revalidate = 120;
 
@@ -134,7 +135,12 @@ export default async function BlogPostPage({ params }) {
 
       <div className="blog-content mt-8" dangerouslySetInnerHTML={{ __html: post.content || "" }} />
 
-      <div className="mt-12 pt-6 border-t border-gray-100">
+      {/* Newsletter-Anmeldung am Artikelende */}
+      <div className="mt-12">
+        <NewsletterSignup />
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-gray-100">
         <Link
           href="/blog"
           className="inline-block px-5 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
