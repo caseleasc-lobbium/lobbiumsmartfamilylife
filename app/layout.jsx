@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import TopNav from "../components/TopNav";
 import SiteFooter from "../components/SiteFooter";
 import CookieConsent from "../components/CookieConsent";
+import PWARegister from "../components/PWARegister";
 import { LanguageProvider } from "../components/i18n/LanguageProvider";
 import { trackingAllowed } from "../utils/consent";
 import "../styles/globals.css";
@@ -85,6 +86,7 @@ export default function RootLayout({ children }) {
         {/* Footer + Cookies */}
         {isFrameVisible && <CookieConsent />}
         {isFrameVisible && <SiteFooter />}
+        {isFrameVisible && <PWARegister />}
 
         </LanguageProvider>
 

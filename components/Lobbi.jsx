@@ -1,0 +1,47 @@
+// Lobbi – das Lobbium-Maskottchen. Freundliche Figur mit Spross (Familie/Wachstum).
+export default function Lobbi({ size = 120, className = "" }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 120 120"
+      className={className}
+      role="img"
+      aria-label="Lobbi – das Lobbium-Maskottchen"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id="lobbiBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#3b82f6" />
+          <stop offset="1" stop-color="#1c3d6c" />
+        </linearGradient>
+      </defs>
+
+      {/* Spross (zwei Blätter) */}
+      <g fill="#2f9e6b">
+        <path d="M60 26 C60 12 48 8 42 10 C44 22 52 27 60 27 Z" />
+        <path d="M60 26 C60 12 72 8 78 10 C76 22 68 27 60 27 Z" />
+      </g>
+      <rect x="58" y="20" width="4" height="12" rx="2" fill="#2f9e6b" />
+
+      {/* Körper */}
+      <path d="M24 66 C24 40 40 28 60 28 C80 28 96 40 96 66 C96 92 82 108 60 108 C38 108 24 92 24 66 Z" fill="url(#lobbiBody)" />
+
+      {/* Bauch */}
+      <ellipse cx="60" cy="76" rx="26" ry="24" fill="#eaf2fb" />
+
+      {/* Augen */}
+      <circle cx="49" cy="62" r="5" fill="#0f1c3f" />
+      <circle cx="71" cy="62" r="5" fill="#0f1c3f" />
+      <circle cx="50.5" cy="60.5" r="1.6" fill="#fff" />
+      <circle cx="72.5" cy="60.5" r="1.6" fill="#fff" />
+
+      {/* Wangen */}
+      <circle cx="41" cy="70" r="4" fill="#ffb4b4" opacity="0.7" />
+      <circle cx="79" cy="70" r="4" fill="#ffb4b4" opacity="0.7" />
+
+      {/* Lächeln */}
+      <path d="M50 72 Q60 82 70 72" fill="none" stroke="#0f1c3f" stroke-width="3.5" stroke-linecap="round" />
+    </svg>
+  );
+}
