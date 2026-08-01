@@ -109,17 +109,25 @@ export default function HomeClient() {
               onClick={() => handleClick(p)}
               className="p-6 bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all flex flex-col items-center text-center"
             >
-              {p.image_url ? (
-                <img
-                  src={p.image_url.startsWith("http") ? p.image_url : `/${p.image_url}`}
-                  alt={p.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-32 h-32 rounded-xl object-contain shadow mb-3 bg-white"
-                />
-              ) : (
-                <div className="w-32 h-32 bg-gray-100 rounded-xl mb-3" />
-              )}
+              <img
+                src={
+                  p.image_url
+                    ? p.image_url.startsWith("http")
+                      ? p.image_url
+                      : `/${p.image_url}`
+                    : "/partner-placeholder.svg"
+                }
+                alt={p.title}
+                loading="lazy"
+                decoding="async"
+                onError={(e) => {
+                  if (!e.currentTarget.dataset.f) {
+                    e.currentTarget.dataset.f = "1";
+                    e.currentTarget.src = "/partner-placeholder.svg";
+                  }
+                }}
+                className="w-32 h-32 rounded-xl object-contain shadow mb-3 bg-white"
+              />
 
               <h3 className="mt-1 font-semibold text-lg text-gray-800">
                 {p.title}

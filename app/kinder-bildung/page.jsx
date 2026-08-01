@@ -68,6 +68,7 @@ export default function KinderBildungClient() {
                   alt={item.title}
                   loading="lazy"
                   decoding="async"
+                  onError={(e) => { if (!e.currentTarget.dataset.f) { e.currentTarget.dataset.f = "1"; e.currentTarget.src = "/partner-placeholder.svg"; } }}
                   className="w-full h-40 rounded-2xl object-contain bg-white p-4 mb-4"
                 />
               ) : (
