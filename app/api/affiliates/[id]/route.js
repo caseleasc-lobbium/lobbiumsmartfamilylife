@@ -57,7 +57,10 @@ export async function GET(req, { params }) {
     }
 
     // Weiterleiten zum Partner
-    return NextResponse.redirect(affiliateUrl);
+    const res = NextResponse.redirect(affiliateUrl);
+    res.headers.set("x-lob-has-tracking", data.tracking_url ? "1" : "0");
+    res.headers.set("x-lob-target", (affiliateUrl || "").slice(0, 30));
+    return res;
   } catch (err) {
     console.error("Click Route Error:", err);
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
