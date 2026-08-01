@@ -21,7 +21,7 @@ export async function GET(req, { params }) {
     // Partner-Link holen (tracking_url = Admitad-Provisionslink, falls freigeschaltet)
     const { data, error } = await supabase
       .from("affiliates")
-      .select("affiliate_url, tracking_url")
+      .select("affiliate_url,tracking_url")
       .eq("id", id)
       .single();
 
