@@ -17,6 +17,7 @@ export default function TopNav() {
     { key: "lifestyle", url: "/lifestyle" },
     { key: "blog", url: "/blog" },
     { key: "tools", url: "/tools" },
+    { key: "deals", url: "/deals" },
   ];
 
   const getActive = () => {
@@ -27,6 +28,7 @@ export default function TopNav() {
     if (pathname.includes("lifestyle")) return "lifestyle";
     if (pathname.includes("blog")) return "blog";
     if (pathname.includes("tools")) return "tools";
+    if (pathname.includes("deals")) return "deals";
     return null;
   };
 

@@ -12,6 +12,7 @@ export default async function sitemap() {
     { path: "/kinder-bildung", priority: 0.8, changeFrequency: "daily" },
     { path: "/lifestyle", priority: 0.7, changeFrequency: "daily" },
     { path: "/blog", priority: 0.8, changeFrequency: "daily" },
+    { path: "/deals", priority: 0.8, changeFrequency: "daily" },
     { path: "/tools", priority: 0.8, changeFrequency: "weekly" },
     { path: "/tools/kindergeld-checker", priority: 0.8, changeFrequency: "monthly" },
     { path: "/tools/familienbudget", priority: 0.7, changeFrequency: "monthly" },
