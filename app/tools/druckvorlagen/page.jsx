@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import SectionHero from "../../../components/SectionHero";
 import { generateMetadata as buildMeta } from "../../../lib/seo";
+import { IconBudget, IconPlate, IconSuitcase, IconTarget } from "../../../components/UiIcons";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export const metadata = buildMeta({
 });
 
 const HREFS = ["/tools/druckvorlagen/haushaltsbudget", "/tools/druckvorlagen/wochenplan", "/tools/druckvorlagen/packliste", "/tools/druckvorlagen/sparziel"];
-const EMOJIS = ["💶", "🍽️", "🧳", "🎯"];
+const ICONS = [IconBudget, IconPlate, IconSuitcase, IconTarget];
 
 const STR = {
   de: {
@@ -59,14 +60,17 @@ export default function Page() {
     <div className="flex flex-col items-center w-full">
       <SectionHero title={s.title} subtitle={s.subtitle} />
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl px-6 pb-24">
-        {s.sheets.map((sh, i) => (
+        {s.sheets.map((sh, i) => {
+          const Ic = ICONS[i] || IconBudget;
+          return (
           <Link key={HREFS[i]} href={HREFS[i]} className="group bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all p-7 flex flex-col">
-            <div className="text-4xl mb-3">{EMOJIS[i]}</div>
+            <div className="mb-3"><Ic size={52} /></div>
             <h2 className="text-xl font-semibold text-[#0F1C3F] group-hover:text-blue-700 transition">{sh.title}</h2>
             <p className="mt-2 text-gray-500 text-sm flex-1">{sh.desc}</p>
             <span className="mt-4 inline-flex items-center gap-1 text-blue-600 font-semibold text-sm">{s.cta}</span>
           </Link>
-        ))}
+          );
+        })}
       </section>
     </div>
   );

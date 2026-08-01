@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import SectionHero from "../../components/SectionHero";
 import { generateMetadata as buildMeta } from "../../lib/seo";
+import { IconBenefits, IconBudget, IconBaby, IconPiggy, IconCompass, IconPrinter } from "../../components/UiIcons";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ const STR = {
 };
 
 const HREFS = ["/tools/kindergeld-checker", "/tools/familienbudget", "/tools/was-kostet-ein-kind", "/tools/taschengeld", "/tools/spartyp-test", "/tools/druckvorlagen"];
-const EMOJIS = ["🧾", "💰", "🍼", "🐷", "🧭", "🖨️"];
+const ICONS = [IconBenefits, IconBudget, IconBaby, IconPiggy, IconCompass, IconPrinter];
 
 export default function ToolsPage() {
   const loc = cookies().get("lobbium_locale")?.value;
@@ -65,19 +66,22 @@ export default function ToolsPage() {
     <div className="flex flex-col items-center w-full">
       <SectionHero title={s.title} subtitle={s.subtitle} />
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-4xl px-6 pb-24">
-        {s.tools.map((tool, i) => (
+        {s.tools.map((tool, i) => {
+          const Ic = ICONS[i] || IconBudget;
+          return (
           <Link
             key={HREFS[i]}
             href={HREFS[i]}
             className="group bg-white rounded-3xl border border-gray-100 shadow hover:shadow-xl transition-all p-7 flex flex-col"
           >
-            <div className="text-4xl mb-3">{EMOJIS[i]}</div>
+            <div className="mb-3"><Ic size={52} /></div>
             <span className="text-xs font-medium text-blue-600">{tool.tag}</span>
             <h2 className="mt-1 text-xl font-semibold text-[#0F1C3F] group-hover:text-blue-700 transition">{tool.title}</h2>
             <p className="mt-2 text-gray-500 text-sm flex-1">{tool.desc}</p>
             <span className="mt-4 inline-flex items-center gap-1 text-blue-600 font-semibold text-sm">{s.cta}</span>
           </Link>
-        ))}
+          );
+        })}
       </section>
     </div>
   );
