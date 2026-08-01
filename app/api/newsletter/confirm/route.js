@@ -63,10 +63,13 @@ export async function GET(req) {
         const email = decrypt(user.email);
         const name = user.name ? decrypt(user.name) : "";
         if (email && email.includes("@")) {
+          const unsubUrl = user.unsub_token
+            ? `${origin}/api/newsletter/unsubscribe?token=${user.unsub_token}`
+            : `${origin}/newsletter`;
           await sendTemplateEmail({
             to: email,
             templateId: TEMPLATE_WELCOME,
-            params: { SITE_URL: origin, NAME: name, LOCALE: user.locale || "de" },
+            params: { SITE_URL: origin, NAME: name, LOCALE: user.locale || "de", UNSUB_URL: unsubUrl },
           });
         }
       } catch (e) {
