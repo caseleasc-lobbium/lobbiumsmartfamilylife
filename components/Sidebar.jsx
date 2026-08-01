@@ -17,6 +17,7 @@ export default function Sidebar() {
     { name: "Affiliates", path: "/admin/affiliates" },
     { name: "Affiliate Statistik", path: "/admin/affiliates/stats" }, // ✔ G8
     { name: "Blog / Ratgeber", path: "/admin/blog" },
+    { name: "Deal-Radar", path: "/admin/deals" },
     { name: "Fehler-Log", path: "/admin/logs" },
     { name: "Einstellungen", path: "/admin/settings" },
   ];
