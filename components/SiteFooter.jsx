@@ -47,6 +47,12 @@ export default function SiteFooter() {
               Deals
             </a>
             <a
+              href="/vergleich"
+              className="px-4 py-2 sm:px-5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs sm:text-sm text-gray-700"
+            >
+              Vergleiche
+            </a>
+            <a
               href="/impressum"
               className="px-4 py-2 sm:px-5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs sm:text-sm text-gray-700"
             >
