@@ -1,0 +1,79 @@
+<!-- Lobbium · Willkommen (nach Bestätigung) · in Brevo als HTML-Vorlage einfügen.
+     Verwendete Parameter: {{ params.NAME }} -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Willkommen bei Lobbium</title>
+</head>
+<body style="margin:0;padding:0;background:#f8faff;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8faff;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;border:1px solid #e6ecfb;">
+          <!-- Kopf -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#2b6cb0,#1c3d6c);padding:28px 32px;text-align:center;">
+              <div style="font-size:24px;font-weight:800;letter-spacing:2px;color:#ffffff;">LOBBIUM</div>
+              <div style="font-size:12px;letter-spacing:3px;color:#c9def5;text-transform:uppercase;margin-top:4px;">Smart Family Life</div>
+            </td>
+          </tr>
+          <!-- Begrüßung -->
+          <tr>
+            <td style="padding:36px 32px 8px;">
+              <h1 style="margin:0 0 12px;font-size:22px;color:#0f1c3f;">Willkommen an Bord, {{ params.NAME | default : "liebe Familie" }}! 🎉</h1>
+              <p style="margin:0 0 8px;font-size:16px;line-height:1.6;color:#374151;">
+                Deine Anmeldung ist bestätigt – schön, dass du dabei bist! Ab jetzt bekommst du <strong>einmal pro Woche</strong>
+                das Beste für Familien: kompakt, ehrlich und in 2 Minuten gelesen.
+              </p>
+            </td>
+          </tr>
+          <!-- Das bekommst du -->
+          <tr>
+            <td style="padding:16px 32px 8px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:10px 0;font-size:15px;color:#374151;border-bottom:1px solid #eef2fb;">🏷️ &nbsp;<strong>Die besten Familien-Deals</strong> – handverlesen, kein Werbe-Wust</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 0;font-size:15px;color:#374151;border-bottom:1px solid #eef2fb;">💡 &nbsp;<strong>1 konkreter Spartipp</strong> – umsetzbar im Alltag</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 0;font-size:15px;color:#374151;">🧮 &nbsp;<strong>1 nützliches Tool oder Ratgeber</strong> – passend zur Woche</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:26px 32px 10px;">
+              <a href="https://www.lobbium.com/tools" style="display:inline-block;background:#2b6cb0;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:15px 34px;border-radius:12px;">
+                Jetzt unsere Familien-Tools entdecken
+              </a>
+            </td>
+          </tr>
+          <!-- Quicklinks -->
+          <tr>
+            <td align="center" style="padding:6px 32px 30px;font-size:14px;">
+              <a href="https://www.lobbium.com/deals" style="color:#2b6cb0;text-decoration:none;">🎯 Deal-Radar</a> &nbsp;·&nbsp;
+              <a href="https://www.lobbium.com/blog" style="color:#2b6cb0;text-decoration:none;">📖 Ratgeber</a> &nbsp;·&nbsp;
+              <a href="https://www.lobbium.com/tools/kindergeld-checker" style="color:#2b6cb0;text-decoration:none;">🧾 Kindergeld-Checker</a>
+            </td>
+          </tr>
+          <!-- Fuß -->
+          <tr>
+            <td style="background:#0f1c3f;padding:22px 32px;text-align:center;">
+              <div style="font-size:13px;color:#9cb2d6;">© {{ "now" | date: "%Y" }} Lobbium – Smart Family Life</div>
+              <div style="font-size:12px;color:#6b7ea6;margin-top:6px;">
+                <a href="https://www.lobbium.com" style="color:#9cc2f0;text-decoration:none;">lobbium.com</a> ·
+                <a href="{{ unsubscribe }}" style="color:#9cc2f0;text-decoration:none;">Abmelden</a>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
