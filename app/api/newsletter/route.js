@@ -86,6 +86,7 @@ export async function POST(req) {
         email_hash: hash,
         name: encryptedName,
         token,
+        unsub_token: (Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)),
         locale: locale || "de",
         confirmed: false,
       });
