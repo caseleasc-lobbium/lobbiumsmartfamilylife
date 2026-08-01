@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useI18n } from "./i18n/LanguageProvider";
+import { IconMail } from "./UiIcons";
 
 const STR = {
   de: {
@@ -15,6 +16,7 @@ const STR = {
     needConsent: "Bitte bestätige die Datenschutzerklärung.",
     err: "Etwas ist schiefgelaufen. Bitte später erneut versuchen.",
     net: "Netzwerkfehler. Bitte später erneut versuchen.",
+    already: "Diese E-Mail ist bereits angemeldet. 🎉",
     successT: "Fast geschafft!",
     successD: "Danke! Wir haben dir eine Bestätigungs-E-Mail geschickt – bitte klicke darin auf den Bestätigungslink.",
     successS: "Keine Mail? Bitte auch im Spam-Ordner nachsehen.",
@@ -31,6 +33,7 @@ const STR = {
     needConsent: "Please accept the privacy policy.",
     err: "Something went wrong. Please try again later.",
     net: "Network error. Please try again later.",
+    already: "This email is already subscribed. 🎉",
     successT: "Almost there!",
     successD: "Thanks! We've sent you a confirmation email – please click „Confirm“ in it.",
     successS: "No email? Please also check your spam folder.",
@@ -47,6 +50,7 @@ const STR = {
     needConsent: "Veuillez accepter la politique de confidentialité.",
     err: "Une erreur est survenue. Réessayez plus tard.",
     net: "Erreur réseau. Réessayez plus tard.",
+    already: "Cet e-mail est déjà inscrit. 🎉",
     successT: "Presque terminé !",
     successD: "Merci ! Nous vous avons envoyé un e-mail de confirmation – cliquez sur « Confirmer ».",
     successS: "Pas d'e-mail ? Vérifiez aussi vos spams.",
@@ -76,7 +80,8 @@ export default function NewsletterSignup({ heading, sub, compact = false }) {
         body: JSON.stringify({ email, name: "", locale }),
       });
       const d = await res.json();
-      if (!res.ok || d.error) setMsg(s.err);
+      if (d.code === "already_subscribed") setMsg(s.already);
+      else if (!res.ok || d.error) setMsg(s.err);
       else { setOk(true); setEmail(""); setConsent(false); }
     } catch {
       setMsg(s.net);
@@ -98,7 +103,7 @@ export default function NewsletterSignup({ heading, sub, compact = false }) {
   return (
     <div className={`bg-white rounded-3xl border border-gray-100 shadow ${compact ? "p-6" : "p-7"}`}>
       <div className="flex items-start gap-3">
-        <span className="text-3xl">📬</span>
+        <IconMail size={46} />
         <div>
           <h3 className="text-lg font-bold text-[#0F1C3F]">{heading || s.heading}</h3>
           <p className="mt-1 text-sm text-gray-500">{sub || s.sub}</p>

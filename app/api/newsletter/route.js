@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { sendTemplateEmail } from "@/lib/email";
-import { encrypt } from "@/lib/encryption";
+import { encrypt, emailHash } from "@/lib/encryption";
 import { getSupabase } from "@/lib/supabase";
 import { newsletterSchema, parseBody } from "@/lib/validation";
 import { getClientIp } from "@/lib/security";
@@ -45,9 +45,35 @@ export async function POST(req) {
     }
     const { email, name, locale } = parsed.data;
 
-    // 🔐 Verschlüsseln
+    // 🔐 Verschlüsseln + deterministischer Hash für Dubletten-Prüfung
     const encryptedEmail = encrypt(email);
     const encryptedName = name ? encrypt(name) : null;
+    const hash = emailHash(email);
+
+    // 🔎 Bereits registriert?
+    const { data: existing } = await supabase
+      .from("newsletter_subscribers")
+      .select("id, confirmed")
+      .eq("email_hash", hash)
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      if (existing.confirmed) {
+        // Schon bestätigt → klar ablehnen
+        return NextResponse.json({ code: "already_subscribed" }, { status: 409 });
+      }
+      // Angemeldet, aber noch nicht bestätigt → Bestätigungsmail erneut senden
+      const token2 = Math.random().toString(36).substring(2, 12);
+      await supabase.from("newsletter_subscribers").update({ token: token2, locale: locale || "de" }).eq("id", existing.id);
+      const confirmUrl2 = `${getOrigin(req)}/api/newsletter/confirm?token=${token2}&lang=${locale}`;
+      await sendTemplateEmail({
+        to: email,
+        templateId: TEMPLATE_DOUBLE_OPT_IN,
+        params: { CONFIRM_URL: confirmUrl2, NAME: name || "", LOCALE: locale },
+      });
+      return NextResponse.json({ success: true, code: "pending_resent" });
+    }
 
     // 🔑 Token für Double-Opt-In
     const token = Math.random().toString(36).substring(2, 12);
@@ -57,6 +83,7 @@ export async function POST(req) {
       .from("newsletter_subscribers")
       .insert({
         email: encryptedEmail,
+        email_hash: hash,
         name: encryptedName,
         token,
         locale: locale || "de",
@@ -64,6 +91,10 @@ export async function POST(req) {
       });
 
     if (insertError) {
+      // Unique-Verletzung (Race) ebenfalls als „schon angemeldet" behandeln
+      if (insertError.code === "23505") {
+        return NextResponse.json({ code: "already_subscribed" }, { status: 409 });
+      }
       console.error("Supabase Insert ERROR:", insertError);
       return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
     }

@@ -3,6 +3,9 @@
 import SectionHero from "../../components/SectionHero";
 import NewsletterSignup from "../../components/NewsletterSignup";
 import { useI18n } from "../../components/i18n/LanguageProvider";
+import { IconDeal, IconTip, IconTool } from "../../components/UiIcons";
+
+const ICONS = [IconDeal, IconTip, IconTool];
 
 const STR = {
   de: {
@@ -56,15 +59,18 @@ export default function NewsletterPage() {
           <div>
             <h2 className="text-xl font-bold text-[#0F1C3F] mb-4">{s.getTitle}</h2>
             <div className="space-y-4">
-              {s.items.map((it, i) => (
-                <div key={i} className="flex gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                  <span className="text-3xl">{it.e}</span>
-                  <div>
-                    <h3 className="font-semibold text-[#0F1C3F]">{it.t}</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">{it.d}</p>
+              {s.items.map((it, i) => {
+                const Ic = ICONS[i] || IconTip;
+                return (
+                  <div key={i} className="flex gap-4 items-center bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                    <Ic size={46} />
+                    <div>
+                      <h3 className="font-semibold text-[#0F1C3F]">{it.t}</h3>
+                      <p className="text-sm text-gray-500 mt-0.5">{it.d}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <h2 className="text-xl font-bold text-[#0F1C3F] mt-8 mb-3">{s.whyTitle}</h2>
