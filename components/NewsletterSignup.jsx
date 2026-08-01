@@ -16,7 +16,7 @@ const STR = {
     err: "Etwas ist schiefgelaufen. Bitte später erneut versuchen.",
     net: "Netzwerkfehler. Bitte später erneut versuchen.",
     successT: "Fast geschafft!",
-    successD: "Danke! Wir haben dir eine Bestätigungs-E-Mail geschickt – bitte klicke darin auf „Bestätigen".",
+    successD: "Danke! Wir haben dir eine Bestätigungs-E-Mail geschickt – bitte klicke darin auf den Bestätigungslink.",
     successS: "Keine Mail? Bitte auch im Spam-Ordner nachsehen.",
     trust: "Kostenlos · jederzeit abbestellbar · kein Spam",
   },
