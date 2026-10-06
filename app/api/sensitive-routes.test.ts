@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GET as getNewsletter } from "./newsletter/route";
 import * as subscribersRoute from "./subscribers/route";
 import { GET as getContact } from "./contact/route";
+import { GET as sendWeeklyNewsletter } from "./admin/newsletter/send-weekly/route";
 import { GET as getAffiliateStats } from "./affiliates/stats/route";
 import { GET as getAffiliateAnalytics } from "./affiliates/analytics/route";
 import { GET as getAffiliateCategoryStats } from "./affiliates/category-stats/route";
@@ -11,6 +12,7 @@ function anonymousRequest(path: string) {
   return {
     url: `https://www.lobbium.com${path}`,
     cookies: { get: () => undefined },
+    headers: { get: () => null },
   } as never;
 }
 
@@ -26,6 +28,7 @@ describe("sensitive API routes", () => {
     ["newsletter", getNewsletter, "/api/newsletter"],
     ["subscribers", subscribersRoute.GET, "/api/subscribers"],
     ["contact", getContact, "/api/contact"],
+    ["weekly newsletter", sendWeeklyNewsletter, "/api/admin/newsletter/send-weekly"],
     ["affiliate stats", getAffiliateStats, "/api/affiliates/stats"],
     ["affiliate analytics", getAffiliateAnalytics, "/api/affiliates/analytics"],
     [

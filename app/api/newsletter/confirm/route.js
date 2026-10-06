@@ -4,18 +4,29 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { decrypt } from "@/lib/encryption";
 import { sendTemplateEmail } from "@/lib/email";
+import { PRIVATE_API_HEADERS } from "@/lib/security";
+import { logError } from "@/lib/errorlog";
 
 const supabase = getSupabase();
 
 const TEMPLATE_WELCOME = 5; // "Lobbium – Willkommen"
 
 function getOrigin(req) {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SITE_URL).origin;
+    } catch {}
+  }
   const host = req.headers.get("host");
   if (!host) return process.env.NEXT_PUBLIC_SITE_URL || "https://www.lobbium.com";
   const proto =
     req.headers.get("x-forwarded-proto") ||
     (host.includes("localhost") ? "http" : "https");
   return `${proto}://${host}`;
+}
+
+function redirect(url) {
+  return NextResponse.redirect(url, { headers: PRIVATE_API_HEADERS });
 }
 
 // GET → Newsletter bestätigen (Double-Opt-In)
@@ -25,8 +36,8 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const token = searchParams.get("token");
 
-    if (!token) {
-      return NextResponse.redirect(`${origin}/`);
+    if (!token || token.length < 10 || token.length > 128) {
+      return redirect(`${origin}/`);
     }
 
     // Token finden
@@ -38,7 +49,7 @@ export async function GET(req) {
 
     if (findError || !user) {
       // Ungültiger/abgelaufener Link → freundlich zur Startseite statt roher 404
-      return NextResponse.redirect(`${origin}/`);
+      return redirect(`${origin}/`);
     }
 
     const wasConfirmed = user.confirmed === true;
@@ -54,7 +65,8 @@ export async function GET(req) {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error("Supabase Update Error:", updateError);
+      await logError("newsletter.confirm-update", updateError.message, {});
+      return redirect(`${origin}/newsletter/?error=confirmation`);
     }
 
     // Willkommens-Mail (Brevo-Template) nur bei der ERSTEN Bestätigung
@@ -66,21 +78,28 @@ export async function GET(req) {
           const unsubUrl = user.unsub_token
             ? `${origin}/api/newsletter/unsubscribe?token=${user.unsub_token}`
             : `${origin}/newsletter`;
-          await sendTemplateEmail({
+          const welcome = await sendTemplateEmail({
             to: email,
             templateId: TEMPLATE_WELCOME,
             params: { SITE_URL: origin, NAME: name, LOCALE: user.locale || "de", UNSUB_URL: unsubUrl },
           });
+          if (!welcome.success) {
+            await logError(
+              "newsletter.brevo-welcome",
+              welcome.error || "Send failed",
+              {}
+            );
+          }
         }
       } catch (e) {
-        console.warn("⚠️ Willkommens-Mail übersprungen:", e.message);
+        await logError("newsletter.welcome", e.message, {});
       }
     }
 
     const lang = user.locale || "de";
-    return NextResponse.redirect(`${origin}/newsletter/bestaetigt/?lang=${lang}`);
+    return redirect(`${origin}/newsletter/bestaetigt/?lang=${lang}`);
   } catch (err) {
-    console.error("❌ Bestätigung Fehler:", err);
-    return NextResponse.redirect(`${origin}/`);
+    await logError("newsletter.confirm", err, {});
+    return redirect(`${origin}/`);
   }
 }

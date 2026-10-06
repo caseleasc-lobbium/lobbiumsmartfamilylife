@@ -54,11 +54,15 @@ export async function POST(req) {
     }
 
     // Admin-Benachrichtigung via Brevo
-    if (process.env.CONTACT_RECEIVER) {
-      await sendEmail({
+    const notificationConfigured = Boolean(process.env.CONTACT_RECEIVER);
+    let notificationFailed = false;
+    if (notificationConfigured) {
+      const notification = await sendEmail({
         from: { name: "Lobbium Kontaktformular", email: "info@lobbium.com" },
         to: process.env.CONTACT_RECEIVER,
+        replyTo: { name: safeName, email },
         subject: `Neue Nachricht von ${safeName}`,
+        tags: ["contact-form"],
         html: `
           <!DOCTYPE html>
           <html>
@@ -81,12 +85,30 @@ export async function POST(req) {
           </html>
         `,
       });
+      notificationFailed = !notification.success;
+      if (notificationFailed) {
+        await logError(
+          "contact.brevo",
+          notification.error || "Send failed",
+          {}
+        );
+      }
     }
 
-    return NextResponse.json({ success: true });
+    if (insErr && (!notificationConfigured || notificationFailed)) {
+      return NextResponse.json(
+        { error: "Nachricht konnte nicht zugestellt werden" },
+        { status: 503, headers: SECURITY_HEADERS }
+      );
+    }
+
+    return NextResponse.json({ success: true }, { headers: SECURITY_HEADERS });
   } catch (err) {
     await logError("contact.POST", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Serverfehler" },
+      { status: 500, headers: SECURITY_HEADERS }
+    );
   }
 }
 
