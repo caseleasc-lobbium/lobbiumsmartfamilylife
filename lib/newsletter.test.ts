@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildWeeklyHtml } from "./newsletter";
+import { buildAdminMessageHtml, buildWeeklyHtml } from "./newsletter";
 
 describe("weekly newsletter HTML", () => {
   it("escapes content and rejects unsafe links", () => {
@@ -24,6 +24,22 @@ describe("weekly newsletter HTML", () => {
     expect(html).not.toContain('<img src=x onerror="alert(1)">');
     expect(html).toContain("Deal &amp; save");
     expect(html).toContain('href="https://www.lobbium.com/deals"');
+    expect(html).toContain('href="https://www.lobbium.com/newsletter"');
+  });
+});
+
+describe("admin message HTML", () => {
+  it("escapes names and message content instead of accepting HTML", () => {
+    const html = buildAdminMessageHtml({
+      name: '<img src=x onerror="alert(1)">',
+      message: '<script>alert("x")</script>\nZweite Zeile',
+      unsubUrl: "javascript:alert(1)",
+    });
+
+    expect(html).not.toContain('<img src=x onerror="alert(1)">');
+    expect(html).not.toContain('<script>alert("x")</script>');
+    expect(html).not.toContain("javascript:");
+    expect(html).toContain("Zweite Zeile");
     expect(html).toContain('href="https://www.lobbium.com/newsletter"');
   });
 });
