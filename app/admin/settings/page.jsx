@@ -71,7 +71,6 @@ export default function AdminSettingsPage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        authorization: "lobbiumAdminAuth:true",
       },
       body: JSON.stringify(settings),
     });

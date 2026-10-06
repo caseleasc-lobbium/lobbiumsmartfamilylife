@@ -5,7 +5,11 @@ import { sendTemplateEmail } from "@/lib/email";
 import { encrypt, emailHash } from "@/lib/encryption";
 import { getSupabase } from "@/lib/supabase";
 import { newsletterSchema, parseBody } from "@/lib/validation";
-import { getClientIp } from "@/lib/security";
+import {
+  getClientIp,
+  PRIVATE_API_HEADERS,
+  validateAdminAuth,
+} from "@/lib/security";
 import { rateLimitDb } from "@/lib/ratelimit";
 import { logError } from "@/lib/errorlog";
 
@@ -132,6 +136,13 @@ export async function POST(req) {
 /* ============================================================================= */
 
 export async function GET(req) {
+  if (!validateAdminAuth(req.cookies)) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_API_HEADERS }
+    );
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter"); // today | all | recent
@@ -143,7 +154,10 @@ export async function GET(req) {
 
     if (error) {
       console.error("Supabase GET Error:", error);
-      return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
+      return NextResponse.json(
+        { error: "DB Fehler" },
+        { status: 500, headers: PRIVATE_API_HEADERS }
+      );
     }
 
     if (filter === "today") {
@@ -157,9 +171,15 @@ export async function GET(req) {
       entries = entries.slice(0, 10);
     }
 
-    return NextResponse.json(entries, { status: 200 });
+    return NextResponse.json(entries, {
+      status: 200,
+      headers: PRIVATE_API_HEADERS,
+    });
   } catch (error) {
     console.error("❌ Fehler bei GET /api/newsletter:", error);
-    return NextResponse.json({ error: "Fehler beim Laden" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Fehler beim Laden" },
+      { status: 500, headers: PRIVATE_API_HEADERS }
+    );
   }
 }

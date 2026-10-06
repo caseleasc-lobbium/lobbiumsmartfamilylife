@@ -5,6 +5,7 @@ import {
   rateLimit,
   validateAdminAuth,
   getClientIp,
+  PRIVATE_API_HEADERS,
   SECURITY_HEADERS,
 } from "./security";
 import { createSessionToken } from "./session";
@@ -70,5 +71,10 @@ describe("SECURITY_HEADERS", () => {
   it("enthält die wichtigsten Schutz-Header", () => {
     expect(SECURITY_HEADERS["X-Frame-Options"]).toBe("DENY");
     expect(SECURITY_HEADERS["X-Content-Type-Options"]).toBe("nosniff");
+  });
+
+  it("markiert sensible API-Antworten als privat und nicht cachebar", () => {
+    expect(PRIVATE_API_HEADERS["Cache-Control"]).toContain("private");
+    expect(PRIVATE_API_HEADERS["Cache-Control"]).toContain("no-store");
   });
 });

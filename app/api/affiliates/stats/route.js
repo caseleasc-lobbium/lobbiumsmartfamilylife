@@ -1,9 +1,19 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { PRIVATE_API_HEADERS, validateAdminAuth } from "@/lib/security";
 
 const supabase = getSupabase();
 
-export async function GET() {
+export async function GET(request) {
+  if (!validateAdminAuth(request.cookies)) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_API_HEADERS }
+    );
+  }
+
   try {
     // 📌 Alle Partner laden
     const { data: affiliates, error: affiliatesError } = await supabase
@@ -13,7 +23,10 @@ export async function GET() {
 
     if (affiliatesError) {
       console.error("Affiliate Load Error:", affiliatesError);
-      return NextResponse.json({ error: "DB error" }, { status: 500 });
+      return NextResponse.json(
+        { error: "DB error" },
+        { status: 500, headers: PRIVATE_API_HEADERS }
+      );
     }
 
     // 📌 Alle Klicks laden
@@ -24,7 +37,10 @@ export async function GET() {
 
     if (clicksError) {
       console.error("Clicks Load Error:", clicksError);
-      return NextResponse.json({ error: "DB error" }, { status: 500 });
+      return NextResponse.json(
+        { error: "DB error" },
+        { status: 500, headers: PRIVATE_API_HEADERS }
+      );
     }
 
     // Kategorie je Partner (für Kategorie-Aggregation)
@@ -92,19 +108,25 @@ export async function GET() {
       }))
       .sort((a, b) => b.count - a.count);
 
-    return NextResponse.json({
-      totalPartners: affiliates.length,
-      totalClicks: clicks.length,
-      today: todayClicks,
-      yesterday: yesterdayClicks,
-      stats,
-      perDay,
-      perCategory,
-      ranking,
-      latestClicks,
-    });
+    return NextResponse.json(
+      {
+        totalPartners: affiliates.length,
+        totalClicks: clicks.length,
+        today: todayClicks,
+        yesterday: yesterdayClicks,
+        stats,
+        perDay,
+        perCategory,
+        ranking,
+        latestClicks,
+      },
+      { headers: PRIVATE_API_HEADERS }
+    );
   } catch (err) {
     console.error("Stats Error:", err);
-    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Server Error" },
+      { status: 500, headers: PRIVATE_API_HEADERS }
+    );
   }
 }

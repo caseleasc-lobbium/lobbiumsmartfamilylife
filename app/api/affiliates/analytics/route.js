@@ -2,11 +2,19 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
+import { PRIVATE_API_HEADERS, validateAdminAuth } from "@/lib/security";
 
 // Supabase
 const supabase = getSupabase();
 
-export async function GET() {
+export async function GET(request) {
+  if (!validateAdminAuth(request.cookies)) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_API_HEADERS }
+    );
+  }
+
   try {
     const todayISO = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
     const todayStart = todayISO + "T00:00:00.000Z";
@@ -51,14 +59,20 @@ export async function GET() {
       .map(([partner_id, count]) => ({ partner_id, count }))
       .sort((a, b) => b.count - a.count);
 
-    return NextResponse.json({
-      today: todayCount || 0,
-      yesterday: yesterdayCount || 0,
-      total: totalCount || 0,
-      ranking: sortedRanking,
-    });
+    return NextResponse.json(
+      {
+        today: todayCount || 0,
+        yesterday: yesterdayCount || 0,
+        total: totalCount || 0,
+        ranking: sortedRanking,
+      },
+      { headers: PRIVATE_API_HEADERS }
+    );
   } catch (err) {
     console.error("AFFILIATE ANALYTICS ERROR:", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Serverfehler" },
+      { status: 500, headers: PRIVATE_API_HEADERS }
+    );
   }
 }

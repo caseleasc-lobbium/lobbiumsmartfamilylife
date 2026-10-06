@@ -3,7 +3,13 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/email";
 import { getSupabase } from "@/lib/supabase";
-import { getClientIp, sanitizeInput, SECURITY_HEADERS } from "@/lib/security";
+import {
+  getClientIp,
+  PRIVATE_API_HEADERS,
+  sanitizeInput,
+  SECURITY_HEADERS,
+  validateAdminAuth,
+} from "@/lib/security";
 import { rateLimitDb } from "@/lib/ratelimit";
 import { logError } from "@/lib/errorlog";
 import { contactSchema, parseBody } from "@/lib/validation";
@@ -89,6 +95,13 @@ export async function POST(req) {
 /* ============================================================================= */
 
 export async function GET(req) {
+  if (!validateAdminAuth(req.cookies)) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_API_HEADERS }
+    );
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter"); // today | recent | all
@@ -100,7 +113,10 @@ export async function GET(req) {
 
     if (error) {
       await logError("contact.GET", error.message);
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json([], {
+        status: 200,
+        headers: PRIVATE_API_HEADERS,
+      });
     }
 
     let messages = (data || []).map((m) => ({
@@ -122,9 +138,15 @@ export async function GET(req) {
       messages = messages.slice(0, 5);
     }
 
-    return NextResponse.json(messages, { status: 200 });
+    return NextResponse.json(messages, {
+      status: 200,
+      headers: PRIVATE_API_HEADERS,
+    });
   } catch (err) {
     await logError("contact.GET", err);
-    return NextResponse.json([], { status: 200 });
+    return NextResponse.json([], {
+      status: 200,
+      headers: PRIVATE_API_HEADERS,
+    });
   }
 }

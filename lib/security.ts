@@ -108,6 +108,12 @@ export const SECURITY_HEADERS: Record<string, string> = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
 
+/** Schutz-Header für Antworten mit personenbezogenen oder internen Daten. */
+export const PRIVATE_API_HEADERS: Record<string, string> = {
+  ...SECURITY_HEADERS,
+  "Cache-Control": "private, no-store, max-age=0",
+};
+
 /** Restriktive CORS-Header für erlaubte Origins. */
 export function getCorsHeaders(origin: string): Record<string, string> {
   const allowedOrigins = [

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import fs from "fs";
 import path from "path";
+import { PRIVATE_API_HEADERS, validateAdminAuth } from "@/lib/security";
 
 // Supabase
 const supabase = getSupabase();
@@ -15,7 +16,14 @@ function loadAffiliates() {
   return JSON.parse(fs.readFileSync(affiliatesPath, "utf8"));
 }
 
-export async function GET() {
+export async function GET(request) {
+  if (!validateAdminAuth(request.cookies)) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_API_HEADERS }
+    );
+  }
+
   try {
     const affiliates = loadAffiliates();
 
@@ -35,9 +43,10 @@ export async function GET() {
       .select("partner_id, clicked_at");
 
     if (!clicks) {
-      return NextResponse.json({
-        error: "Keine Klickdaten gefunden",
-      });
+      return NextResponse.json(
+        { error: "Keine Klickdaten gefunden" },
+        { headers: PRIVATE_API_HEADERS }
+      );
     }
 
     // Kategorien vorbereiten
@@ -97,9 +106,12 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json(stats);
+    return NextResponse.json(stats, { headers: PRIVATE_API_HEADERS });
   } catch (err) {
     console.error("CATEGORY STATS ERROR:", err);
-    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Serverfehler" },
+      { status: 500, headers: PRIVATE_API_HEADERS }
+    );
   }
 }

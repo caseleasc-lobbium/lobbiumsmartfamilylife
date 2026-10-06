@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { PRIVATE_API_HEADERS, validateAdminAuth } from "@/lib/security";
 
 export const dynamic = "force-dynamic"; // 🟦 wichtig für Netlify & SSR
 
@@ -43,22 +44,32 @@ function writeSettings(data) {
 }
 
 // GET: Settings abrufen
-export async function GET() {
+export async function GET(req) {
+  if (!validateAdminAuth(req.cookies)) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_API_HEADERS }
+    );
+  }
+
   const settings = readSettings();
-  return NextResponse.json(settings);
+  return NextResponse.json(settings, { headers: PRIVATE_API_HEADERS });
 }
 
 // POST: Settings speichern (Admin only)
 export async function POST(req) {
-  const auth = req.headers.get("authorization");
-
-  // Auth-Check
-  if (auth !== "lobbiumAdminAuth:true") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!validateAdminAuth(req.cookies)) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: PRIVATE_API_HEADERS }
+    );
   }
 
   const data = await req.json();
   writeSettings(data);
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json(
+    { success: true },
+    { headers: PRIVATE_API_HEADERS }
+  );
 }
