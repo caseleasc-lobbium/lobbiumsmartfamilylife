@@ -7,7 +7,8 @@ const supabase = getSupabase();
 
 export async function GET(request, { params }) {
   if (!validateAdminAuth(request.cookies)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { data, error } = await supabase.from("deals").select("*").eq("id", Number(params.id)).maybeSingle();
+  const { id } = await params;
+  const { data, error } = await supabase.from("deals").select("*").eq("id", Number(id)).maybeSingle();
   if (error || !data) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
   return NextResponse.json(data);
 }
@@ -15,6 +16,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   if (!validateAdminAuth(request.cookies)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
+    const { id } = await params;
     const b = await request.json();
     if (!(b.title || "").trim()) return NextResponse.json({ error: "Titel fehlt" }, { status: 400 });
     const update = {
@@ -30,7 +32,7 @@ export async function PUT(request, { params }) {
       published: b.published !== false,
       updated_at: new Date().toISOString(),
     };
-    const { data, error } = await supabase.from("deals").update(update).eq("id", Number(params.id)).select().single();
+    const { data, error } = await supabase.from("deals").update(update).eq("id", Number(id)).select().single();
     if (error) return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
     return NextResponse.json(data);
   } catch {
@@ -40,7 +42,8 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   if (!validateAdminAuth(request.cookies)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { error } = await supabase.from("deals").delete().eq("id", Number(params.id));
+  const { id } = await params;
+  const { error } = await supabase.from("deals").delete().eq("id", Number(id));
   if (error) return NextResponse.json({ error: "DB Fehler" }, { status: 500 });
   return NextResponse.json({ success: true });
 }

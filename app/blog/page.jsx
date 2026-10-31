@@ -34,8 +34,10 @@ const coverFor = (category) => `/blog/cover-${COVER_CATS.has(category) ? categor
 
 export default async function BlogPage() {
   const supabase = getSupabase();
-  const locale = ["de", "en", "fr"].includes(cookies().get("lobbium_locale")?.value)
-    ? cookies().get("lobbium_locale").value
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("lobbium_locale")?.value;
+  const locale = ["de", "en", "fr"].includes(localeCookie)
+    ? localeCookie
     : "de";
 
   // Kanonische Themen-Liste = DE-Artikel

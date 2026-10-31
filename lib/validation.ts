@@ -4,17 +4,17 @@
 import { z } from "zod";
 
 export const emailSchema = z
-  .string({ required_error: "E-Mail fehlt" })
+  .string({ error: "E-Mail fehlt" })
   .trim()
   .min(3, "Ungültige E-Mail-Adresse")
   .max(120, "E-Mail-Adresse zu lang")
   .email("Ungültige E-Mail-Adresse");
 
 export const contactSchema = z.object({
-  name: z.string({ required_error: "Name fehlt" }).trim().min(1, "Name fehlt").max(100, "Name zu lang"),
+  name: z.string({ error: "Name fehlt" }).trim().min(1, "Name fehlt").max(100, "Name zu lang"),
   email: emailSchema,
   message: z
-    .string({ required_error: "Nachricht fehlt" })
+    .string({ error: "Nachricht fehlt" })
     .trim()
     .min(1, "Nachricht fehlt")
     .max(5000, "Nachricht zu lang"),

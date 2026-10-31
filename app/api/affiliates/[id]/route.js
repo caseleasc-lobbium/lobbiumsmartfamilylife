@@ -12,7 +12,8 @@ const supabase = getSupabase();
 // ------------------------------------------------------
 export async function GET(req, { params }) {
   try {
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
 
     if (!id) {
       return NextResponse.json({ error: "Ungültige Partner-ID" }, { status: 400 });
@@ -73,7 +74,8 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = Number(params.id);
+    const { id: rawId } = await params;
+    const id = Number(rawId);
     if (!id) {
       return NextResponse.json({ error: "Ungültige Partner-ID" }, { status: 400 });
     }

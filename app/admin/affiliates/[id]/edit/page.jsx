@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
-export default function EditAffiliatePage({ params }) {
+export default function EditAffiliatePage() {
   const router = useRouter();
-  const { id } = params;
+  const { id } = useParams();
 
   const [loading, setLoading] = useState(true);
   const [affiliate, setAffiliate] = useState(null);
@@ -55,7 +55,6 @@ export default function EditAffiliatePage({ params }) {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        authorization: "lobbiumAdminAuth:true",
       },
       body: JSON.stringify({
         title,

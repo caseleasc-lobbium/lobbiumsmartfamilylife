@@ -1,14 +1,22 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { getSupabase } from "@/lib/supabase";
 
 const supabase = getSupabase();
 
 function isAuthorized(req) {
   const auth = req.headers.get("authorization");
-  const key = process.env.ADMIN_SECRET || "lobbium_secure_key_2025_V6.1";
-  return auth === `Bearer ${key}`;
+  const key = process.env.AFFILIATE_REVENUE_SECRET;
+  if (!key || !auth?.startsWith("Bearer ")) return false;
+
+  const provided = Buffer.from(auth.slice(7));
+  const expected = Buffer.from(key);
+  return (
+    provided.length === expected.length &&
+    crypto.timingSafeEqual(provided, expected)
+  );
 }
 
 export async function POST(req) {
@@ -17,11 +25,21 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { partnerId, amount, currency, clickId } = await req.json();
+    const body = await req.json();
+    const partnerId = Number(body.partnerId);
+    const amount = Number(body.amount);
+    const currency = String(body.currency || "EUR").trim().toUpperCase();
+    const clickId = body.clickId ?? null;
 
-    if (!partnerId || !amount) {
+    if (
+      !Number.isInteger(partnerId) ||
+      partnerId <= 0 ||
+      !Number.isFinite(amount) ||
+      amount <= 0 ||
+      !/^[A-Z]{3}$/.test(currency)
+    ) {
       return NextResponse.json(
-        { error: "Pflichtfelder fehlen" },
+        { error: "Ungültige Umsatzdaten" },
         { status: 400 }
       );
     }
@@ -30,7 +48,7 @@ export async function POST(req) {
       partner_id: partnerId,
       amount,
       currency: currency || "EUR",
-      click_id: clickId || null,
+      click_id: clickId,
     });
 
     if (error) {

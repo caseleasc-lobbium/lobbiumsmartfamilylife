@@ -1,9 +1,10 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { PRIVATE_API_HEADERS, validateAdminAuth } from "@/lib/security";
 
-export async function GET() {
-  // ✅ Konsistenter Cookie-Name: lobbium_admin_auth
-  const session = cookies().get("lobbium_admin_auth");
-  const authorized = session?.value === "true";
-  return NextResponse.json({ authorized });
+export async function GET(request) {
+  const authorized = validateAdminAuth(request.cookies);
+  return NextResponse.json(
+    { authorized },
+    { headers: PRIVATE_API_HEADERS }
+  );
 }

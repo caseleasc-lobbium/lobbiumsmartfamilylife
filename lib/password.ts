@@ -19,12 +19,17 @@ export function verifyPassword(
 ): boolean {
   try {
     if (!stored || typeof stored !== "string") return false;
-    const [scheme, saltHex, hashHex] = stored.split(":");
-    if (scheme !== "scrypt" || !saltHex || !hashHex) return false;
+    const parts = stored.split(":");
+    if (parts.length !== 3) return false;
+
+    const [scheme, saltHex, hashHex] = parts;
+    if (scheme !== "scrypt") return false;
+    if (!/^[0-9a-f]{32}$/.test(saltHex)) return false;
+    if (!new RegExp(`^[0-9a-f]{${KEYLEN * 2}}$`).test(hashHex)) return false;
 
     const salt = Buffer.from(saltHex, "hex");
     const expected = Buffer.from(hashHex, "hex");
-    const derived = crypto.scryptSync(String(password), salt, expected.length || KEYLEN);
+    const derived = crypto.scryptSync(String(password), salt, KEYLEN);
 
     if (derived.length !== expected.length) return false;
     return crypto.timingSafeEqual(derived, expected);

@@ -35,8 +35,8 @@ const STR = {
   },
 };
 
-export default function Page() {
-  const loc = cookies().get("lobbium_locale")?.value;
+export default async function Page() {
+  const loc = (await cookies()).get("lobbium_locale")?.value;
   const s = STR[["de", "en", "fr"].includes(loc) ? loc : "de"];
   return (
     <div className="flex flex-col items-center w-full">

@@ -27,7 +27,7 @@ const img = (u) => (!u ? "/partner-placeholder.svg" : u.startsWith("http") ? u :
 
 export default async function DealsPage() {
   const supabase = getSupabase();
-  const loc = cookies().get("lobbium_locale")?.value;
+  const loc = (await cookies()).get("lobbium_locale")?.value;
   const s = STR[["de", "en", "fr"].includes(loc) ? loc : "de"] || STR.de;
   const cat = CAT[["de", "en", "fr"].includes(loc) ? loc : "de"] || CAT.de;
   const today = new Date().toISOString().slice(0, 10);

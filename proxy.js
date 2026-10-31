@@ -37,7 +37,7 @@ async function verifyEdgeToken(token) {
   }
 }
 
-export async function middleware(req) {
+export async function proxy(req) {
   const url = req.nextUrl.clone();
   const host = req.headers.get("host") || "";
   const pathname = url.pathname;

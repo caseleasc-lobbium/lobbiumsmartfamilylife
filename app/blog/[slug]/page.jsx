@@ -44,8 +44,9 @@ function coverFor(category) {
 }
 
 export async function generateMetadata({ params }) {
-  const post = await getPost(params.slug);
-  if (!post) return buildMeta({ title: "Artikel nicht gefunden", path: `/blog/${params.slug}` });
+  const { slug } = await params;
+  const post = await getPost(slug);
+  if (!post) return buildMeta({ title: "Artikel nicht gefunden", path: `/blog/${slug}` });
 
   const siblings = await getSiblings(post.translation_key);
   let languages;
@@ -66,7 +67,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function BlogPostPage({ params }) {
-  const post = await getPost(params.slug);
+  const { slug } = await params;
+  const post = await getPost(slug);
   if (!post) notFound();
 
   const siblings = await getSiblings(post.translation_key);

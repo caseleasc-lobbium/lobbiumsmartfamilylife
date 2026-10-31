@@ -23,8 +23,8 @@ const ITEMS = [
   { href: "/vergleich/girokonto-familien", emoji: "🏦", de: ["Girokonto für Familien", "Filiale, Direktbank oder Smartphone-Bank?"], en: ["Family current account", "Branch, direct or smartphone bank?"], fr: ["Compte courant famille", "Agence, en ligne ou néobanque ?"] },
 ];
 
-export default function Page() {
-  const loc = cookies().get("lobbium_locale")?.value;
+export default async function Page() {
+  const loc = (await cookies()).get("lobbium_locale")?.value;
   const L = ["de", "en", "fr"].includes(loc) ? loc : "de";
   const s = STR[L];
   return (

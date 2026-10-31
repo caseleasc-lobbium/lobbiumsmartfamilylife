@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
 
-export default function NewsletterPage({ params }) {
+export default function NewsletterPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const locale = params.locale;
+  const locale = "de";
 
   async function handleSubmit(e) {
     e.preventDefault();

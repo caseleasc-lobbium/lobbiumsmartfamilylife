@@ -34,6 +34,9 @@ describe("password hashing (scrypt)", () => {
     expect(verifyPassword(pw, "kaputt")).toBe(false);
     expect(verifyPassword(pw, "scrypt:only-salt")).toBe(false);
     const h = hashPassword(pw);
-    expect(verifyPassword(pw, h + "00")).toBe(false); // manipuliert
+    expect(verifyPassword(pw, h + "00")).toBe(false);
+    expect(verifyPassword(pw, h.slice(0, -2))).toBe(false);
+    expect(verifyPassword(pw, h.replace(/.$/, "z"))).toBe(false);
+    expect(verifyPassword(pw, `${h}:extra`)).toBe(false);
   });
 });

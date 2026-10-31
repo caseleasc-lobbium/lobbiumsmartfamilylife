@@ -58,8 +58,8 @@ const STR = {
 const HREFS = ["/tools/kindergeld-checker", "/tools/familienbudget", "/tools/was-kostet-ein-kind", "/tools/taschengeld", "/tools/spartyp-test", "/tools/druckvorlagen"];
 const ICONS = [IconBenefits, IconBudget, IconBaby, IconPiggy, IconCompass, IconPrinter];
 
-export default function ToolsPage() {
-  const loc = cookies().get("lobbium_locale")?.value;
+export default async function ToolsPage() {
+  const loc = (await cookies()).get("lobbium_locale")?.value;
   const s = STR[["de", "en", "fr"].includes(loc) ? loc : "de"];
 
   return (
